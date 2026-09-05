@@ -1,0 +1,15 @@
+# Normalise line endings across Windows, macOS and Linux.
+* text=auto eol=lf
+
+# The hook must be LF. A CRLF shebang fails on macOS while working under Git Bash,
+# which reads as a machine-specific problem rather than a line-ending one.
+.githooks/** text eol=lf
+
+# Binary assets
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary

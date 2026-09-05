@@ -1,0 +1,62 @@
+#!/bin/sh
+#
+# StickyMD pre-commit hook — FLOW Net 1.
+#
+# Reports only. Never rewrites files, never stages anything, never calls the
+# network. POSIX shell only: must run under Git Bash on Windows and zsh on
+# macOS without modification. Staged diff only.
+#
+# `git commit --no-verify` is legitimate. This is one of four nets; a bypass is
+# caught by reconciliation at the next session start.
+#
+# Two checks. Both are unambiguous and both will actually fire. Judgement-based
+# obligations belong to FLOW's trigger table, not here.
+
+fail=0
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+# --- 1. A new shared component or token file with no change to DESIGN.md ------
+#
+# docs/DESIGN.md's component inventory is authoritative: if a component is not
+# listed, it does not exist. A new file in the shared directories owes an entry
+# in the same commit.
+
+new_ui=$(git diff --cached --name-only --diff-filter=A \
+         | grep -E '^src/lib/(components|tokens)/' )
+
+if [ -n "$new_ui" ]; then
+  if ! echo "$staged" | grep -q '^docs/DESIGN\.md$'; then
+    echo "FLOW: new shared component or token file staged, with no change to docs/DESIGN.md:"
+    echo "$new_ui" | sed 's/^/    /'
+    echo "  Fix: add each to the Component Inventory in docs/DESIGN.md, in this commit."
+    echo
+    fail=1
+  fi
+fi
+
+# --- 2. A hard-coded colour outside the token layer ---------------------------
+#
+# docs/DESIGN.md principle 5: every colour is read through a semantic token.
+# Raw values are permitted only in src/lib/tokens/.
+
+hits=""
+for f in $(echo "$staged" | grep -E '\.(svelte|ts|css)$' | grep -v '^src/lib/tokens/'); do
+  if git diff --cached -U0 -- "$f" \
+     | grep '^+' \
+     | grep -Eqi '#[0-9a-f]{3}([0-9a-f]{3})?\b|rgba?\(|hsla?\('; then
+    hits="$hits $f"
+  fi
+done
+
+if [ -n "$hits" ]; then
+  echo "FLOW: hard-coded colour value added outside src/lib/tokens/:"
+  for f in $hits; do echo "    $f"; done
+  echo "  Fix: read the colour through a semantic token."
+  echo "  See docs/DESIGN.md section 'Token contract'."
+  echo
+  fail=1
+fi
+
+exit $fail
