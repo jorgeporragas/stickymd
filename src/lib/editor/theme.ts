@@ -53,6 +53,36 @@ export const editorTheme = EditorView.theme({
     backgroundColor: 'var(--accent-glow)'
   },
 
+  // Rendered tables. Wide tables scroll inside their own container so the note
+  // never scrolls sideways.
+  '.cm-md-table-wrapper': {
+    overflowX: 'auto',
+    margin: 'var(--space-2) 0'
+  },
+
+  '.cm-md-table': {
+    borderCollapse: 'collapse',
+    fontSize: 'var(--font-size-label)',
+    lineHeight: 'var(--line-height-ui)'
+  },
+
+  '.cm-md-table th, .cm-md-table td': {
+    border: '1px solid var(--rule)',
+    padding: 'var(--space-1) var(--space-2)',
+    textAlign: 'left',
+    verticalAlign: 'top'
+  },
+
+  '.cm-md-table th': {
+    fontWeight: '650',
+    color: 'var(--ink-secondary)'
+  },
+
+  '.cm-md-table code': {
+    fontFamily: 'var(--font-mono)',
+    fontSize: 'var(--font-size-code)'
+  },
+
   '.cm-placeholder': {
     color: 'var(--ink-muted)',
     fontStyle: 'normal'

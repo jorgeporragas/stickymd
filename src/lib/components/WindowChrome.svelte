@@ -63,7 +63,7 @@
 
   .control:hover {
     color: var(--ink-primary);
-    background: var(--surface-border);
+    background: var(--control-hover);
   }
 
   .control svg {

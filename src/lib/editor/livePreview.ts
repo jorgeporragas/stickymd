@@ -1,5 +1,5 @@
 import { syntaxTree } from '@codemirror/language';
-import { RangeSetBuilder, type Text } from '@codemirror/state';
+import { RangeSetBuilder } from '@codemirror/state';
 import {
   Decoration,
   ViewPlugin,
@@ -7,6 +7,8 @@ import {
   type EditorView,
   type ViewUpdate
 } from '@codemirror/view';
+
+import { isHiddenUrl, MARKUP_NODES, markupEnd } from './markup';
 
 /**
  * Inline rendering.
@@ -19,32 +21,10 @@ import {
  * The reveal unit is the *line*, not the node: put the cursor anywhere on a
  * line and that line's syntax comes back whole. A node-scoped rule reveals
  * marks one at a time as the cursor crosses them, which reads as flicker.
- */
-
-/** Lezer node names whose text is markup rather than content. */
-const MARKUP_NODES = new Set([
-  'HeaderMark',
-  'EmphasisMark',
-  'StrikethroughMark',
-  'CodeMark',
-  'LinkMark',
-  'QuoteMark'
-]);
-
-/** Markup that owns the whitespace following it. Hiding `#` alone leaves an indent. */
-const CONSUMES_TRAILING_SPACE = new Set(['HeaderMark', 'QuoteMark']);
-
-/**
- * A link's destination is markup too — hiding only the brackets leaves
- * `the docshttps://example.com` on the line.
  *
- * It is hidden only inside a `Link`. A bare autolink is *also* a `URL` node,
- * and its destination is the only text it has: hide that and the line goes
- * blank. Never add `URL` to MARKUP_NODES to simplify this — see docs/FIXES.md.
+ * Block-level rendering cannot live here — CodeMirror forbids a ViewPlugin
+ * from replacing line breaks. Tables are a StateField in `tableView.ts`.
  */
-function isHiddenUrl(name: string, inLink: boolean): boolean {
-  return name === 'URL' && inLink;
-}
 
 const hidden = Decoration.replace({});
 
@@ -64,12 +44,6 @@ function linesInSelection(view: EditorView): Set<number> {
   return lines;
 }
 
-/** Extend a markup range over the single space that follows it, where it owns one. */
-function markupEnd(name: string, to: number, doc: Text): number {
-  if (!CONSUMES_TRAILING_SPACE.has(name)) return to;
-  return doc.sliceString(to, to + 1) === ' ' ? to + 1 : to;
-}
-
 function buildDecorations(view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
   const revealed = linesInSelection(view);
@@ -80,6 +54,10 @@ function buildDecorations(view: EditorView): DecorationSet {
       from,
       to,
       enter: (node) => {
+        // A rendered table replaces its whole range; decorating inside it is
+        // both pointless and a source of overlapping decorations.
+        if (node.name === 'Table') return false;
+
         const markup =
           MARKUP_NODES.has(node.name) || isHiddenUrl(node.name, node.matchContext(['Link']));
 
@@ -93,6 +71,7 @@ function buildDecorations(view: EditorView): DecorationSet {
         if (revealed.has(doc.lineAt(node.from).number)) return;
 
         builder.add(node.from, markupEnd(node.name, node.to, doc), hidden);
+        return;
       }
     });
   }

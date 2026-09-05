@@ -8,6 +8,7 @@ import { formattingKeymap } from './commands';
 import { markdownHighlight } from './highlight';
 import { codeLanguages } from './languages';
 import { livePreview } from './livePreview';
+import { tableView } from './tableView';
 import { editorTheme } from './theme';
 
 export { toggleBold, toggleInlineCode, toggleItalic, toggleStrikethrough } from './commands';
@@ -38,6 +39,9 @@ export function createEditor(parent: HTMLElement, doc: string): EditorView {
           codeLanguages
         }),
         syntaxHighlighting(markdownHighlight),
+        // Tables first: a StateField's block widget takes precedence over the
+        // plugin's inline decorations inside the same range.
+        tableView,
         livePreview,
         editorTheme,
 

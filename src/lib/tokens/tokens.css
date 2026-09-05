@@ -23,6 +23,11 @@
   --neutral-050: #f7f6f3;
   --white: #ffffff;
 
+  /* Ink at low alpha — content rules and control fills, which must read
+     against the surface rather than against the desktop behind it. */
+  --ink-wash-strong: rgba(26, 26, 23, 0.14);
+  --ink-wash-soft: rgba(26, 26, 23, 0.06);
+
   /* Accent — the single interactive colour. */
   --aqua-400: #4cc7e6;
   --aqua-500: #2fb6d9;
@@ -89,6 +94,12 @@
   --surface-grain-opacity: 0.035;
   --surface-edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   --surface-border: rgba(255, 255, 255, 0.35);
+
+  /* Rules and fills *inside* the surface. Distinct from --surface-border,
+     which is the window's own edge against the desktop: that one is a light
+     hairline on glass, these must read against the surface itself. */
+  --rule: var(--ink-wash-strong);
+  --control-hover: var(--ink-wash-soft);
 
   /* Ink */
   --ink-primary: var(--neutral-950);

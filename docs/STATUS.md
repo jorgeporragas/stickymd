@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Render tables as tables (SMD-017), completing the markdown surface listed in `MASTER.md § In Scope`. Requires a block-level widget rather than the character-hiding the rest of the syntax uses, so it is the one piece of inline rendering that does not follow the existing pattern.
+Vendor Handjet, Geist and Martian Mono (SMD-013). The type stacks currently fall back to system faces, so nothing in the app is yet shown in its intended typography. Doing this also unblocks SMD-006, which needs the real Handjet files to measure.
 
 ---
 
@@ -21,7 +21,8 @@ Render tables as tables (SMD-017), completing the markdown surface listed in `MA
 | Development machine | Windows 11 Pro |
 | Build target | Windows x64 |
 | Node | v24.19.0, npm 11.17.0 — verified present 2026-09-05 |
-| Rust | Absent on the development machine as of 2026-09-05. `rustc`, `cargo` and `rustup` are not on PATH. The Rust half of the project cannot build or run until rustup is installed. |
+| Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
+| MSVC linker | Absent as of 2026-09-05. `cargo check` fails at link time: `link.exe` not found. Rust on Windows targets MSVC, so the Rust half cannot compile until the Visual Studio C++ build tools are installed. |
 | WebView2 | Ships with Windows 11 |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
@@ -164,11 +165,12 @@ Notes: CodeMirror 6 with markdown syntax hidden on every line the cursor is not 
 
 ### [SMD-017] Render tables as tables
 Type:    feature
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: GFM tables parse and highlight, but still display as pipe-delimited text. `MASTER.md § In Scope` requires them rendered when the cursor is outside and raw when it is inside. Needs a block-level widget decoration; the character-hiding approach used everywhere else cannot express it.
+  2026-09-05  active
+Notes: Rendered when the cursor is outside, raw pipes when inside, with column alignment read from the delimiter row and inline markup rendered inside cells. Clicking a cell puts the cursor in that cell's source, which is the only way back into text a widget has replaced. Verified in a browser across the full cycle.
 
 ### [SMD-018] Verify copy yields raw markdown in the running application
 Type:    chore

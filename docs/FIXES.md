@@ -51,3 +51,36 @@ Fix:      Those three are imported statically and registered with `support:`.
 Never:    Never "tidy" the list by making all six lazy again. It reads as
           consistent and is factually wrong — the bundler ignores it silently,
           and the code then claims a saving that does not exist.
+
+### Block widgets must come from a StateField, not a ViewPlugin
+Area:     The CodeMirror inline-rendering layer and its decorations
+Date:     2026-09-05
+Commit:   (this commit)
+Problem:  Table rendering replaces several whole lines with one widget. Every
+          other part of the rendering layer is a ViewPlugin, so that is where
+          it was reached for first. CodeMirror forbids a plugin from producing
+          decorations that replace line breaks — a block widget must come from
+          the state.
+Fix:      `tableView` is a StateField providing decorations through
+          `EditorView.decorations.from(field)`. `livePreview` stays a
+          ViewPlugin and skips descending into `Table` nodes so the two never
+          decorate the same range.
+Never:    Never move table rendering into `livePreview` for tidiness. The
+          restriction is structural, not stylistic. The cost of the StateField
+          is that it scans the whole document rather than the viewport, which
+          is acceptable only because notes are small.
+
+### Never style `t.content` with the monospace family
+Area:     The CodeMirror inline-rendering layer and its decorations
+Date:     2026-09-05
+Commit:   (this commit)
+Problem:  `HighlightStyle` mapped `[t.monospace, t.content]` to the mono
+          family, on the assumption that `content` meant code content. It does
+          not — `content` is a broad tag covering ordinary inline text, so the
+          entire note rendered in the code face. Type-checking and DOM
+          assertions both passed; only a screenshot showed it.
+Fix:      The mono family is applied to `t.monospace` alone.
+Never:    Never add `t.content` to a rule carrying a font family, colour or
+          size intended for code. Check any highlight change against a
+          rendered screenshot, not only the DOM — a wrong font is invisible in
+          `textContent`.

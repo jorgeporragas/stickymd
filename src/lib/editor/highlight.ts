@@ -25,7 +25,9 @@ export const markdownHighlight = HighlightStyle.define([
 
   { tag: t.quote, color: 'var(--ink-secondary)', fontStyle: 'italic' },
 
-  { tag: [t.monospace, t.content], fontFamily: 'var(--font-mono)' },
+  // Only `monospace`. `content` is a broad tag covering ordinary inline text,
+  // and including it here renders the whole note in the code face.
+  { tag: t.monospace, fontFamily: 'var(--font-mono)' },
 
   // The syntax characters themselves, shown only on the cursor's line.
   { tag: t.processingInstruction, color: 'var(--ink-syntax)' },
