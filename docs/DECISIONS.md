@@ -113,3 +113,11 @@ Date:       2026-09-05
 Context:    Gitignoring the FLOW documentation as a whole was considered and rejected: FLOW's central contract is that a change and the docs it invalidates land in the same commit, which is meaningless if the docs are untracked, and reconciliation works by diffing `git log` against STATUS.md. The founder's actual concern was narrower — FLOW is his own system, still in development, and he does not want to publish it unfinished.
 Decision:   Track `CLAUDE.md`, `MASTER.md`, `docs/`, `.githooks/` and `.gitattributes`. Exclude only `FLOW_SYSTEM.md`.
 Consequences: All four of FLOW's nets remain intact. A visitor sees a repository with a scope document and a decision log, not the spec that produced them. `CLAUDE.md` names the file as local-only so the reference is not dangling for someone who clones.
+
+## ADR-016 — Token values live in code; DESIGN.md owns only the contract
+Status:     Accepted
+Date:       2026-09-05
+Context:    DESIGN.md was drafted during Planning with the full token contract and every value of the Frost theme written out. When `src/lib/tokens/tokens.css` was created during the Phase 1 scaffold, every one of those values existed in two files. Changing a colour would have required editing both, and one would eventually disagree with the other.
+Decision:   `docs/DESIGN.md` is authoritative for which tokens exist and what role each plays. `src/lib/tokens/tokens.css` is the single source for every value. DESIGN links to it and never restates a value.
+Consequences: A reader of DESIGN.md cannot see the palette without opening the code, which is the cost of the rule. Added to DESIGN's never-allowed list so the duplication cannot creep back. Window dimensions are the one value DESIGN still names, because they are a window property in `src-tauri/tauri.conf.json` and JSON carries no comment to point back with — DESIGN records that asymmetry explicitly.
+            2026-09-05 — docs/DESIGN.md amended; values removed in commit 2a5b11b.
