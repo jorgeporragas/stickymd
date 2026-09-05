@@ -3,6 +3,7 @@
  * no raw colour, size, duration or easing value may appear here.
  */
 
+@import './assets/fonts/fonts.css';
 @import './lib/tokens/tokens.css';
 
 *,

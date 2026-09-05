@@ -46,6 +46,8 @@ Three families, all SIL Open Font License, all vendored into the repository with
 
 **Handjet** is a variable face whose glyphs are built from repeated elements on a grid. `ELGR` controls how many elements compose each letter; `ELSH` morphs those elements between square and round. Degradation is therefore continuous, and is set through tokens rather than by choosing a file.
 
+Handjet's advance widths are identical at every setting of `ELGR`, `ELSH` and `wght` — the grid it is built on fixes them. Animating its axes therefore reflows nothing, which is what makes degradation usable as motion rather than only as a static choice.
+
 **Handjet never appears inside a note.** That boundary is Principle 1 made concrete: display type is surface, and note content is content.
 
 ---

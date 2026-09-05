@@ -38,6 +38,7 @@ There is no `docs/SCHEMA.md`. This project has no database.
 
 ```
 src/                      Svelte frontend
+  assets/fonts/           vendored typefaces, each with its licence text
   lib/
     components/           shared components — every file here is in the DESIGN inventory
     tokens/               design tokens — the only place a raw colour value may appear

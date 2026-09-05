@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Vendor Handjet, Geist and Martian Mono (SMD-013). The type stacks currently fall back to system faces, so nothing in the app is yet shown in its intended typography. Doing this also unblocks SMD-006, which needs the real Handjet files to measure.
+Draw the application icon and add the bundle configuration (SMD-014). `tauri-build` requires `icons/icon.ico` to generate the Windows resource, so the Rust half does not compile without it — this blocks running the application at all, not only releases. The icon is an identity decision and needs the founder.
 
 ---
 
@@ -22,7 +22,7 @@ Vendor Handjet, Geist and Martian Mono (SMD-013). The type stacks currently fall
 | Build target | Windows x64 |
 | Node | v24.19.0, npm 11.17.0 — verified present 2026-09-05 |
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
-| MSVC linker | Absent as of 2026-09-05. `cargo check` fails at link time: `link.exe` not found. Rust on Windows targets MSVC, so the Rust half cannot compile until the Visual Studio C++ build tools are installed. |
+| MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Rust links; `cargo check` now fails only on the missing application icon (SMD-014). |
 | WebView2 | Ships with Windows 11 |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
@@ -74,11 +74,12 @@ Notes: Must prompt before replacing anything. Requires a minisign keypair genera
 
 ### [SMD-006] Verify Handjet axis behaviour and metrics
 Type:    chore
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: Confirm whether changing ELGR or ELSH alters advance widths. If it does, animating the axes causes reflow and any identity animation must be sized to a fixed box. Establishes whether the app-title animation described in `docs/DESIGN.md § Motion` is affordable.
+  2026-09-05  active — measured
+Notes: Measured in a browser against the vendored file: the string "StickyMD scratchpad" is 221.19px wide at 32px under every combination of ELGR 1–2, ELSH 0–16 and wght 100–900. Advance widths do not move, so animating the axes reflows nothing. Recorded in `docs/DESIGN.md § Typography`.
 
 ### [SMD-007] Add the GPL-3.0 licence file
 Type:    chore
@@ -132,11 +133,12 @@ Notes: Vite multi-page build with one entry per window type, the design token la
 
 ### [SMD-013] Vendor Handjet, Geist and Martian Mono
 Type:    chore
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: Subset to the characters actually used, each with its `OFL.txt` alongside. Until then the type stacks fall back to system faces. Nothing may be fetched at runtime — MASTER veto 2.
+  2026-09-05  active
+Notes: Eight variable woff2 files in `src/assets/fonts/`, 190 kB total, subset to latin and latin-ext — other scripts deliberately absent. Geist ships roman and italic; the others are roman only. Each family's `OFL.txt` sits beside its files. Verified in a browser: all three families load and render, and the Handjet axes drive real degradation.
 
 ### [SMD-014] App icon and bundle configuration
 Type:    chore
@@ -144,7 +146,8 @@ State:   accepted
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: `tauri.conf.json` carries no `bundle` section, so `tauri build` cannot produce an installer. `tauri dev` is unaffected. Blocks any release work.
+  2026-09-05  scope corrected — blocks the build, not only releases
+Notes: `tauri-build` requires `icons/icon.ico` to generate the Windows resource file, so `cargo check` fails without it and the application cannot run at all. The earlier note claiming `tauri dev` was unaffected was wrong. Also needs the `bundle` section in `tauri.conf.json` for NSIS and the portable zip. The icon itself is an identity decision for the founder.
 
 ### [SMD-015] Compositor glass and the Glass/Solid mode switch
 Type:    feature
