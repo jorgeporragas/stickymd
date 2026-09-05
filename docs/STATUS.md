@@ -165,11 +165,12 @@ Notes: CodeMirror 6 with markdown syntax hidden on every line the cursor is not 
 
 ### [SMD-017] Render tables as tables
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active
+  2026-09-05  shipped — commit 793ff8a
 Notes: Rendered when the cursor is outside, raw pipes when inside, with column alignment read from the delimiter row and inline markup rendered inside cells. Clicking a cell puts the cursor in that cell's source, which is the only way back into text a widget has replaced. Verified in a browser across the full cycle.
 
 ### [SMD-018] Verify copy yields raw markdown in the running application

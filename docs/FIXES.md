@@ -55,7 +55,7 @@ Never:    Never "tidy" the list by making all six lazy again. It reads as
 ### Block widgets must come from a StateField, not a ViewPlugin
 Area:     The CodeMirror inline-rendering layer and its decorations
 Date:     2026-09-05
-Commit:   (this commit)
+Commit:   793ff8a
 Problem:  Table rendering replaces several whole lines with one widget. Every
           other part of the rendering layer is a ViewPlugin, so that is where
           it was reached for first. CodeMirror forbids a plugin from producing
@@ -73,7 +73,7 @@ Never:    Never move table rendering into `livePreview` for tidiness. The
 ### Never style `t.content` with the monospace family
 Area:     The CodeMirror inline-rendering layer and its decorations
 Date:     2026-09-05
-Commit:   (this commit)
+Commit:   793ff8a
 Problem:  `HighlightStyle` mapped `[t.monospace, t.content]` to the mono
           family, on the assumption that `content` meant code content. It does
           not — `content` is a broad tag covering ordinary inline text, so the
