@@ -122,11 +122,12 @@ Notes: Trivial to add once releases exist. GitHub Releases is the source of trut
 
 ### [SMD-012] Scaffold the Tauri v2 + Svelte 5 shell and the token layer
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 1 — Foundation & Editor Core
-Notes: Vite multi-page build with one entry per window type, the design token layer, and the first inventoried component. Ships in Solid surface mode; glass is SMD-015.
+  2026-09-05  shipped — commit 2a5b11b
+Notes: Vite multi-page build with one entry per window type, the design token layer, and the first inventoried component. Ships in Solid surface mode; glass is SMD-015. Frontend verified by svelte-check and vite build; the Rust half is unverified until rustup is installed.
 
 ### [SMD-013] Vendor Handjet, Geist and Martian Mono
 Type:    chore
