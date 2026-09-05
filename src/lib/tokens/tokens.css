@@ -1,0 +1,110 @@
+/*
+ * StickyMD design tokens.
+ *
+ * This file is the single source of every visual value in the application.
+ * docs/DESIGN.md owns the *contract* — which tokens exist, what role each one
+ * plays, and the rules governing them. It does not restate these values.
+ *
+ * Components read semantic tokens only. Primitives are named here so that a
+ * theme can re-point a role without editing a component.
+ *
+ * A raw colour, size, duration or easing value outside this directory is a bug,
+ * and the pre-commit hook rejects it.
+ */
+
+/* ---------------------------------------------------------------- primitives */
+
+:root {
+  /* Neutrals — warm, so the surface never reads clinical. */
+  --neutral-950: #1a1a17;
+  --neutral-700: #4a4945;
+  --neutral-500: #8b8a85;
+  --neutral-400: #a8a6a0;
+  --neutral-050: #f7f6f3;
+  --white: #ffffff;
+
+  /* Accent — the single interactive colour. */
+  --aqua-400: #4cc7e6;
+  --aqua-500: #2fb6d9;
+  --aqua-600: #1fa3c6;
+
+  /* Duration */
+  --dur-instant: 90ms;
+  --dur-quick: 160ms;
+  --dur-settle: 240ms;
+
+  /* Easing */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Type families. Faces are vendored; nothing is fetched at runtime. */
+  --font-display: 'Handjet', system-ui, sans-serif;
+  --font-content: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, monospace;
+
+  /* Type scale */
+  --font-size-display: 2rem;
+  --font-size-title: 1.125rem;
+  --font-size-body: 0.9375rem;
+  --font-size-label: 0.8125rem;
+  --font-size-caption: 0.75rem;
+  --font-size-code: 0.875rem;
+
+  --line-height-prose: 1.6;
+  --line-height-ui: 1.35;
+  --line-height-code: 1.5;
+
+  --tracking-display: 0.02em;
+  --tracking-body: 0;
+  --tracking-caps: 0.08em;
+
+  /* Handjet variable axes. See docs/DESIGN.md section 'Typography'. */
+  --handjet-elgr: 1;
+  --handjet-elsh: 2;
+  --handjet-weight: 500;
+
+  /* Geometry */
+  --radius-window: 18px;
+  --radius-control: 10px;
+  --radius-chip: 6px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+/* ------------------------------------------------------- theme: Frost (default)
+ *
+ * Colourless frosted glass. The tint exists so that a dark wallpaper cannot
+ * swallow the text; it is not perceived as a colour.
+ */
+
+:root[data-theme='frost'] {
+  /* Surface */
+  --surface-tint: rgba(255, 255, 255, 0.55);
+  --surface-solid: var(--neutral-050);
+  --surface-grain-opacity: 0.035;
+  --surface-edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --surface-border: rgba(255, 255, 255, 0.35);
+
+  /* Ink */
+  --ink-primary: var(--neutral-950);
+  --ink-secondary: var(--neutral-700);
+  --ink-muted: var(--neutral-500);
+  --ink-syntax: var(--neutral-400);
+  --ink-on-accent: var(--white);
+
+  /* Accent */
+  --accent: var(--aqua-500);
+  --accent-hover: var(--aqua-600);
+  --accent-glow: rgba(47, 182, 217, 0.35);
+  --focus-ring: var(--aqua-500);
+
+  /* Elevation */
+  --shadow-rest: 0 2px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.18);
+  --shadow-dragging: 0 18px 48px rgba(0, 0, 0, 0.24);
+}

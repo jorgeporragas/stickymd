@@ -1,0 +1,20 @@
+[package]
+name = "stickymd"
+version = "0.1.0"
+description = "A markdown scratchpad."
+edition = "2021"
+license = "GPL-3.0-only"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+# Bundle size is a stated product priority. See MASTER.md section 'Stack'.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

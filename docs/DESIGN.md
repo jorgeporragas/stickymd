@@ -1,7 +1,7 @@
 # DESIGN
 
 > **Authoritative for:** the visual system — design principles, the token contract, typography, themes, motion, and the component inventory.
-> **Never contains:** work state. Components and themes that do not exist, and anything carrying a completion mark, live in `docs/STATUS.md`. Product truth lives in `MASTER.md`. Engineering imperatives live in `CLAUDE.md`.
+> **Never contains:** work state, or token values. Components and themes that do not exist, and anything carrying a completion mark, live in `docs/STATUS.md`. Every token's value lives in `src/lib/tokens/tokens.css`. Product truth lives in `MASTER.md`. Engineering imperatives live in `CLAUDE.md`.
 > **Last verified:** 2026-09-05
 
 ---
@@ -21,10 +21,10 @@ The frosted surface comes from the OS compositor — Acrylic on Windows, vibranc
 Transparency is a system setting, and Windows disables it under battery saver. Some users will only ever see the Solid surface mode. It is designed to look deliberate, not degraded.
 
 **5. Every colour is read through a token.**
-No component declares a static colour, ever. This is what makes a theme a data file rather than a refactor.
+No component declares a static colour, ever. This is what makes a theme a data file rather than a refactor. The pre-commit hook rejects a raw colour outside `src/lib/tokens/`.
 
 **6. Tokens layer: primitive, then semantic.**
-Primitives name values (`--blur-32`, `--aqua-500`). Semantics name roles (`--note-surface-tint`, `--accent`). Components read semantics only. When a semantic token starts serving two visually distinct purposes, it splits into two named tokens before the roles need to diverge.
+Primitives name values. Semantics name roles. Components read semantics only. When a semantic token starts serving two visually distinct purposes, it splits into two named tokens before the roles need to diverge.
 
 **7. Motion moves objects. It never re-blurs them.**
 Animate `transform` and `box-shadow`. See § Never Allowed.
@@ -48,33 +48,6 @@ Three families, all SIL Open Font License, all vendored into the repository with
 
 **Handjet never appears inside a note.** That boundary is Principle 1 made concrete: display type is surface, and note content is content.
 
-### Type tokens
-
-```
---font-display:        "Handjet", system-ui, sans-serif
---font-content:        "Geist", system-ui, sans-serif
---font-mono:           "Martian Mono", ui-monospace, monospace
-
---font-size-display:   2rem        /* 32px — app identity */
---font-size-title:     1.125rem    /* 18px — note titles in the hub */
---font-size-body:      0.9375rem   /* 15px — note content */
---font-size-label:     0.8125rem   /* 13px — controls, UI labels */
---font-size-caption:   0.75rem     /* 12px — metadata */
---font-size-code:      0.875rem    /* 14px — Martian Mono runs wide; one step down */
-
---line-height-prose:   1.6
---line-height-ui:      1.35
---line-height-code:    1.5
-
---tracking-display:    0.02em
---tracking-body:       0
---tracking-caps:       0.08em
-
---handjet-elgr:        1           /* element grid */
---handjet-elsh:        2           /* element shape */
---handjet-weight:      500
-```
-
 ---
 
 ## Surface modes
@@ -91,79 +64,52 @@ Both modes read from the same semantic tokens. A component never branches on sur
 
 ## Token contract
 
+This section is authoritative for which tokens exist and what role each plays. **It is not authoritative for their values** — those live in `src/lib/tokens/tokens.css`, which is the single source for every visual value in the application. A value written in both places is a value that will disagree with itself.
+
 Components read semantic tokens only. A theme supplies a complete set of values for every semantic token below.
 
-### Surface
+### Semantic — surface
 
-```
---surface-tint            /* the colour layered over the compositor blur */
---surface-solid           /* the opaque surface in Solid mode */
---surface-grain-opacity   /* fine noise; keeps glass reading as frosted paper */
---surface-edge-highlight  /* the gloss line along the top edge */
---surface-border          /* the hairline containing the window */
-```
+| Token | Role |
+|---|---|
+| `--surface-tint` | The colour layered over the compositor blur in Glass mode |
+| `--surface-solid` | The opaque surface in Solid mode |
+| `--surface-grain-opacity` | Fine noise; keeps glass reading as frosted paper |
+| `--surface-edge-highlight` | The gloss line along the top edge |
+| `--surface-border` | The hairline containing the window |
 
-### Ink
+### Semantic — ink
 
-```
---ink-primary             /* note content */
---ink-secondary           /* UI labels, metadata */
---ink-muted               /* placeholder, disabled */
---ink-syntax              /* markdown syntax characters when revealed */
---ink-on-accent
-```
+| Token | Role |
+|---|---|
+| `--ink-primary` | Note content |
+| `--ink-secondary` | UI labels, metadata |
+| `--ink-muted` | Placeholder and inactive states |
+| `--ink-syntax` | Markdown syntax characters when revealed |
+| `--ink-on-accent` | Text on an accent-filled surface |
 
-### Accent
+### Semantic — accent
 
-```
---accent                  /* the single interactive colour */
---accent-hover
---accent-glow             /* the Aero bloom; used on focus and active states */
---focus-ring
-```
+| Token | Role |
+|---|---|
+| `--accent` | The single interactive colour |
+| `--accent-hover` | Its hover state |
+| `--accent-glow` | The Aero bloom, on focus and active states |
+| `--focus-ring` | The focus indicator |
 
-### Geometry
+### Semantic — elevation
 
-```
---radius-window:   18px
---radius-control:  10px
---radius-chip:     6px
+| Token | Role |
+|---|---|
+| `--shadow-rest` | A window at rest |
+| `--shadow-lifted` | Hover and focus |
+| `--shadow-dragging` | A window being moved |
 
---space-1:  4px
---space-2:  8px
---space-3:  12px
---space-4:  16px
---space-6:  24px
---space-8:  32px
-```
+### Primitive families
 
-Spacing and radius outside this scale are not permitted.
+Named in `src/lib/tokens/tokens.css`: neutrals, accent ramp, duration (`--dur-*`), easing (`--ease-*`), type families and scale (`--font-*`, `--line-height-*`, `--tracking-*`), the Handjet axes (`--handjet-*`), radius (`--radius-*`), and spacing (`--space-*`).
 
-### Glass
-
-```
---blur-window:     32     /* consumed by the Rust side, not by CSS */
---blur-popover:    20
-```
-
-### Elevation
-
-```
---shadow-rest
---shadow-lifted     /* hover, focus */
---shadow-dragging
-```
-
-### Motion
-
-```
---motion-instant:  90ms
---motion-quick:    160ms
---motion-settle:   240ms
-
---ease-out:        cubic-bezier(0.22, 1, 0.36, 1)
---ease-in-out:     cubic-bezier(0.65, 0, 0.35, 1)
-```
+Spacing and radius outside the scale are not permitted.
 
 ---
 
@@ -173,32 +119,11 @@ A theme is a complete set of values for every semantic token, and nothing else.
 
 ### Frost — the default
 
-Colourless frosted glass. The tint is present only so that dark wallpapers cannot swallow the text; it is not perceived as a colour.
+Colourless frosted glass. The tint is present only so that dark wallpapers cannot swallow the text; it is not perceived as a colour. Warm neutrals, so the surface never reads clinical, and a single aqua accent.
 
-```
---surface-tint            rgba(255, 255, 255, 0.55)
---surface-solid           #F7F6F3
---surface-grain-opacity   0.035
---surface-edge-highlight  inset 0 1px 0 rgba(255, 255, 255, 0.65)
---surface-border          rgba(255, 255, 255, 0.35)
+Values: `src/lib/tokens/tokens.css`, under `:root[data-theme='frost']`.
 
---ink-primary             #1A1A17
---ink-secondary           #4A4945
---ink-muted               #8B8A85
---ink-syntax              #A8A6A0
---ink-on-accent           #FFFFFF
-
---accent                  #2FB6D9
---accent-hover            #1FA3C6
---accent-glow             rgba(47, 182, 217, 0.35)
---focus-ring              #2FB6D9
-
---shadow-rest             0 2px 12px rgba(0, 0, 0, 0.12)
---shadow-lifted           0 8px 28px rgba(0, 0, 0, 0.18)
---shadow-dragging         0 18px 48px rgba(0, 0, 0, 0.24)
-```
-
-Contrast: `--ink-primary` against `--surface-tint` over a worst-case wallpaper is the constraint that sets the tint's alpha. Body text holds at 4.5:1 or better in both surface modes. A theme that cannot meet that is not shippable.
+**Contrast is the binding constraint.** `--ink-primary` against `--surface-tint` over a worst-case wallpaper is what sets the tint's alpha. Body text holds at 4.5:1 or better in both surface modes. A theme that cannot meet that is not shippable.
 
 ---
 
@@ -206,13 +131,9 @@ Contrast: `--ink-primary` against `--surface-tint` over a worst-case wallpaper i
 
 A square with rounded corners — the Post-It proportion, and the shape the app is recognised by.
 
-```
---note-size-default:  320px × 320px
---note-size-expanded: 480px × 480px
---note-size-min:      240px × 200px
-```
+Default and expanded sizes are a toggle. Free resize is available between the minimum and the display bounds; the square is the default proportion, not a locked aspect ratio.
 
-Default and expanded are a toggle. Free resize is available between the minimum and the display bounds; the square is the default proportion, not a locked aspect ratio.
+Dimensions are a window property, not a style: they live in `src-tauri/tauri.conf.json` under `app.windows`. JSON carries no comments, so this is the only pointer between the two — treat it as the reciprocal reference.
 
 ---
 
@@ -243,6 +164,7 @@ Motion is how the Aero personality is expressed without cost. Three rules govern
 | One semantic token serving two visual roles | Split it into two named tokens |
 | Fetching a font or any asset over the network | Vendored assets — MASTER veto 2 |
 | Branching a component on surface mode or theme | Read the token; the theme carries the difference |
+| Restating a token value in this file | Link to `src/lib/tokens/tokens.css` |
 
 ---
 
@@ -252,5 +174,6 @@ Complete and authoritative. **If a component is not listed here, it does not exi
 
 Every entry lands in the same commit as the component it describes.
 
-| Component | Role | Tokens it owns |
+| Component | Role | Notes |
 |---|---|---|
+| `WindowChrome` | The drag region and window controls for any note window. Takes `revealed: boolean`; the window shell decides when chrome is shown. | Implements Principle 2. Controls fade via `opacity`, which is permitted for small non-glass elements. |

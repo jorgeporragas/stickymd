@@ -127,3 +127,4 @@ Run the app with `npm run tauri dev`. Never start a dev server with a bare `npm 
 - Vendor all fonts and assets into the repository with their licence files alongside. Never fetch an asset over the network at runtime or at build time.
 - The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
 - Do not add a dependency that makes a network request at runtime.
+- The Content Security Policy in `src-tauri/tauri.conf.json` is restrictive by design — it is MASTER veto 2 enforced by the engine rather than by discipline. Never widen it to make something work. If a change appears to require a wider CSP, the change is wrong.

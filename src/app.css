@@ -1,0 +1,54 @@
+/*
+ * Base styles. Values come from src/lib/tokens/tokens.css only —
+ * no raw colour, size, duration or easing value may appear here.
+ */
+
+@import './lib/tokens/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-content);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-prose);
+  letter-spacing: var(--tracking-body);
+  color: var(--ink-primary);
+
+  /* The window is undecorated and rounded; the compositor draws nothing behind
+     it, so the surface is painted here. */
+  background: transparent;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The window itself is the drag surface in places; never let a stray selection
+   fight a drag. Text inside the editor re-enables selection explicitly. */
+body {
+  user-select: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

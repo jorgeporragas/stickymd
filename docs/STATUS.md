@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Scaffold the Tauri v2 + Svelte 5 + TypeScript project against the structure in `CLAUDE.md § Project structure`, and establish the design token layer from `docs/DESIGN.md § Token contract` before any component is written.
+Integrate CodeMirror 6 into the note window and build the inline-rendering layer — syntax hidden off the cursor's line, revealed on it, with formatting commands inserting real characters. This is the riskiest work in the project and is deliberately first. It is pure frontend, so it proceeds while Rust is being installed.
 
 ---
 
@@ -119,6 +119,38 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as idea during Planning
 Notes: Trivial to add once releases exist. GitHub Releases is the source of truth either way.
+
+### [SMD-012] Scaffold the Tauri v2 + Svelte 5 shell and the token layer
+Type:    chore
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 1 — Foundation & Editor Core
+Notes: Vite multi-page build with one entry per window type, the design token layer, and the first inventoried component. Ships in Solid surface mode; glass is SMD-015.
+
+### [SMD-013] Vendor Handjet, Geist and Martian Mono
+Type:    chore
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
+Notes: Subset to the characters actually used, each with its `OFL.txt` alongside. Until then the type stacks fall back to system faces. Nothing may be fetched at runtime — MASTER veto 2.
+
+### [SMD-014] App icon and bundle configuration
+Type:    chore
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
+Notes: `tauri.conf.json` carries no `bundle` section, so `tauri build` cannot produce an installer. `tauri dev` is unaffected. Blocks any release work.
+
+### [SMD-015] Compositor glass and the Glass/Solid mode switch
+Type:    feature
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
+Notes: Acrylic applied to the transparent window from Rust, per `docs/DESIGN.md` principle 3. Adds a dependency, which owes a CLAUDE.md entry. Must degrade to Solid when the system disables transparency effects.
 
 ---
 
