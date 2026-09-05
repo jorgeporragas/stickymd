@@ -26,6 +26,7 @@ There is no `docs/SCHEMA.md`. This project has no database.
 ### Areas that require reading FIXES.md first
 
 - The CodeMirror inline-rendering layer and its decorations
+- The editor's language set and bundle composition
 - Window transparency, vibrancy, and compositor blur setup
 - The sidecar index, and note file rename and deduplication logic
 - Global shortcut registration and tray lifecycle

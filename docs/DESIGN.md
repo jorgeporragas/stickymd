@@ -177,3 +177,4 @@ Every entry lands in the same commit as the component it describes.
 | Component | Role | Notes |
 |---|---|---|
 | `WindowChrome` | The drag region and window controls for any note window. Takes `revealed: boolean`; the window shell decides when chrome is shown. | Implements Principle 2. Controls fade via `opacity`, which is permitted for small non-glass elements. |
+| `Editor` | The note's markdown editing surface. Takes `value?: string` as initial source. Owns the CodeMirror instance and its lifecycle. | Content, not surface — quiet and typographic per Principle 1. No gutters, no active-line highlight, no border. Editor internals live in `src/lib/editor/`. |

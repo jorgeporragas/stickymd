@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Editor from '../../lib/components/Editor.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
 
   let revealed = $state(false);
@@ -23,6 +24,7 @@
 
 <div class="surface">
   <WindowChrome {revealed} />
+  <Editor />
 </div>
 
 <style>

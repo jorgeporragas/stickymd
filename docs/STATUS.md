@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Integrate CodeMirror 6 into the note window and build the inline-rendering layer — syntax hidden off the cursor's line, revealed on it, with formatting commands inserting real characters. This is the riskiest work in the project and is deliberately first. It is pure frontend, so it proceeds while Rust is being installed.
+Render tables as tables (SMD-017), completing the markdown surface listed in `MASTER.md § In Scope`. Requires a block-level widget rather than the character-hiding the rest of the syntax uses, so it is the one piece of inline rendering that does not follow the existing pattern.
 
 ---
 
@@ -152,6 +152,46 @@ Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
 Notes: Acrylic applied to the transparent window from Rust, per `docs/DESIGN.md` principle 3. Adds a dependency, which owes a CLAUDE.md entry. Must degrade to Solid when the system disables transparency effects.
+
+### [SMD-016] Inline rendering layer
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 1 — Foundation & Editor Core
+Notes: CodeMirror 6 with markdown syntax hidden on every line the cursor is not on and revealed on the line it is. Formatting commands insert real characters — `Mod-b`, `Mod-i`, `Mod-e`, `Mod-Shift-x`. Fenced code highlighted across six languages. Verified in a browser against the live DOM: hiding, revealing, the link/autolink distinction, and bold round-tripping.
+
+### [SMD-017] Render tables as tables
+Type:    feature
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
+Notes: GFM tables parse and highlight, but still display as pipe-delimited text. `MASTER.md § In Scope` requires them rendered when the cursor is outside and raw when it is inside. Needs a block-level widget decoration; the character-hiding approach used everywhere else cannot express it.
+
+### [SMD-018] Verify copy yields raw markdown in the running application
+Type:    chore
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
+Notes: The document holds real markdown and CodeMirror serialises the clipboard from state rather than the DOM, so raw source is expected. Unverified — reading the clipboard was not possible in the browser harness. This is the single property the product exists to provide, so it gets an explicit check.
+
+### [SMD-019] Note window JavaScript weight
+Type:    idea
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: The note window's main chunk is 552 kB raw, 192 kB gzipped — mostly CodeMirror plus the HTML, CSS and JavaScript grammars that `@codemirror/lang-markdown` pulls in unconditionally (see `docs/FIXES.md`). Loaded from disk, so no network cost, but every open note window parses its own copy. Worth measuring against real memory use before treating it as a problem.
+
+### [SMD-020] Fenced code block presentation
+Type:    feature
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: Fence markers stay visible by design — hiding them leaves a bare language name floating above the block. A proper treatment gives the block its own surface with the language shown deliberately rather than as leftover syntax.
 
 ---
 
