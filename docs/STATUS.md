@@ -74,11 +74,12 @@ Notes: Must prompt before replacing anything. Requires a minisign keypair genera
 
 ### [SMD-006] Verify Handjet axis behaviour and metrics
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active — measured
+  2026-09-05  shipped — commit 7417271
 Notes: Measured in a browser against the vendored file: the string "StickyMD scratchpad" is 221.19px wide at 32px under every combination of ELGR 1–2, ELSH 0–16 and wght 100–900. Advance widths do not move, so animating the axes reflows nothing. Recorded in `docs/DESIGN.md § Typography`.
 
 ### [SMD-007] Add the GPL-3.0 licence file
@@ -133,11 +134,12 @@ Notes: Vite multi-page build with one entry per window type, the design token la
 
 ### [SMD-013] Vendor Handjet, Geist and Martian Mono
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active
+  2026-09-05  shipped — commit 7417271
 Notes: Eight variable woff2 files in `src/assets/fonts/`, 190 kB total, subset to latin and latin-ext — other scripts deliberately absent. Geist ships roman and italic; the others are roman only. Each family's `OFL.txt` sits beside its files. Verified in a browser: all three families load and render, and the Handjet axes drive real degradation.
 
 ### [SMD-014] App icon and bundle configuration
