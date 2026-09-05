@@ -1,6 +1,7 @@
 # FLOW system spec — the founder's portable system, deliberately untracked.
-# See docs/DECISIONS.md ADR-015.
-FLOW_SYSTEM.md
+# Wildcarded: the file carries its version in the name (FLOW_SYSTEM_v2.2.md),
+# and matches in any directory. See docs/DECISIONS.md ADR-015.
+FLOW_SYSTEM*.md
 
 # Dependencies
 node_modules/

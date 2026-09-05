@@ -20,7 +20,9 @@ Scaffold the Tauri v2 + Svelte 5 + TypeScript project against the structure in `
 |---|---|
 | Development machine | Windows 11 Pro |
 | Build target | Windows x64 |
-| Toolchain | Rust stable (rustup), Node LTS with npm, WebView2 runtime |
+| Node | v24.19.0, npm 11.17.0 — verified present 2026-09-05 |
+| Rust | Absent on the development machine as of 2026-09-05. `rustc`, `cargo` and `rustup` are not on PATH. The Rust half of the project cannot build or run until rustup is installed. |
+| WebView2 | Ships with Windows 11 |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
 ---
@@ -58,8 +60,8 @@ Type:    feature
 State:   accepted
 Created: 2026-09-05
 History:
-  2026-09-05  logged and accepted into Phase 5 — Theme & Motion
-Notes: A complete set of token values, not a code change — faint black tint over the frosted surface with warm white ink, inverting Frost. Light is the default mode. Needs founder confirmation that Phase 5 is the right home rather than post-V1.
+  2026-09-05  logged and accepted into Phase 5 — Theme & Motion (confirmed by founder)
+Notes: A complete set of token values, not a code change — faint black tint over the frosted surface with warm white ink, inverting Frost. Light is the default mode.
 
 ### [SMD-005] Auto-update via the Tauri updater
 Type:    feature

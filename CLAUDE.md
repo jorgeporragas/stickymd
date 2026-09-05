@@ -4,7 +4,7 @@
 > **Never contains:** project context, stack rationale, or current state. What StickyMD is and why the stack was chosen live in `MASTER.md`. The visual system lives in `docs/DESIGN.md`. Current phase and active work live in `docs/STATUS.md`.
 > **Last verified:** 2026-09-05
 
-This project runs on FLOW. `FLOW_SYSTEM.md` is maintained **outside this repository** — it is the founder's portable system, deliberately untracked (ADR-015). The founder provides it at session start. If it has not been provided, ask for it before doing anything else. `.gitignore` excludes it by name in case a copy ever lands in the working tree.
+This project runs on FLOW. The spec sits in the working tree at `docs/FLOW_SYSTEM_v*.md` and is **deliberately untracked** — it is the founder's portable system, excluded by `.gitignore` per ADR-015. Read it before doing anything else. If it is absent from your working copy, ask the founder for it rather than proceeding without it.
 
 ---
 
