@@ -143,6 +143,6 @@ Every release carries two assets:
 
 **GitHub Actions** builds both. Pushing a `v*` tag triggers a workflow that checks out the tagged commit on a clean machine, builds, and attaches the assets to the release. Builds come from a known commit rather than from a developer's machine, and the same workflow is what makes non-Windows targets possible.
 
-Builds are distributed **unsigned**. Windows SmartScreen warns on unsigned binaries, and the README documents this honestly. A signing certificate is an annual cost this project does not carry.
+Builds are distributed **unsigned**. Windows SmartScreen warns on unsigned binaries, and that warning is disclosed to users rather than hidden. A signing certificate is an annual cost this project does not carry.
 
 The project is licensed **GPL-3.0**. Forks must stay open; as sole copyright holder the founder retains the right to license the same code commercially.

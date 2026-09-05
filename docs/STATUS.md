@@ -79,11 +79,12 @@ Notes: Confirm whether changing ELGR or ELSH alters advance widths. If it does, 
 
 ### [SMD-007] Add the GPL-3.0 licence file
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active
-Notes: The canonical text from gnu.org, verbatim, as `LICENSE` in the repository root. Per ADR-009. Must not be paraphrased or retyped from memory.
+  2026-09-05  shipped — commit 641f340
+Notes: The canonical text from gnu.org, verbatim, as `LICENSE` in the repository root. Per ADR-009. Fetched rather than retyped, so it is byte-exact.
 
 ### [SMD-008] Write the README
 Type:    chore

@@ -125,4 +125,5 @@ Run the app with `npm run tauri dev`. Never start a dev server with a bare `npm 
 - Build artifacts are produced by GitHub Actions on a `v*` tag, never by hand for distribution.
 - Every release carries both the NSIS installer and the portable zip.
 - Vendor all fonts and assets into the repository with their licence files alongside. Never fetch an asset over the network at runtime or at build time.
+- The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
 - Do not add a dependency that makes a network request at runtime.
