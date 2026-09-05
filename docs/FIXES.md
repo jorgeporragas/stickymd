@@ -25,7 +25,7 @@ Never:    what must never be done to this code again, and why.
 ### Link destinations hide only inside a Link node
 Area:     The CodeMirror inline-rendering layer and its decorations
 Date:     2026-09-05
-Commit:   (this commit)
+Commit:   b930795
 Problem:  Hiding only `LinkMark` left the destination on the line, rendering
           `[the docs](https://example.com)` as `the docshttps://example.com`.
           The obvious fix — adding `URL` to the hidden-markup set — breaks bare
@@ -40,7 +40,7 @@ Never:    Never add `URL` to `MARKUP_NODES` to simplify the check. The two
 ### HTML, CSS and JavaScript modes cannot be lazy-loaded
 Area:     The editor's language set and bundle composition
 Date:     2026-09-05
-Commit:   (this commit)
+Commit:   b930795
 Problem:  All six fenced-code languages were declared with a dynamic `load()`.
           Rollup reported INEFFECTIVE_DYNAMIC_IMPORT for three of them:
           `@codemirror/lang-markdown` statically imports `lang-html`, which

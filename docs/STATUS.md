@@ -155,10 +155,11 @@ Notes: Acrylic applied to the transparent window from Rust, per `docs/DESIGN.md`
 
 ### [SMD-016] Inline rendering layer
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 1 — Foundation & Editor Core
+  2026-09-05  shipped — commit b930795
 Notes: CodeMirror 6 with markdown syntax hidden on every line the cursor is not on and revealed on the line it is. Formatting commands insert real characters — `Mod-b`, `Mod-i`, `Mod-e`, `Mod-Shift-x`. Fenced code highlighted across six languages. Verified in a browser against the live DOM: hiding, revealing, the link/autolink distinction, and bold round-tripping.
 
 ### [SMD-017] Render tables as tables
