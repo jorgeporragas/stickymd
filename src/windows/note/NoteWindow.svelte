@@ -18,9 +18,12 @@
 
   // Mod- resolves to Ctrl or Cmd per platform. Never write either literally
   // (CLAUDE.md section 'Cross-platform discipline').
+  //
+  // Mod-Alt-n rather than the obvious Mod-n: WebView2 keeps Ctrl+N for itself
+  // and the chord never reaches the page. See docs/FIXES.md.
   const windowKeymap = [
     {
-      key: 'Mod-n',
+      key: 'Mod-Alt-n',
       run: () => {
         void openNewNoteWindow();
         return true;

@@ -293,7 +293,8 @@ History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
 Notes: One window per note. Which note a window holds is tracked in Rust by window label, so nothing is threaded through the URL and a window can simply ask. A window with no note is a new, unsaved one; it reports the name it takes on its first save, which is what stops a second window being opened onto the same file and the two overwriting each other. `Mod-n` opens a new window, bound through CodeMirror because its `Mod-` prefix is the platform abstraction and a DOM listener would mean writing Ctrl literally.
   Every window is built from the window entry in `src-tauri/tauri.conf.json`, so geometry has one home.
-  Not confirmed: that `Mod-n` opens a second window and that two windows write two different files. Needs someone at the keyboard.
+  The in-app chord is `Mod-Alt-n`, not `Mod-n`. WebView2 keeps Ctrl+N for itself and the chord never reaches the page — see `docs/FIXES.md`. Diagnosed rather than guessed: the binding fired correctly when dispatched in a browser, and a temporary probe proved Rust window creation worked on its own, which left the chord not arriving as the only explanation.
+  Not confirmed: that `Mod-Alt-n` opens a second window in the running application, and that two windows write two different files. Needs someone at the keyboard.
   Known sloppiness: `surface_mode` returns the mode measured on the first window. A second window has acrylic applied and its result discarded. In practice every window on a machine resolves the same way, but it is an assumption rather than a measurement.
 
 ### [SMD-031] Deleting a note whose window is open does not stick

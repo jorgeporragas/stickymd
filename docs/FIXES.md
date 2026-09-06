@@ -84,3 +84,24 @@ Never:    Never add `t.content` to a rule carrying a font family, colour or
           size intended for code. Check any highlight change against a
           rendered screenshot, not only the DOM — a wrong font is invisible in
           `textContent`.
+
+### Ctrl+N cannot be bound inside the webview
+Area:     Global and in-app shortcut registration, and tray lifecycle
+Date:     2026-09-05
+Commit:   pending
+Problem:  `Mod-n` was bound to "new note window" through CodeMirror and did
+          nothing in the running application. The binding was not at fault:
+          dispatching the chord in a browser fired it correctly, and a probe
+          proved the Rust window-creation path worked on its own. WebView2
+          claims Ctrl+N as a browser accelerator — Edge's "new window" — and
+          swallows it before the page sees it.
+Fix:      The in-app binding is `Mod-Alt-n`. wry exposes
+          `with_browser_accelerator_keys(false)`, which would disable the
+          interception, but Tauri 2.11.5 does not surface it, so the chord
+          cannot be reclaimed through Tauri's API.
+Never:    Never "correct" this back to Mod-n because it reads more naturally.
+          It is not a preference — the chord does not arrive. The same applies
+          to the other accelerators WebView2 keeps: Ctrl+T, Ctrl+W, Ctrl+P,
+          Ctrl+F, Ctrl+R, Ctrl+D, Ctrl+Shift+N and F5. A shortcut that must
+          use one of those has to be registered as an OS-level global shortcut
+          from Rust instead, which bypasses the webview entirely.
