@@ -6,11 +6,13 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Phase
 
-**Build** — Phase 4 — The Hub
+**Build** — Phase 5 — Theme & Motion
 
 ## Current Active Step
 
-SMD-047 is written and building, awaiting confirmation that the hub opens from the tray, lists notes by title, opens one on click, and deletes to the Recycle Bin.
+The theme system and its built-in themes. The dark theme (SMD-004) cannot ship alone: without a way to choose it, it is unreachable code. It lands with per-note colour (SMD-021), which is what makes a theme selectable at all — `Note.theme` has been in the domain model and the sidecar index since Phase 2 with nothing writing it.
+
+Then the motion pass, including the transition the founder asked for between written and rendered markdown (SMD-045).
 
 ---
 
@@ -502,11 +504,17 @@ State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
+  2026-09-06  shipped — commit 8c7f373, the hub gave the last of them callers
 Notes: `list_notes` and `delete_note` are written, tested where testable, and registered — but nothing calls them. Both wait on the hub, since deleting a note needs somewhere to delete it from. `read_note` and `window_note` gained their callers with SMD-030; `note_state` and `set_note_always_on_top` gained theirs with SMD-040. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
 
 ---
 
 ## Completed Milestones
+
+### Phase 4 — The Hub — closed 2026-09-06
+Every note in one place: listed newest first by title rather than filename, opened by clicking, focused rather than duplicated if already open, and deleted to the operating system's trash without a confirmation dialog for something the OS already made undoable. Opened by clicking the tray icon or from its menu. Item SMD-047, which also closed SMD-027 by giving the last written-but-uncalled commands their callers.
+
+Truth check run 2026-09-06: retraction grep clean; all five hub-related entries of `MASTER.md § In Scope` verified present in code; no supersession pointers to reconcile; 47 items, with one genuine failure found and fixed — SMD-027 was marked shipped without citing the commit that closed it.
 
 ### Phase 3 — Windows, Tray & Shortcuts — closed 2026-09-06
 Notes became windows. One window per note with its own file identity, tracked by window label; tray residency, so closing the last window puts the application away rather than ending it; a global new-note shortcut registered with the operating system, configurable through `settings.json` and reporting in the tray when it cannot be claimed; session restore of open windows with their geometry; a per-note always-on-top pin; launch at startup, off by default. Items SMD-030, SMD-032, SMD-033, SMD-034, SMD-035, SMD-036, SMD-037, SMD-040, SMD-041, SMD-042, SMD-043.
