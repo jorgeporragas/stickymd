@@ -89,6 +89,21 @@
      switched off rather than as quietly on. */
   --tide-600-diluted: #78bec0;
 
+  /* Code. The one place in the application where hue tells several things
+     apart at once, which is the functional use ADR-025 allows — and the one
+     place the content is not the user's prose but something pasted in.
+
+     Drawn from the same --tide-* ramp as everything else, so a fenced block
+     reads as part of this application rather than as a theme from another one.
+     Every value clears 4.5:1 against both code panels. Theme-independent
+     because the panel is dark in both themes. See ADR-030. */
+  --code-ink: #e8e6e1;
+  --code-muted: #8b8a85;
+  --code-keyword: var(--tide-600);
+  --code-string: var(--tide-200);
+  --code-number: var(--tide-100);
+  --code-type: var(--tide-400);
+
   /* Signals — the only hues in the interface, and only where colour is
      carrying the meaning. Traffic-light reading, because it needs no learning:
      red is the one that takes something away. Amber and green have nothing to
@@ -120,7 +135,12 @@
   --font-size-body: 0.9375rem;
   --font-size-label: 0.8125rem;
   --font-size-caption: 0.75rem;
-  --font-size-code: 0.875rem;
+  /* Measured, not inherited. Fenced code had been taking --font-size-body,
+     and at the same pixel size Martian Mono sets a line 52% wider than Geist —
+     10.5px per character against 8.23. Code read as larger because it is far
+     wider, not because it is taller. At 13px the advance is 9.1px, 11% wider
+     than the prose around it rather than 28%. */
+  --font-size-code: 0.8125rem;
 
   --line-height-prose: 1.6;
   --line-height-ui: 1.35;
@@ -217,6 +237,10 @@
      hard ring around a control whose job is to stay quiet. */
   --gloss-neutral: radial-gradient(circle at 50% 18%, #ffffff 0%, #f1efe9 60%, #dedbd2 100%);
   --rim-neutral: rgba(26, 26, 23, 0.3);
+
+  /* Dark on a light note, which is the point: code is read on a dark ground
+     by nearly everyone who reads code. */
+  --code-surface: #131317;
   --selection: var(--ink-wash-strong);
 
   /* Elevation */
@@ -288,6 +312,10 @@
 
   --gloss-neutral: radial-gradient(circle at 50% 18%, #4a4945 0%, #33322f 60%, #232220 100%);
   --rim-neutral: rgba(255, 255, 255, 0.22);
+
+  /* Lighter than the note here, not darker. On a dark surface a darker panel
+     reads as a hole rather than as a block set into the page. */
+  --code-surface: #1e1e23;
   --selection: rgba(242, 239, 232, 0.20);
 
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);

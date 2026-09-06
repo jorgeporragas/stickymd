@@ -46,7 +46,7 @@ Three families, all SIL Open Font License, all vendored into `src/assets/fonts/`
 |---|---|---|
 | Display | **Departure Mono** | App identity and the hub's title. Never inside note content, and not for sentences — an empty state is the application talking, and it takes the content face. |
 | Content | **Geist** | Note body, all UI labels, everything functional. |
-| Mono | **Martian Mono** | Fenced code blocks. |
+| Mono | **Martian Mono** | Fenced code blocks and inline code, at `--font-size-code`. Never at body size: at the same pixel size it sets a line 52% wider than Geist, so code at body size reads as oversized. |
 
 **Departure Mono** is a monospaced pixel face drawn on a fixed grid (ADR-029). It ships one weight and no axes, so `font-synthesis: none` is set on the body: a synthesised bold thickens strokes off the grid the glyphs are drawn on, and it stops looking like pixels. Anything using the display face names its weight rather than inheriting a heading's default.
 
@@ -107,6 +107,8 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 |---|---|
 | `--signal-danger` | A control that takes something away |
 | `--signal-engaged` | A control holding a setting on — the always-on-top pin |
+| `--code-surface` | The panel behind a fenced block. Dark in both themes; darker than the note on Frost, lighter than it on Dark, because on a dark surface a darker panel reads as a hole. |
+| `--code-ink`, `--code-muted`, `--code-keyword`, `--code-string`, `--code-number`, `--code-type` | How a fenced block's tokens are told apart. The one place a hue is not a signal — and still not decoration, since inside a block colour is doing work. Drawn from the `--tide-*` ramp so code reads as part of this application. See ADR-030. |
 | `--gloss-tinted` | The fill of a disc that carries a colour, mixed from `currentColor` — a primitive, since it says the same thing in every theme |
 | `--gloss-neutral` | The fill of a disc that carries none: the window's own controls |
 | `--gloss-seat` | The shade inside a disc's lower edge, and the contact shadow under it |

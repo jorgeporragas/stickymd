@@ -228,14 +228,17 @@ Notes: The note window's main chunk is 555 kB raw, 193 kB gzipped — mostly Cod
 
 ### [SMD-020] Fenced code block presentation
 Type:    feature
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
 Notes: Fence markers stay visible by design — hiding them leaves a bare language name floating above the block. A proper treatment gives the block its own surface with the language shown deliberately rather than as leftover syntax.
   2026-09-06, from the founder using it: fenced blocks have no surface — he wants a light rounded panel separating code from prose, as Obsidian has, and suggested the panel could be black regardless of theme, since developers rarely read code on a light background. The text also reads much larger than body text, and there is no colour in it.
   Two of those three are measured rather than reported. **The size is a real defect:** `--font-size-code` exists but is applied only inside tables, so fenced code inherits `--font-size-body`. And at the same 15px, Martian Mono sets `const value = 42;` 52% wider than Geist — 10.5px per character against 8.23px. Code does not read larger because it is taller; it reads larger because it is far wider, and width is what reads as size in a block. Matching Geist's rhythm wants about 12px; 13px (`0.8125rem`) is the likely landing, at 11% wider.
-  **The missing colour is mine, not the face's.** ADR-025 took the hues out of the highlight style along with the accent, and the commit that did it said that was the part of the change most likely to be wrong. The founder has now independently reported it as missing, which settles that. Restoring it wants an ADR: colour inside a fenced block is carrying token classes, which is the functional use ADR-025 permits, but a dark panel inside a quiet note is an exception to principle 1 and should be written down rather than assumed.
+  Shipped (ADR-030): a dark rounded panel in both themes, the mono face at 13px with `--line-height-code`, and tokens told apart by hue from the `--tide-*` ramp.
+  One thing found only by rendering it: the face and size could not be set on the `monospace` highlight tag, which is what the earlier note assumed. That tag covers *inline* code only — the contents of a fenced block are tagged by the language inside it, so the block never saw either. They are set on the panel, which is the thing that says "this is code" anyway.
+  Verified in the running dev server behind a seeded probe note, in both themes, and the probe removed: the panel paints across seven lines with the corners rounded at the ends, the gaps between adjacent line backgrounds measure exactly 0, and the code sets in Martian Mono at 13px on a 19.5px line.
+  **The missing colour was mine, not the face's.** ADR-025 took the hues out of the highlight style along with the accent, and the commit that did it said that was the part of the change most likely to be wrong. The founder has now independently reported it as missing, which settles that. Restoring it wants an ADR: colour inside a fenced block is carrying token classes, which is the functional use ADR-025 permits, but a dark panel inside a quiet note is an exception to principle 1 and should be written down rather than assumed.
 
 ### [SMD-021] Per-note colour
 Type:    feature

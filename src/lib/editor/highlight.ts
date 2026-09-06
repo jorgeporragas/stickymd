@@ -29,18 +29,27 @@ export const markdownHighlight = HighlightStyle.define([
 
   // Only `monospace`. `content` is a broad tag covering ordinary inline text,
   // and including it here renders the whole note in the code face.
-  { tag: t.monospace, fontFamily: 'var(--font-mono)' },
+  //
+  // The size is set here rather than left to inherit. It had been inheriting
+  // --font-size-body, and Martian Mono at that size sets a line half again as
+  // wide as the prose around it. See --font-size-code.
+  { tag: t.monospace, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-code)' },
 
   // The syntax characters themselves, shown only on the cursor's line.
   { tag: t.processingInstruction, color: 'var(--ink-syntax)' },
 
-  // Fenced code contents.
-  { tag: t.keyword, color: 'var(--ink-primary)', fontWeight: 'var(--weight-emphasis)' },
-  { tag: [t.string, t.special(t.string)], color: 'var(--ink-secondary)' },
-  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--ink-muted)', fontStyle: 'italic' },
-  { tag: [t.number, t.bool, t.null], color: 'var(--ink-secondary)' },
-  { tag: [t.function(t.variableName), t.definition(t.variableName)], color: 'var(--ink-primary)' },
-  { tag: [t.typeName, t.className], color: 'var(--ink-primary)' },
-  { tag: t.operator, color: 'var(--ink-secondary)' },
-  { tag: t.propertyName, color: 'var(--ink-primary)' }
+  // Fenced code contents, on the dark panel `codeBlock.ts` paints.
+  //
+  // These are the only hues in the application that are not signals, and
+  // ADR-030 is why: inside a fenced block, colour is telling token classes
+  // apart, which is work rather than decoration. They come from the same
+  // --tide-* ramp as the rest of the palette.
+  { tag: t.keyword, color: 'var(--code-keyword)' },
+  { tag: [t.string, t.special(t.string)], color: 'var(--code-string)' },
+  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--code-muted)', fontStyle: 'italic' },
+  { tag: [t.number, t.bool, t.null], color: 'var(--code-number)' },
+  { tag: [t.function(t.variableName), t.definition(t.variableName)], color: 'var(--code-ink)' },
+  { tag: [t.typeName, t.className], color: 'var(--code-type)' },
+  { tag: t.operator, color: 'var(--code-muted)' },
+  { tag: t.propertyName, color: 'var(--code-ink)' }
 ]);

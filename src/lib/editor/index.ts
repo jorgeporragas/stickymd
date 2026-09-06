@@ -4,6 +4,7 @@ import { syntaxHighlighting } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { EditorView, drawSelection, keymap, placeholder, type KeyBinding } from '@codemirror/view';
 
+import { codeBlockSurface } from './codeBlock';
 import { formattingKeymap } from './commands';
 import { markdownHighlight } from './highlight';
 import { codeLanguages } from './languages';
@@ -69,6 +70,7 @@ export function createEditor({
         // Tables first: a StateField's block widget takes precedence over the
         // plugin's inline decorations inside the same range.
         tableView,
+        codeBlockSurface,
         livePreview,
         editorTheme,
 
