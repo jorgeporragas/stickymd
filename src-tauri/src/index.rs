@@ -136,9 +136,9 @@ pub fn forget_entry(dir: &Path, name: &str) -> Result<(), NoteError> {
 
 /// Remember where a note's window is and whether it is open.
 ///
-/// Positions are physical pixels. Restoring them on a display with a different
-/// scale factor puts the window in the right place but at the wrong size for
-/// that display — a trade worth taking over storing nothing.
+/// Geometry is in logical pixels — the units the page itself thinks in. See
+/// `position_of` in `src-tauri/src/windows.rs` for why physical ones do not
+/// work.
 pub fn set_placement(
     dir: &Path,
     name: &str,

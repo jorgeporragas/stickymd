@@ -370,9 +370,21 @@ History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
 Notes: Notes that were open when the application stopped come back where they were. The index carries `open` and the geometry; a note is marked open when it takes a name, and closed when its window is closed deliberately. Position is written when a window loses focus and again as it closes — the two moments it is worth writing. Writing on every drag frame would put the disk to work for the whole gesture.
   The window Tauri builds from the config is reused for the first restored note rather than left empty beside them, or every restored session would come back with one more note than it had.
-  Positions are physical pixels. Restoring on a display with a different scale factor puts a window in the right place at the wrong size — a trade taken over storing nothing. Placement failures are ignored: a saved position can be off-screen after a monitor is unplugged, and a note that opens in the wrong place beats one that refuses to open.
+  Geometry is in logical pixels. Physical ones were tried first and were wrong — see SMD-043. Placement failures are ignored: a saved position can be off-screen after a monitor is unplugged, and a note that opens in the wrong place beats one that refuses to open.
   A restore that fails does not stop the application starting. The notes are still on disk and an empty window is a working app.
   Not confirmed: that a session comes back, and that a deliberately closed note stays closed.
+
+### [SMD-043] Pale lines down the right and bottom of a restored window
+Type:    bug
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  reported by founder after a session restore
+  2026-09-05  active — cause found
+Notes: SMD-041 stored geometry in physical pixels, recorded at the time as a deliberate trade. It was not a sound one. A physical size does not divide evenly into CSS pixels at a fractional DPI scale, so a restored window is a sliver wider than the web view inside it, and that strip is painted by nothing — a pale line down the right edge and along the bottom.
+  Geometry is now logical pixels, the units the page itself thinks in, so nothing is left over. That also fixes the cross-display problem the original note wrote off: logical units carry correctly onto a monitor with a different scale factor.
+  Also corrected while here: the size measured was the *outer* size while `set_size` sets the *inner* one, so a window would have grown slightly on every session.
+  Entries written before this change hold physical values. They are rewritten the first time each window loses focus, so at worst one restore is off on a scaled display.
 
 ### [SMD-042] Apostrophes were turned into separators in filenames
 Type:    bug

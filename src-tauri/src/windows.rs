@@ -93,11 +93,11 @@ fn build(app: &AppHandle, label: &str) -> Result<WebviewWindow, NoteError> {
 /// than one that refuses to open at all.
 fn place(window: &WebviewWindow, state: &NoteState) {
     if let (Some(x), Some(y)) = (state.x, state.y) {
-        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+        let _ = window.set_position(tauri::LogicalPosition::new(f64::from(x), f64::from(y)));
     }
 
     if let (Some(width), Some(height)) = (state.width, state.height) {
-        let _ = window.set_size(tauri::PhysicalSize::new(width, height));
+        let _ = window.set_size(tauri::LogicalSize::new(f64::from(width), f64::from(height)));
     }
 }
 
@@ -157,12 +157,27 @@ pub fn claim_note(
     index::set_placement(&dir, &name, position_of(&window), size_of(&window), true)
 }
 
+/// Geometry is stored in logical pixels, not physical ones.
+///
+/// A physical size does not divide evenly into CSS pixels at a fractional DPI
+/// scale, so restoring one leaves the web view a sliver short of the window and
+/// that strip is painted by nothing — visible as a pale line down the right
+/// edge and along the bottom. Logical units are the same units the page thinks
+/// in, so nothing is left over. They also carry correctly onto a display with a
+/// different scale factor, which physical units did not.
 fn position_of(window: &WebviewWindow) -> Option<(i32, i32)> {
-    window.outer_position().ok().map(|p| (p.x, p.y))
+    let scale = window.scale_factor().ok()?;
+    let position = window.outer_position().ok()?.to_logical::<f64>(scale);
+    Some((position.x.round() as i32, position.y.round() as i32))
 }
 
+/// Paired with `set_size`, which sets the *inner* size — so the inner size is
+/// what gets measured. Measuring the outer size and restoring it as the inner
+/// one would grow the window a little on every session.
 fn size_of(window: &WebviewWindow) -> Option<(u32, u32)> {
-    window.outer_size().ok().map(|s| (s.width, s.height))
+    let scale = window.scale_factor().ok()?;
+    let size = window.inner_size().ok()?.to_logical::<f64>(scale);
+    Some((size.width.round() as u32, size.height.round() as u32))
 }
 
 /// Record where a window is, and whether its note should reopen next time.
