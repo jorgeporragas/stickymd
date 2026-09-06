@@ -10,11 +10,14 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Nothing in progress. The autonomous bundle the founder approved is done and awaiting his verification: SMD-022 (the transparency setting followed at runtime), SMD-020 (fenced code blocks — panel, size, colour), SMD-061 (the hub's delete control, and a press state for every seated control), and SMD-019 (the bundle measured rather than changed).
+Awaiting the founder's verification of the second autonomous bundle. Shipped in it: the code face swapped to JetBrains Mono (SMD-063), the settings window with a configurable notes folder (SMD-064, closing SMD-046 and SMD-003), typographic scrambling on the window titles (SMD-051), and the radial menu (SMD-038).
 
-Build phases 1 to 5 are shipped. What remains on the list is all `idea`-state and each piece needs a decision that is the founder's rather than mine — the notes folder being configurable needs migration semantics, the settings surface and the radial menu need design, typographic scrambling lost its mechanism with Handjet, and cutting the language set decides which fenced blocks highlight.
+Two of the six did not finish, and neither was skipped quietly:
 
-Two phases in `MASTER.md` are deliberately beyond V1: Phase 6 (macOS and Linux) and Phase 7 (auto-update), the latter by the founder's own call.
+- **SMD-052, the line boil, is blocked.** Its subject is the application mark and the founder is redrawing it. The mark on disk is also still the old one — it carries the aqua gradient ADR-025 removed and is titled "StickyMD" rather than "sticky.md".
+- **SMD-065, release readiness, is active.** Everything testable without a remote was tested by hand and both artefacts build. The workflow's own first run is the only part that has never executed, and it needs a tag pushed to a remote that does not exist yet.
+
+Build phases 1 to 5 are shipped. The log now holds nothing that is both unblocked and undecided.
 
 ---
 
