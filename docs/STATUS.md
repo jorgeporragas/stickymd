@@ -22,7 +22,7 @@ SMD-015 is written and running but **unconfirmed** — whether the window is act
 | Build target | Windows x64 |
 | Node | v24.19.0, npm 11.17.0 — verified present 2026-09-05 |
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
-| MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Rust links; `cargo check` now fails only on the missing application icon (SMD-014). |
+| MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Both halves build and the application runs. |
 | WebView2 | Ships with Windows 11 |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
