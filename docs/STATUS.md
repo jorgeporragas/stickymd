@@ -469,6 +469,17 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-058] The palette, and the pin lights instead of inverting
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: ADR-028. The founder set a ten-stop ramp — yellow-green through teal to a deep blue — and said the pin looked wrong inverted. It is a lit lozenge now, taking its hue as `color` so the same `--gloss-tinted` and `--swatch-rim` the tint swatches use light it: one kind of object lit, not a second kind of control.
+  The measurement picked the stop and the glyph together. The gloss lightens the top of a disc to 45% of its colour over white, which puts a *white* glyph under 2.3:1 at every stop on this ramp — so the glyph had to be dark, and a dark glyph clears 4:1 through the teal stops and falls away past them. `--tide-600` at 4.06:1 is the darkest that holds, and it is the middle of the ramp.
+  The other half of the request needed no change and is not claimed as one: `.control.active` has kept `opacity: 1` since the chrome was built, so a pinned control has never receded. Confirmed by reading the rule, not by watching it — the browser pane throttles transitions while it is hidden, and an opacity reading taken there is worth nothing. Worth the founder's eye in the running app.
+  Nine stops have no role yet. Principle 6 is what permits that: primitives name values, semantics name roles, and a stop nothing reaches for is not a colour in the interface. Red is untouched — `--signal-danger` has no equivalent on this ramp, and deleting a note is not a green.
+
 ### [SMD-057] The direction is Aqua; the lozenges take the gloss
 Type:    feature
 State:   shipped

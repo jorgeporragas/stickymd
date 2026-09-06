@@ -104,6 +104,7 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | Token | Role |
 |---|---|
 | `--signal-danger` | A control that takes something away |
+| `--signal-engaged` | A control holding a setting on — the always-on-top pin |
 | `--gloss-tinted` | The fill of a disc that carries a colour, mixed from `currentColor` — a primitive, since it says the same thing in every theme |
 | `--gloss-neutral` | The fill of a disc that carries none: the window's own controls |
 | `--gloss-seat` | The shade inside a disc's lower edge, and the contact shadow under it |
@@ -112,13 +113,15 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | `--focus-ring` | The focus indicator |
 | `--selection` | The wash behind selected text |
 
+The palette is one ramp, `--tide-100` to `--tide-1000`, running from a yellow-green through teal to a deep blue (ADR-028). It is a primitive family: a stop nothing reaches for is a value, not a colour in the interface.
+
 **There is no brand colour** (ADR-025). The interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what something does — traffic-light reading, because it needs no learning. Today that is one control: delete.
 
 Amber and green are deliberately not defined. A colour with no job is how a palette turns decorative, and the moment one has a job it can be added with its contrast computed then.
 
 Every signal value is computed, never picked: it clears 4.5:1 against the worst of the seven tints in its own theme, so it stays legible on any note.
 
-A state is not a colour. "On" is shown by a filled chip — see the always-on-top pin — because a state you can see beats a state you have to have learned.
+A state can be a colour when the state is the thing the control exists to report. The always-on-top pin lights to `--signal-engaged` when held, and stops receding — a pin you cannot see is a note you do not know is floating. It lights by taking the hue as `color`, feeding the same fill and rim every tint swatch uses, so it stays one kind of object rather than becoming a second kind of control.
 
 Note tints are not interface colour. They are the note's own paper, and ADR-025 leaves them untouched.
 

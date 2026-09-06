@@ -59,6 +59,21 @@
   --swatch-lilac: #dcd4f7;
   --swatch-blush: #fbd5e0;
 
+  /* The palette, as the founder set it: one ramp from a yellow-green through
+     teal to a deep blue. Light to dark, numbered the way the neutrals are.
+     Primitives name values; only the stops a role reaches for are in use, and
+     a stop with no role is not a colour in the interface yet. */
+  --tide-100: #d9ed92;
+  --tide-200: #b5e48c;
+  --tide-300: #99d98c;
+  --tide-400: #76c893;
+  --tide-500: #52b69a;
+  --tide-600: #34a0a4;
+  --tide-700: #168aad;
+  --tide-800: #1a759f;
+  --tide-900: #1e6091;
+  --tide-1000: #184e77;
+
   /* Signals — the only hues in the interface, and only where colour is
      carrying the meaning. Traffic-light reading, because it needs no learning:
      red is the one that takes something away. Amber and green have nothing to
@@ -179,6 +194,12 @@
 
   /* Accent */
   --signal-danger: var(--red-600);
+
+  /* A control holding a setting on. `--tide-600` because the gloss lightens
+     the top of a disc to 45% of its colour over white, which puts a light
+     glyph under 2.3:1 everywhere on this ramp — the glyph has to be dark, and
+     a dark glyph clears 4:1 through the teal stops and fails past them. */
+  --signal-engaged: var(--tide-600);
   --focus-ring: var(--neutral-950);
 
   /* A control carries no tint, so its gloss is named rather than mixed, and
@@ -253,6 +274,7 @@
   --ink-syntax: #6a6760;
 
   --signal-danger: var(--red-300);
+  --signal-engaged: var(--tide-600);
   --focus-ring: #f2efe8;
 
   --gloss-neutral: radial-gradient(circle at 50% 18%, #4a4945 0%, #33322f 60%, #232220 100%);

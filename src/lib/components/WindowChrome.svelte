@@ -124,16 +124,30 @@
     plainest "held down" there is — no colour required to say it.
   */
   /*
-    Pinned inverts rather than filling a little harder. Once every control was
-    a lozenge, a stronger fill was too close to hover to tell apart, and an
-    inverted one is the plainest "held down" there is — no colour needed.
-    It keeps its seat and its specular: it is the same object, pressed.
+    Pinned takes a colour rather than inverting. Inverting made it the darkest
+    thing in the window for a setting that is not an alarm, and this is what
+    the traffic lights do anyway: a lit control is a coloured one.
+
+    It reads its hue as `color`, which is what feeds the same --gloss-tinted
+    and --swatch-rim the tint swatches use — one lit lozenge, not a second
+    kind of control.
+
+    It also does not recede. A pin you cannot see is a note you do not know is
+    floating, which is the same reason a tinted swatch stays put: chrome
+    recedes, chrome that is carrying information does not.
   */
   .control.active,
   .control.active:hover {
-    color: var(--surface-solid);
-    background: var(--ink-primary);
-    border-color: var(--ink-primary);
+    color: var(--signal-engaged);
+    background: var(--gloss-tinted);
+    border-color: var(--swatch-rim);
+  }
+
+  /* The glyph cannot be `currentColor` here — that is now the fill's own hue.
+     The hue taken most of the way to black is how Aqua drew a traffic light's
+     glyph, and it holds against both ends of the gradient. */
+  .control.active svg {
+    stroke: color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade));
   }
 
   .control svg {
