@@ -146,18 +146,23 @@ pub fn note_state(
     Ok(load(&dir).notes.get(&name).cloned().unwrap_or_default())
 }
 
+/// Set one note's always-on-top flag.
+///
+/// Targeted rather than writing a whole `NoteState` back: the frontend does not
+/// hold the note's geometry, and a read-modify-write from there would erase
+/// whatever it did not know about.
 #[tauri::command]
-pub fn set_note_state(
+pub fn set_note_always_on_top(
     app: AppHandle,
     lock: State<'_, IndexLock>,
     name: String,
-    state: NoteState,
+    value: bool,
 ) -> Result<(), NoteError> {
     let dir = notes_dir(&app)?;
     let _guard = guard(&lock)?;
 
     let mut index = load(&dir);
-    index.notes.insert(name, state);
+    index.notes.entry(name).or_default().always_on_top = value;
     store(&dir, &index)
 }
 

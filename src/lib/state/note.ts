@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 /**
  * The note this window is editing, and when it gets written.
@@ -38,6 +39,15 @@ let pending: string | undefined;
 /** What is currently on disk, so an unchanged buffer is never rewritten. */
 let written: string | undefined;
 
+/**
+ * Whether this note floats above other windows.
+ *
+ * Held here because it can be set before the note has a file. A note pinned
+ * and then given a title keeps the pin: the setting is written as soon as
+ * there is a name to write it against.
+ */
+let pinned = false;
+
 export function noteFileName(): string | undefined {
   return noteName;
 }
@@ -48,32 +58,72 @@ export function noteFileName(): string | undefined {
  * A window with no note is a new one and starts empty. Rust tracks the mapping
  * by window label, so nothing has to be threaded through the URL.
  */
-export async function loadNote(): Promise<string> {
+export interface LoadedNote {
+  body: string;
+  alwaysOnTop: boolean;
+}
+
+export async function loadNote(): Promise<LoadedNote> {
+  const empty: LoadedNote = { body: '', alwaysOnTop: false };
+
   try {
     noteName = (await invoke<string | null>('window_note')) ?? undefined;
   } catch {
     // No backend — the window is being served in a plain browser for testing.
-    return '';
+    return empty;
   }
 
-  if (noteName === undefined) return '';
+  if (noteName === undefined) return empty;
+
+  let body = '';
 
   try {
-    const body = await invoke<string>('read_note', { name: noteName });
+    body = await invoke<string>('read_note', { name: noteName });
     written = body;
-    return body;
   } catch (error) {
     const noteError = asNoteError(error);
 
-    if (noteError?.kind === 'not_found') {
-      // The file went away between the window opening and this read — deleted
-      // in Explorer, most likely. Treat it as a new note under that name.
-      return '';
+    if (noteError?.kind !== 'not_found') {
+      console.error('sticky.md: could not read the note', noteError ?? error);
     }
-
-    console.error('sticky.md: could not read the note', noteError ?? error);
-    return '';
+    // A note that is not there yet is a new one under that name, not an error.
   }
+
+  try {
+    const state = await invoke<{ alwaysOnTop: boolean }>('note_state', { name: noteName });
+    pinned = state.alwaysOnTop;
+  } catch (error) {
+    console.error('sticky.md: could not read the note index', asNoteError(error) ?? error);
+  }
+
+  if (pinned) await applyPin();
+
+  return { body, alwaysOnTop: pinned };
+}
+
+async function applyPin(): Promise<void> {
+  try {
+    await getCurrentWindow().setAlwaysOnTop(pinned);
+  } catch (error) {
+    console.error('sticky.md: could not set always-on-top', error);
+  }
+}
+
+/** Remember the pin, once there is a note to remember it against. */
+async function persistPin(): Promise<void> {
+  if (noteName === undefined) return;
+
+  try {
+    await invoke('set_note_always_on_top', { name: noteName, value: pinned });
+  } catch (error) {
+    console.error('sticky.md: could not save always-on-top', asNoteError(error) ?? error);
+  }
+}
+
+export async function setAlwaysOnTop(value: boolean): Promise<void> {
+  pinned = value;
+  await applyPin();
+  await persistPin();
 }
 
 /** The note's title: its first line, which Rust slugifies into the filename. */
@@ -121,6 +171,8 @@ export async function flushSave(): Promise<void> {
       // Tell Rust which note this window now holds, so a second window cannot
       // be opened onto the same file and overwrite it.
       await invoke('claim_note', { name: saved });
+      // A note pinned before it had a file gets its pin written now.
+      if (pinned) await persistPin();
     }
 
     written = body;

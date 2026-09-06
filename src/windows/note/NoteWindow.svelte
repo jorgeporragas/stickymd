@@ -3,17 +3,31 @@
   import { onMount } from 'svelte';
   import Editor from '../../lib/components/Editor.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
-  import { flushSave, queueSave } from '../../lib/state/note';
+  import { flushSave, queueSave, setAlwaysOnTop } from '../../lib/state/note';
 
   interface Props {
-    /** The note's source. A new window starts empty; reopening an existing
-        note arrives with session restore, which is Phase 3 work. */
+    /** The note's source. A new window starts empty. */
     initial?: string;
+    /**
+     * Whether this note was pinned when it was last open. Read once, at
+     * mount: after that the window owns the setting and writes it back.
+     */
+    initiallyPinned?: boolean;
   }
 
-  let { initial = '' }: Props = $props();
+  let { initial = '', initiallyPinned = false }: Props = $props();
 
   let revealed = $state(false);
+
+  // Capturing the initial value is the intent: the index seeds the window, and
+  // from then on the window is authoritative and persists its own changes.
+  // svelte-ignore state_referenced_locally
+  let alwaysOnTop = $state(initiallyPinned);
+
+  function togglePin(value: boolean): void {
+    alwaysOnTop = value;
+    void setAlwaysOnTop(value);
+  }
 
   function reveal(): void {
     revealed = true;
@@ -59,7 +73,7 @@
 />
 
 <div class="surface">
-  <WindowChrome {revealed} />
+  <WindowChrome {revealed} {alwaysOnTop} onAlwaysOnTop={togglePin} />
   <Editor value={initial} onChange={queueSave} />
 </div>
 

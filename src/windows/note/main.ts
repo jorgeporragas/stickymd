@@ -13,6 +13,9 @@ if (!target) {
 // Both resolved before mounting: the surface mode so the window is painted in
 // its final mode once rather than flicking from solid to glass, and the note
 // so the editor is created with its content already in it.
-const [, initial] = await Promise.all([applySurfaceMode(), loadNote()]);
+const [, note] = await Promise.all([applySurfaceMode(), loadNote()]);
 
-export default mount(NoteWindow, { target, props: { initial } });
+export default mount(NoteWindow, {
+  target,
+  props: { initial: note.body, initiallyPinned: note.alwaysOnTop }
+});

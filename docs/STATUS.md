@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-The per-note always-on-top toggle, which is also the first consumer the sidecar index has had: `note_state` and `set_note_state` have been written, tested and registered since Phase 2 with nothing calling them (SMD-027).
+SMD-040 is written and running, awaiting confirmation that the pin holds a note above other windows and survives closing and reopening it.
 
 Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037), session restore of open windows, and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
 
@@ -350,6 +350,18 @@ Notes: The application lives in the tray so the global shortcut has something to
   Left-clicking the tray writes a new note rather than opening a menu; the menu is on the right button. That should become "open the hub" once there is one (Phase 4 — The Hub).
   Confirmed by the founder on 2026-09-05. The founder also confirmed the intent that left-click should open the hub once one exists.
 
+### [SMD-040] Per-note always-on-top
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+Notes: A pin in the window chrome, off by default per `MASTER.md § In Scope`. The setting lives in the sidecar index and survives closing and reopening the note — which makes this the first consumer the index has had since it was built in Phase 2.
+  A note can be pinned before it has a file. The setting is held in the window until the note takes a name on its first save, then written.
+  `set_note_state` was replaced by `set_note_always_on_top` rather than added to. The frontend does not hold a note's geometry, so writing a whole `NoteState` back from there would erase whatever it did not know about — a targeted command cannot.
+  Deliberate exception to `docs/DESIGN.md` principle 2: a pinned note keeps its pin visible when the chrome recedes. A state you cannot see is a state you cannot trust.
+  Not confirmed: that the pin holds the window above others, and that it survives closing and reopening the note.
+
 ### [SMD-037] Launch at startup, off by default
 Type:    feature
 State:   accepted
@@ -400,7 +412,7 @@ State:   idea
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: `list_notes`, `delete_note`, `note_state` and `set_note_state` are written, tested where testable, and registered — but nothing calls them. `read_note` and `window_note` gained their callers with SMD-030. The index commands wait on the always-on-top toggle and session restore; `list_notes` and `delete_note` wait on the hub, since deleting a note needs somewhere to delete it from. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
+Notes: `list_notes` and `delete_note` are written, tested where testable, and registered — but nothing calls them. Both wait on the hub, since deleting a note needs somewhere to delete it from. `read_note` and `window_note` gained their callers with SMD-030; `note_state` and `set_note_always_on_top` gained theirs with SMD-040. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
 
 ---
 

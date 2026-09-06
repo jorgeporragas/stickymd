@@ -52,7 +52,7 @@ fn main() {
             notes::save_note,
             notes::delete_note,
             index::note_state,
-            index::set_note_state,
+            index::set_note_always_on_top,
             windows::window_note,
             windows::claim_note,
             windows::new_note_window
