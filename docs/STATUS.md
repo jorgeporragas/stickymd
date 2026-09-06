@@ -226,6 +226,9 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as idea
 Notes: Fence markers stay visible by design — hiding them leaves a bare language name floating above the block. A proper treatment gives the block its own surface with the language shown deliberately rather than as leftover syntax.
+  2026-09-06, from the founder using it: fenced blocks have no surface — he wants a light rounded panel separating code from prose, as Obsidian has, and suggested the panel could be black regardless of theme, since developers rarely read code on a light background. The text also reads much larger than body text, and there is no colour in it.
+  Two of those three are measured rather than reported. **The size is a real defect:** `--font-size-code` exists but is applied only inside tables, so fenced code inherits `--font-size-body`. And at the same 15px, Martian Mono sets `const value = 42;` 52% wider than Geist — 10.5px per character against 8.23px. Code does not read larger because it is taller; it reads larger because it is far wider, and width is what reads as size in a block. Matching Geist's rhythm wants about 12px; 13px (`0.8125rem`) is the likely landing, at 11% wider.
+  **The missing colour is mine, not the face's.** ADR-025 took the hues out of the highlight style along with the accent, and the commit that did it said that was the part of the change most likely to be wrong. The founder has now independently reported it as missing, which settles that. Restoring it wants an ADR: colour inside a fenced block is carrying token classes, which is the functional use ADR-025 permits, but a dark panel inside a quiet note is an exception to principle 1 and should be written down rather than assumed.
 
 ### [SMD-021] Per-note colour
 Type:    feature
@@ -562,6 +565,16 @@ History:
 Notes: The swatch was at the leading edge of the chrome; the founder asked for it beside the other controls, before the pin. `WindowChrome`'s `leading` snippet becomes `controls` and no longer claims the space at the start, so the drag region is now the whole bar in one piece rather than split around something.
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
+
+### [SMD-061] Restyle the hub's delete control
+Type:    feature
+State:   idea
+Created: 2026-09-06
+History:
+  2026-09-06  logged as idea (founder)
+Notes: The founder wants it square rather than round, with the grey bezel the window's controls wear, appearing only on hover, and pressing it should read as a click.
+  Half of that already holds and should not be claimed as work: it is revealed by `.row:hover` in CSS today. What is missing is the lozenge treatment at a square radius, and a press state — the control has a hover colour but nothing that responds to the press itself.
+  One thing to settle while building it: `.lozenge` is round because every disc so far has been. A square variant means the shared treatment stops being "the disc" and becomes "the seated control", which is the more honest name for it either way.
 
 ### [SMD-051] Typographic scrambling
 Type:    idea

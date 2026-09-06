@@ -89,10 +89,16 @@
      application is saying, and the display face is for identity — the app's
      name and the hub's title. A sentence set in it reads as a label on the
      furniture rather than as the app talking. */
+  /* The content face at content dimensions. "Nothing yet." is a sentence the
+     application is saying, and it should be the same size as the sentences the
+     user reads everywhere else — the display face is for identity, and a
+     larger size would make an empty folder feel like an announcement. */
   .empty {
     margin: var(--space-4) var(--space-2);
     font-family: var(--font-content);
-    font-size: var(--font-size-title);
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-prose);
+    letter-spacing: var(--tracking-body);
     color: var(--ink-muted);
   }
 </style>
