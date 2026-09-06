@@ -160,12 +160,16 @@
   --font-size-body: 0.9375rem;
   --font-size-label: 0.8125rem;
   --font-size-caption: 0.75rem;
-  /* Measured, not inherited. Fenced code had been taking --font-size-body,
-     and at the same pixel size Martian Mono sets a line 52% wider than Geist —
-     10.5px per character against 8.23. Code read as larger because it is far
-     wider, not because it is taller. At 13px the advance is 9.1px, 11% wider
-     than the prose around it rather than 28%. */
-  --font-size-code: 0.8125rem;
+  /* Set below the prose on purpose, and by measurement.
+     Martian Mono and Geist have almost exactly the same x-height on screen at
+     13px and 15px — 7.92px against 7.97 — so code was never *taller* than the
+     text around it. It is wider: the same sentence runs 35% longer, and that
+     extra ink is what reads as a larger size.
+     No size fixes both. At 12px the width gap closes to 25% while the glyphs
+     go 8% shorter than the prose, which is the better-looking trade of the
+     two; at 11px it is 14% and 16%, and the code starts to look shrunken.
+     Closing it properly means a narrower mono face, not a smaller size. */
+  --font-size-code: 0.75rem;
 
   --line-height-prose: 1.6;
   --line-height-ui: 1.35;

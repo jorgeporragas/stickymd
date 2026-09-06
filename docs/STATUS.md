@@ -580,6 +580,17 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-063] Monospaced text still reads larger than prose
+Type:    bug
+State:   active
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder a second time, after the size was already reduced once
+Notes: Measured properly this time, and the first measurement was wrong. Martian Mono is loaded lazily, so on a note with no code in it the face is not loaded at all and a canvas measurement silently falls back to another one. The x-height figures taken that way said mono was 15% *smaller* per em; with the face actually loaded it is 15% larger.
+  What is true: on screen, code at 13px and prose at 15px have the same x-height — 7.92px against 7.97 — so code was never taller than the text around it. It is wider. The same sentence runs 35% longer, and that extra ink is what reads as a larger size.
+  No size fixes both. At 12px the width gap closes to 25% and the glyphs go 8% shorter than the prose; at 11px it is 14% and 16%, and the code starts to look shrunken. 12px is shipped as the better of the two trades.
+  Left `active` rather than shipped, because the size is a compromise and not the answer. Closing the gap properly means a narrower mono face. Martian Mono is a wide design; a mono at a conventional 0.6em advance would sit far closer to the prose at a normal size. That is a swap the founder has to want, and it is on his list of scoping questions.
+
 ### [SMD-062] The seated controls are the window's, and wear the note's colour
 Type:    feature
 State:   shipped
