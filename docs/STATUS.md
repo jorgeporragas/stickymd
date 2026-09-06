@@ -10,11 +10,9 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-040 is written and running, awaiting confirmation that the pin holds a note above other windows and survives closing and reopening it.
+SMD-041 is written and running, awaiting confirmation that closing the app with notes open and reopening it brings those notes back, in the same places, and that a note closed deliberately stays closed.
 
-Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037), session restore of open windows, and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
-
-Waiting on the founder: SMD-039, whether dead keys and accented input work in the editor. Storage is proven by test; composition is not, and the browser harness cannot type.
+Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037) and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
 
 ---
 
@@ -363,6 +361,18 @@ Notes: A pin in the window chrome, off by default per `MASTER.md § In Scope`. T
   `set_note_state` was replaced by `set_note_always_on_top` rather than added to. The frontend does not hold a note's geometry, so writing a whole `NoteState` back from there would erase whatever it did not know about — a targeted command cannot.
   Deliberate exception to `docs/DESIGN.md` principle 2: a pinned note keeps its pin visible when the chrome recedes. A state you cannot see is a state you cannot trust.
   Confirmed by the founder on 2026-09-05.
+
+### [SMD-041] Session restore of open windows
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+Notes: Notes that were open when the application stopped come back where they were. The index carries `open` and the geometry; a note is marked open when it takes a name, and closed when its window is closed deliberately. Position is written when a window loses focus and again as it closes — the two moments it is worth writing. Writing on every drag frame would put the disk to work for the whole gesture.
+  The window Tauri builds from the config is reused for the first restored note rather than left empty beside them, or every restored session would come back with one more note than it had.
+  Positions are physical pixels. Restoring on a display with a different scale factor puts a window in the right place at the wrong size — a trade taken over storing nothing. Placement failures are ignored: a saved position can be off-screen after a monitor is unplugged, and a note that opens in the wrong place beats one that refuses to open.
+  A restore that fails does not stop the application starting. The notes are still on disk and an empty window is a working app.
+  Not confirmed: that a session comes back, and that a deliberately closed note stays closed.
 
 ### [SMD-037] Launch at startup, off by default
 Type:    feature

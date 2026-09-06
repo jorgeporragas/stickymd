@@ -134,6 +134,45 @@ pub fn forget_entry(dir: &Path, name: &str) -> Result<(), NoteError> {
     Ok(())
 }
 
+/// Remember where a note's window is and whether it is open.
+///
+/// Positions are physical pixels. Restoring them on a display with a different
+/// scale factor puts the window in the right place but at the wrong size for
+/// that display — a trade worth taking over storing nothing.
+pub fn set_placement(
+    dir: &Path,
+    name: &str,
+    position: Option<(i32, i32)>,
+    size: Option<(u32, u32)>,
+    open: bool,
+) -> Result<(), NoteError> {
+    let mut index = load(dir);
+    let state = index.notes.entry(name.to_string()).or_default();
+
+    if let Some((x, y)) = position {
+        state.x = Some(x);
+        state.y = Some(y);
+    }
+
+    if let Some((width, height)) = size {
+        state.width = Some(width);
+        state.height = Some(height);
+    }
+
+    state.open = open;
+    store(dir, &index)
+}
+
+/// The notes that were open when the application last stopped, in a stable
+/// order so a restored session does not shuffle itself.
+pub fn restorable(dir: &Path) -> Vec<(String, NoteState)> {
+    load(dir)
+        .notes
+        .into_iter()
+        .filter(|(_, state)| state.open)
+        .collect()
+}
+
 #[tauri::command]
 pub fn note_state(
     app: AppHandle,

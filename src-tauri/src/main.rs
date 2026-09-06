@@ -40,6 +40,13 @@ fn main() {
             app.state::<windows::OpenNotes>()
                 .register(windows::FIRST_WINDOW, None)?;
 
+            // A session that cannot be restored is not a reason to refuse to
+            // start: the notes are still on disk, and an empty window is a
+            // working application.
+            if let Err(error) = windows::restore(app.handle()) {
+                eprintln!("sticky.md: could not restore the last session: {error}");
+            }
+
             shortcuts::register(app.handle());
             tray::install(app.handle())?;
 
@@ -57,10 +64,21 @@ fn main() {
             windows::claim_note,
             windows::new_note_window
         ])
-        .on_window_event(|window, event| {
-            if matches!(event, tauri::WindowEvent::Destroyed) {
+        .on_window_event(|window, event| match event {
+            // Closing means this note should not come back next time.
+            tauri::WindowEvent::CloseRequested { .. } => {
+                windows::remember(window.app_handle(), window.label(), false);
+            }
+            // Losing focus is the moment a position is worth writing. Writing
+            // on every drag frame would put the disk to work for the whole
+            // gesture.
+            tauri::WindowEvent::Focused(false) => {
+                windows::remember(window.app_handle(), window.label(), true);
+            }
+            tauri::WindowEvent::Destroyed => {
                 windows::closed(window.app_handle(), window.label());
             }
+            _ => {}
         })
         .build(tauri::generate_context!())
         .expect("sticky.md failed to start")

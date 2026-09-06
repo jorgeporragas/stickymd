@@ -13,7 +13,8 @@ use std::sync::Mutex;
 
 use tauri::{AppHandle, Manager, WebviewWindow, WebviewWindowBuilder};
 
-use crate::notes::NoteError;
+use crate::index::{self, IndexLock, NoteState};
+use crate::notes::{notes_dir, NoteError};
 use crate::surface;
 
 /// The label of the window Tauri creates from `tauri.conf.json` at startup.
@@ -85,6 +86,21 @@ fn build(app: &AppHandle, label: &str) -> Result<WebviewWindow, NoteError> {
         .map_err(|error| NoteError::Io { message: error.to_string() })
 }
 
+/// Put a restored window back where it was.
+///
+/// Failures are ignored on purpose: a saved position can be off-screen after a
+/// monitor is unplugged, and a note that opens in the wrong place is far better
+/// than one that refuses to open at all.
+fn place(window: &WebviewWindow, state: &NoteState) {
+    if let (Some(x), Some(y)) = (state.x, state.y) {
+        let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+    }
+
+    if let (Some(width), Some(height)) = (state.width, state.height) {
+        let _ = window.set_size(tauri::PhysicalSize::new(width, height));
+    }
+}
+
 /// Open a note window. An already-open note is focused rather than opened
 /// twice — two windows editing one file would overwrite each other.
 pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> {
@@ -125,11 +141,84 @@ pub fn window_note(
 /// two would overwrite each other.
 #[tauri::command]
 pub fn claim_note(
+    app: AppHandle,
     window: WebviewWindow,
     open_notes: tauri::State<'_, OpenNotes>,
+    lock: tauri::State<'_, IndexLock>,
     name: String,
 ) -> Result<(), NoteError> {
-    open_notes.register(window.label(), Some(name))
+    open_notes.register(window.label(), Some(name.clone()))?;
+
+    // The note is open from this moment, which is what a restored session
+    // reads. Its position is recorded too, so a note written and left alone
+    // still comes back where it was put.
+    let dir = notes_dir(&app)?;
+    let _guard = index::guard(&lock)?;
+    index::set_placement(&dir, &name, position_of(&window), size_of(&window), true)
+}
+
+fn position_of(window: &WebviewWindow) -> Option<(i32, i32)> {
+    window.outer_position().ok().map(|p| (p.x, p.y))
+}
+
+fn size_of(window: &WebviewWindow) -> Option<(u32, u32)> {
+    window.outer_size().ok().map(|s| (s.width, s.height))
+}
+
+/// Record where a window is, and whether its note should reopen next time.
+///
+/// Called when a window loses focus and again when it is closing — the two
+/// moments a position is worth writing. Writing on every drag frame would put
+/// the disk to work for the whole gesture.
+pub fn remember(app: &AppHandle, label: &str, still_open: bool) {
+    let Some(window) = app.get_webview_window(label) else {
+        return;
+    };
+
+    let Ok(Some(name)) = app.state::<OpenNotes>().lock().map(|open| {
+        open.get(label).cloned().flatten()
+    }) else {
+        // An unnamed note has no file, so there is nothing to remember it by.
+        return;
+    };
+
+    let Ok(dir) = notes_dir(app) else { return };
+    let lock = app.state::<IndexLock>();
+    let Ok(_guard) = index::guard(&lock) else { return };
+
+    if let Err(error) =
+        index::set_placement(&dir, &name, position_of(&window), size_of(&window), still_open)
+    {
+        eprintln!("sticky.md: could not record where '{name}' was: {error}");
+    }
+}
+
+/// Reopen the notes that were open when the application last stopped.
+///
+/// The window Tauri built from the config is reused for the first of them
+/// rather than left empty beside them — otherwise every restored session would
+/// come back with one more note than it had.
+pub fn restore(app: &AppHandle) -> Result<(), NoteError> {
+    let dir = notes_dir(app)?;
+    let notes = index::restorable(&dir);
+
+    let mut notes = notes.into_iter();
+
+    if let Some((name, state)) = notes.next() {
+        if let Some(window) = app.get_webview_window(FIRST_WINDOW) {
+            app.state::<OpenNotes>().register(FIRST_WINDOW, Some(name))?;
+            place(&window, &state);
+        }
+    }
+
+    for (name, state) in notes {
+        let label = open(app, Some(name))?;
+        if let Some(window) = app.get_webview_window(&label) {
+            place(&window, &state);
+        }
+    }
+
+    Ok(())
 }
 
 /// Open a new, empty note window.
