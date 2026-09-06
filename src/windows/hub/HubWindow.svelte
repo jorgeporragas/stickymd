@@ -85,9 +85,13 @@
     gap: 2px;
   }
 
+  /* The content face, not the display one. "Nothing yet." is a sentence the
+     application is saying, and the display face is for identity — the app's
+     name and the hub's title. A sentence set in it reads as a label on the
+     furniture rather than as the app talking. */
   .empty {
     margin: var(--space-4) var(--space-2);
-    font-family: var(--font-display);
+    font-family: var(--font-content);
     font-size: var(--font-size-title);
     color: var(--ink-muted);
   }

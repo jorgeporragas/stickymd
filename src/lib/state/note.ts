@@ -30,6 +30,47 @@ function asNoteError(value: unknown): NoteError | undefined {
   return undefined;
 }
 
+/**
+ * Why the last write failed, if it did.
+ *
+ * A failed write keeps its text queued and retries on the next flush, so
+ * nothing is lost while the window is open. What the window has to know is
+ * that the note on disk is behind what is on screen — a console nobody has
+ * open is not telling anyone.
+ */
+let trouble: string | undefined;
+
+const watchers = new Set<(reason: string | undefined) => void>();
+
+/** Watch whether this note is failing to save. Returns an unsubscribe. */
+export function onSaveTrouble(watcher: (reason: string | undefined) => void): () => void {
+  watchers.add(watcher);
+  watcher(trouble);
+  return () => watchers.delete(watcher);
+}
+
+function report(reason: string | undefined): void {
+  if (reason === trouble) return;
+  trouble = reason;
+  for (const watcher of watchers) watcher(trouble);
+}
+
+/** What to tell the user about a save failure, from a typed error. */
+function reasonFor(error: unknown): string {
+  const noteError = asNoteError(error);
+
+  switch (noteError?.kind) {
+    case 'no_notes_folder':
+      return 'sticky.md cannot find the notes folder.';
+    case 'unsafe_name':
+      return 'This note\u2019s title cannot be used as a filename.';
+    case 'io':
+      return `This note could not be written: ${noteError.message}`;
+    default:
+      return 'This note could not be written.';
+  }
+}
+
 /** Undefined until the note has been written once and has a file. */
 let noteName: string | undefined;
 
@@ -178,8 +219,12 @@ export function queueSave(body: string): void {
 /**
  * Write now, if there is anything to write. Called on the debounce, and again
  * before the window closes so the last few characters are never lost.
+ *
+ * Resolves true when the note on disk matches what is on screen — which is
+ * also true when there was nothing to write. The window closing path reads
+ * that: a note that could not be saved should not disappear quietly.
  */
-export async function flushSave(): Promise<void> {
+export async function flushSave(): Promise<boolean> {
   if (timer !== undefined) {
     clearTimeout(timer);
     timer = undefined;
@@ -188,11 +233,11 @@ export async function flushSave(): Promise<void> {
   const body = pending;
   pending = undefined;
 
-  if (body === undefined || body === written) return;
+  if (body === undefined || body === written) return true;
 
   // A window opened and closed without typing leaves no file behind. Once a
   // note exists, emptying it is an edit like any other and is written.
-  if (body.trim() === '' && noteName === undefined) return;
+  if (body.trim() === '' && noteName === undefined) return true;
 
   try {
     const saved = await invoke<string>('save_note', {
@@ -212,10 +257,14 @@ export async function flushSave(): Promise<void> {
     }
 
     written = body;
+    report(undefined);
+    return true;
   } catch (error) {
     // Keep the text queued so the next flush tries again rather than
     // discarding what the user typed.
     pending = body;
     console.error('sticky.md: could not save the note', asNoteError(error) ?? error);
+    report(reasonFor(error));
+    return false;
   }
 }

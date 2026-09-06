@@ -2,9 +2,17 @@
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { onMount } from 'svelte';
   import Editor from '../../lib/components/Editor.svelte';
+  import SaveTrouble from '../../lib/components/SaveTrouble.svelte';
   import TintPicker from '../../lib/components/TintPicker.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
-  import { flushSave, queueSave, setAlwaysOnTop, setTint, type Tint } from '../../lib/state/note';
+  import {
+    flushSave,
+    onSaveTrouble,
+    queueSave,
+    setAlwaysOnTop,
+    setTint,
+    type Tint
+  } from '../../lib/state/note';
 
   interface Props {
     /** The note's source. A new window starts empty. */
@@ -39,6 +47,12 @@
     void setAlwaysOnTop(value);
   }
 
+  let trouble = $state<string | undefined>(undefined);
+
+  function retrySave(): void {
+    void flushSave();
+  }
+
   function reveal(): void {
     revealed = true;
   }
@@ -48,17 +62,36 @@
   }
 
   onMount(() => {
+    const watching = onSaveTrouble((reason) => (trouble = reason));
+
     // Closing the window must not lose the last few characters typed: the
     // debounce may still be pending. Take over the close, write, then close.
+    //
+    // If that write fails, the first close is refused and the window says so
+    // instead — closing would take the queued text with it, and a note
+    // disappearing quietly is the failure this whole indicator exists to
+    // prevent. Asking again closes anyway: by then the user has been told,
+    // and a window that cannot be closed is its own kind of broken.
+    let refused = false;
+
     const unlisten = getCurrentWindow()
       .onCloseRequested(async (event) => {
         event.preventDefault();
-        await flushSave();
+
+        const saved = await flushSave();
+
+        if (!saved && !refused) {
+          refused = true;
+          reveal();
+          return;
+        }
+
         await getCurrentWindow().destroy();
       })
       .catch(() => undefined);
 
     return () => {
+      watching();
       void unlisten.then((stop) => stop?.());
     };
   });
@@ -85,6 +118,7 @@
 <div class="surface">
   <WindowChrome {revealed} {alwaysOnTop} onAlwaysOnTop={togglePin} closeLabel="Close note">
     {#snippet controls()}
+      <SaveTrouble reason={trouble} onRetry={retrySave} />
       <TintPicker {revealed} {tint} onTint={chooseTint} />
     {/snippet}
   </WindowChrome>

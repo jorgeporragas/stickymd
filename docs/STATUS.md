@@ -260,11 +260,16 @@ Notes: The editor reports every change; the note is written 600ms after typing s
 
 ### [SMD-025] Surface save failures in the window
 Type:    bug
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
+  2026-09-06  shipped
 Notes: A failed write is logged to the console and the text stays queued for the next flush, so nothing is lost while the window is open. But the user is told nothing, and if the window closes the queued text goes with it. A full disk or a permissions problem should be visible in the window rather than only in a console nobody has open.
+  Shipped as `SaveTrouble`: a lit `--signal-danger` lozenge that appears in the chrome only when a write has failed, carries the reason as its label, and retries when clicked. It does not recede — principle 2 stops at chrome that is carrying information.
+  The reason is built from the typed error rather than from a string, so a missing notes folder, an unusable title and an I/O failure each say what they are. That is what the typed error boundary was for.
+  The second half is the closing path, and it is the half that was actually losing text: the window used to flush and destroy itself regardless of whether the flush worked. A failed flush now refuses the first close and shows the indicator instead. Asking again closes anyway — by then the user has been told, and a window that cannot be closed is its own kind of broken.
+  Verified as far as the harness allows: rendered in the running dev server behind a temporary probe, which is where the screenshot of the lit lozenge came from, and the probe removed after. The wiring from a real failed write is type-checked but not exercised — the browser pane cannot take keyboard input while it is hidden, so no save could be made to fail on purpose. The founder can exercise it in one move: rename `Documents/sticky.md` while a note window is open, type a character, and wait a second.
 
 ### [SMD-026] Slugified filenames with deduplication and renaming
 Type:    feature
@@ -469,6 +474,15 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-060] Tighten the display face, and give the empty state the content face
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: Two notes from the founder on seeing Departure Mono in the hub. Its letters sit too far apart in the title — the face is monospaced, so they carry a code face's sidebearings rather than a title's. `--tracking-display` is `-0.08em`, measured rather than guessed: it renders "notes" 15.2% narrower, which is the 15% he asked for.
+  And the empty state read in the display face. It is a sentence the application is saying, not identity, so it takes the content face. `docs/DESIGN.md`'s typography table said the display face was for empty states; that line is corrected rather than left to contradict the code.
+
 ### [SMD-059] Departure Mono replaces Handjet
 Type:    feature
 State:   shipped
@@ -638,12 +652,14 @@ Notes: If another application already holds the chord, registration fails. Previ
 
 ### [SMD-031] Deleting a note whose window is open does not stick
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
   2026-09-06  reported by the founder from the hub, and decided: the delete wins (ADR-023)
   2026-09-06  active
+  2026-09-06  shipped in af3bf6e; confirmed by the founder, who deleted from the hub and saw the files reach the recycle bin
+  2026-09-06  state corrected — it had been left `active` after shipping, and was caught by a reconciliation sweep rather than at the commit that fixed it
 Notes: The window keeps the note's content and filename in memory, so the next autosave writes the file straight back. Reachable today by deleting in Explorer while a window is open, and it becomes reachable from inside the app once the hub can delete (Phase 4 — The Hub). Confirmed by reading `save_into`: the rename is skipped because the old file is gone, then `fs::write` recreates it. The founder hit it from the hub and chose: deleting a note closes its window (ADR-023). The window is destroyed rather than asked to close, because a close request runs the frontend's flush and would write the note straight back; and it is closed before the file is trashed, so a save landing between the two cannot resurrect it.
 
 ### [SMD-027] list_notes, delete_note and the index commands have no frontend consumer
