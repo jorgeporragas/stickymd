@@ -1,6 +1,6 @@
-# StickyMD
+# sticky.md
 
-> **Authoritative for:** what StickyMD is — problem, user, core loop, domain model, stack choices and their rationale, scope, permanent vetoes, build phase definitions, and deployment.
+> **Authoritative for:** what sticky.md is — problem, user, core loop, domain model, stack choices and their rationale, scope, permanent vetoes, build phase definitions, and deployment.
 > **Never contains:** anything with a state. Current phase, active work, the item log and completed milestones live in `docs/STATUS.md`. Engineering imperatives live in `CLAUDE.md`. Decision history lives in `docs/DECISIONS.md`. The visual system lives in `docs/DESIGN.md`.
 > **Last verified:** 2026-09-05
 
@@ -85,7 +85,7 @@ Two consequences worth stating plainly:
 
 ## In Scope
 
-What StickyMD does. Amended by decision as capability is added or removed, and verified against the code at every phase transition. Phases 1 through 5 constitute V1.
+What sticky.md does. Amended by decision as capability is added or removed, and verified against the code at every phase transition. Phases 1 through 5 constitute V1.
 
 - Tray-resident application; launch-at-startup off by default and user-togglable
 - A global hotkey that creates a new note window, focused and empty

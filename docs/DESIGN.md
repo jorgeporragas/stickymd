@@ -54,7 +54,7 @@ Handjet's advance widths are identical at every setting of `ELGR`, `ELSH` and `w
 
 ## Surface modes
 
-StickyMD renders every window in one of two surface modes.
+sticky.md renders every window in one of two surface modes.
 
 **Glass** — the window is transparent, the compositor blurs what is behind it, and CSS layers a near-colourless tint, a fine grain, and a top edge highlight over the result. The note reads as heavily frosted translucent paper.
 

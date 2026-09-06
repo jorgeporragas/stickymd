@@ -1,6 +1,6 @@
 # DECISIONS
 
-> **Authoritative for:** why StickyMD is the way it is. One entry per decision, append-only.
+> **Authoritative for:** why sticky.md is the way it is. One entry per decision, append-only.
 > **Never contains:** work tracking, or current policy. A decision is not a task — tasks live in `docs/STATUS.md`. Current policy lives in `MASTER.md § Permanent Vetoes` or in an item's state. Nothing may cite this file as current policy.
 > **Last verified:** 2026-09-05
 
@@ -135,3 +135,13 @@ Date:       2026-09-05
 Context:    The design brief is Frutiger Aero warmth held inside Rams restraint, on a colourless frosted surface. Three accent candidates were put forward — aqua, a greener spring, and a cooler sky blue — alongside a set of note tints. The founder approved the palette as proposed, which carried a recommendation to keep aqua.
 Decision:   `--accent` stays aqua `#2FB6D9`. Spring reads botanical rather than interface and fights the quiet-content rule on a focus ring; sky is the least distinctive of the three. Note tints are Clear (the default), Sun `#FFE9A3`, Spring `#C7F0D8`, Aqua `#B8ECF7`, Sky `#CFE4FD`, Lilac `#DCD4F7`, Blush `#FBD5E0`.
 Consequences: The tints are pale by necessity, not by taste: they are layered over frosted glass, so `--ink-primary` must hold 4.5:1 against a tint sitting over an arbitrary wallpaper. A saturated Post-It yellow fails that the moment it goes translucent. The values land in `src/lib/tokens/tokens.css` when per-note colour is built (STATUS SMD-021); until then this record is the only place they exist, and it is not policy — `docs/DESIGN.md` and the token file become authoritative once implemented.
+
+## ADR-019 — The product is styled "sticky.md"
+Status:     Accepted
+Date:       2026-09-05
+Context:    The project was written throughout as "StickyMD". The founder asked for it to be styled "sticky.md" — lowercase, with the markdown file extension as part of the name rather than a suffix bolted on.
+Decision:   "sticky.md" is the product's name wherever a person reads it: the window title, the installer, documentation prose, and the Start Menu. Machine identifiers keep the flat form — the npm package, the Cargo crate, the repository, and the bundle identifier `com.stickymd.app` all stay `stickymd`.
+Consequences: `productName` in `tauri.conf.json` is "sticky.md", and `mainBinaryName` is set to `stickymd` so the executable does not become `sticky.md.exe` — a name with a false second extension that reads as a file rather than a program.
+            Historical decision records keep the name they were written under. ADR-007's title still says "StickyMD" because Context, Decision and titles are immutable: a record states what was decided at the time, and rewriting it would make the log claim a name that did not yet exist. Only this file's header was amended.
+            One measurement in STATUS SMD-006 quotes the literal string "StickyMD scratchpad". It was deliberately left unrenamed — the number is the width of that exact string, and changing it would make a recorded measurement false.
+            2026-09-05 — MASTER, CLAUDE, DESIGN and STATUS amended.

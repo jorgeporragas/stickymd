@@ -1,4 +1,4 @@
-// StickyMD — application entry point.
+// sticky.md — application entry point.
 //
 // Rust owns file I/O, the sidecar index, tray residency, global shortcuts and
 // window lifecycle. See CLAUDE.md section 'Backend'.
@@ -9,5 +9,5 @@
 fn main() {
     tauri::Builder::default()
         .run(tauri::generate_context!())
-        .expect("StickyMD failed to start");
+        .expect("sticky.md failed to start");
 }
