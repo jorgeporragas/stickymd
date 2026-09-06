@@ -258,10 +258,11 @@ Notes: A failed write is logged to the console and the text stays queued for the
 
 ### [SMD-026] Slugified filenames with deduplication and renaming
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 2 — Files & Persistence
+  2026-09-05  shipped — commit 11184fb
 Notes: ADR-006 implemented. The frontend sends a title; Rust slugifies it, finds a free name, renames the file if the title changed, and returns the name the note now has. Leading `#` characters are stripped, so notes do not all sort under `-`. Windows reserved stems get a `-note` suffix. A title that still slugifies to the stem a note already holds does not trigger a rename, so editing never churns the folder. Twelve unit tests, six of them against a real scratch folder, covering the two properties that move a user's file: retitling leaves nothing behind, and retitling onto a name another note holds does not clobber it.
   Replaces the fixed `untitled.md`, which meant a second window would have overwritten the first.
 
