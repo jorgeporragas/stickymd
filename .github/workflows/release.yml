@@ -1,0 +1,108 @@
+# Builds a release from a v* tag and attaches both assets to it.
+#
+# Nothing here builds a distributable on a developer's machine — that is a
+# CLAUDE.md imperative, and the reason is that a build from a laptop carries
+# whatever that laptop happened to have installed. This starts from a clean
+# runner and a known commit.
+#
+# The only actions used are GitHub's own, and the release itself is created
+# through the `gh` CLI that ships on the runner. A third-party action here would
+# be a supply-chain dependency in the one workflow whose output people download
+# and execute.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# The workflow only ever writes releases. Nothing else needs a token.
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # A tag whose version does not match the manifests produces an installer
+      # named after the wrong version, which is only ever noticed after it has
+      # been downloaded. Fail here instead.
+      - name: Check the tag against the manifests
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}' -replace '^v', ''
+          $tauri = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $npm = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          "tag $tag | tauri.conf.json $tauri | package.json $npm"
+          if ($tauri -ne $tag -or $npm -ne $tag) {
+            throw "Version mismatch: the tag says $tag, tauri.conf.json says $tauri, package.json says $npm."
+          }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install Rust
+        shell: pwsh
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustc --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The Rust tests carry the path and name validation. A release that has
+      # not run them is a release that has not checked the one piece of this
+      # application that handles untrusted input.
+      - name: Test
+        working-directory: src-tauri
+        run: cargo test
+
+      - name: Build
+        run: npm run tauri build
+
+      # Tauri builds the installer. The portable asset is the same binary with
+      # no installer around it — extract and run, nothing written to the
+      # registry, no administrator rights. The licence travels with it: GPL-3.0
+      # requires the terms to be conveyed alongside the binary, and a zip
+      # someone extracts on its own is exactly the case that would otherwise
+      # arrive without them.
+      - name: Assemble the portable zip
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}' -replace '^v', ''
+          $staging = "portable/sticky.md-$version"
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+          Copy-Item src-tauri/target/release/stickymd.exe $staging
+          Copy-Item LICENSE $staging
+          Copy-Item README.md $staging
+          Compress-Archive -Path $staging -DestinationPath "portable/sticky.md-$version-portable-x64.zip"
+
+      # Created as a draft: MASTER.md says every release carries written notes,
+      # and notes nobody wrote are not written notes. The assets are attached
+      # and the release waits for the founder to describe it and publish.
+      - name: Attach the assets to a draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $assets = @(Get-ChildItem -Recurse -Include *.exe -Path src-tauri/target/release/bundle/nsis | ForEach-Object { $_.FullName })
+          $assets += (Get-ChildItem portable/*.zip | ForEach-Object { $_.FullName })
+          $assets
+
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --draft --title $tag --notes "Draft. Release notes go here before publishing."
+          }
+          gh release upload $tag $assets --clobber
