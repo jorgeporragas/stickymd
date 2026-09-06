@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-037 is written and running, awaiting confirmation that the tray toggle actually registers sticky.md to launch with Windows.
+Closing Phase 3 — Windows, Tray & Shortcuts. Every item is done; the truth check runs next, then `Current Phase` moves to Phase 4 — The Hub.
 
 Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037) and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
 
@@ -414,14 +414,24 @@ Notes: A note titled "I'm Jorge" produced `i-m-jorge.md`. An apostrophe joins a 
 
 ### [SMD-037] Launch at startup, off by default
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 3 — Windows, Tray & Shortcuts
   2026-09-06  active
+  2026-09-06  shipped — commit 1f4a0f6
+  2026-09-06  confirmed — the founder ticked it and the Run key gained `sticky.md`; unticked it is absent
 Notes: A checkable "Launch at startup" item in the tray menu, since there is no settings surface. `tauri-plugin-autostart` is registered but never enables anything on its own — only the toggle does, which is what MASTER veto 5 requires.
   The checkbox is read from what the system reports, both when the menu is built and after every toggle, rather than from a remembered value. The user may have removed the entry outside the application, and a menu that claims a change succeeded when it failed is worse than one that shows nothing.
-  Not confirmed: that the toggle survives a restart of the machine, which is the only test that means anything.
+  Verified from the registry rather than by inference: with the box unticked `HKCU\...\CurrentVersion\Run` has no sticky.md value, and ticking it adds one pointing at the executable. A dev build registers the dev binary, which is correct — an installed build would register the installed one.
+
+### [SMD-046] A settings surface
+Type:    idea
+State:   idea
+Created: 2026-09-06
+History:
+  2026-09-06  logged as idea
+Notes: Settings are a JSON file the user edits by hand (ADR-022). That satisfies "remappable" for someone willing to open a text editor and no one else. Not in `MASTER.md § In Scope` and not smuggled in as though it were — a settings window is a real feature with its own design, and it would also be the natural home for the notes-folder location (SMD-003) and theme choice.
 
 ### [SMD-045] Animate the transition between written and rendered markdown
 Type:    idea
@@ -455,11 +465,13 @@ Notes: Storage is proven: 23 Rust tests pass, including a real file round-trip w
 
 ### [SMD-033] A user whose global shortcut is already taken has no remedy
 Type:    bug
-State:   idea
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: If another application already holds `Ctrl+Shift+Space`, registration fails, the failure is printed to a console nobody has open, and the only way to summon a note is to click the application. `MASTER.md § In Scope` lists remappable shortcuts, which is the remedy — this records that it is load-bearing rather than a nicety, and that the failure needs to be visible somewhere the user will see it.
+Notes: If another application already holds the chord, registration fails. Previously the only sign was a line in a console nobody has open, leaving a user with no way to summon a note and no idea why.
+  Both halves are now addressed. The shortcut is read from `settings.json` (ADR-022), so it can be changed. And a failure appears in the tray menu as a disabled line naming both the problem and the file to edit, rather than being swallowed.
+  A parse failure is distinguished from a chord already held: a typo falls back to the default shortcut and still says so, rather than leaving the user with nothing.
 
 ### [SMD-031] Deleting a note whose window is open does not stick
 Type:    bug

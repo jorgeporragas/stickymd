@@ -8,6 +8,7 @@
 
 mod index;
 mod notes;
+mod settings;
 mod shortcuts;
 mod surface;
 mod tray;
@@ -55,7 +56,8 @@ fn main() {
                 None,
             ))?;
 
-            shortcuts::register(app.handle());
+            app.manage(shortcuts::ShortcutStatus::default());
+            shortcuts::register(app.handle(), &app.state::<shortcuts::ShortcutStatus>());
             tray::install(app.handle())?;
 
             Ok(())

@@ -10,14 +10,17 @@
 
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 use tauri_plugin_autostart::ManagerExt;
 
+use crate::settings;
+use crate::shortcuts::ShortcutStatus;
 use crate::windows;
 
 const NEW_NOTE: &str = "new-note";
 const AUTOSTART: &str = "autostart";
+const SHORTCUT_PROBLEM: &str = "shortcut-problem";
 const QUIT: &str = "quit";
 
 fn new_note(app: &AppHandle) {
@@ -47,6 +50,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     // Bound separately: a slice needs one type, and these are several.
     let new_note_item = MenuItem::with_id(app, NEW_NOTE, "New note", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
+    let second_separator = PredefinedMenuItem::separator(app)?;
 
     // Reflects the real state rather than a remembered one: the user may have
     // removed the entry outside the application.
@@ -56,10 +60,28 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
 
     let quit_item = MenuItem::with_id(app, QUIT, "Quit sticky.md", true, None::<&str>)?;
 
-    let menu = Menu::with_items(
-        app,
-        &[&new_note_item, &separator, &autostart_item, &separator, &quit_item],
-    )?;
+    // A shortcut that could not be claimed is shown here rather than left in a
+    // console nobody has open. Disabled: there is nothing to click, it is there
+    // to be read, and it names the file to edit.
+    let menu = match app.state::<ShortcutStatus>().problem() {
+        Some(problem) => {
+            let note = MenuItem::with_id(
+                app,
+                SHORTCUT_PROBLEM,
+                format!("Shortcut unavailable — {problem}. Edit {}", settings::location(app)),
+                false,
+                None::<&str>,
+            )?;
+            Menu::with_items(
+                app,
+                &[&new_note_item, &note, &separator, &autostart_item, &second_separator, &quit_item],
+            )?
+        }
+        None => Menu::with_items(
+            app,
+            &[&new_note_item, &separator, &autostart_item, &second_separator, &quit_item],
+        )?,
+    };
 
     let autostart_checkbox = autostart_item.clone();
 

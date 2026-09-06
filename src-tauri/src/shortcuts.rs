@@ -8,46 +8,58 @@
 //!
 //! An OS-level registration sees the chord before either can intervene.
 
-use tauri::AppHandle;
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use std::str::FromStr;
+use std::sync::Mutex;
 
+use tauri::AppHandle;
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
+
+use crate::settings::{self, DEFAULT_NEW_NOTE_SHORTCUT};
 use crate::windows;
 
-/// The primary modifier, per platform.
+/// Whether the new-note shortcut is actually held, and what went wrong if not.
 ///
-/// Never write `Ctrl` or `Cmd` literally — CLAUDE.md section 'Cross-platform
-/// discipline'. This is that abstraction for global shortcuts, the way
-/// CodeMirror's `Mod-` is for in-editor ones.
-const PRIMARY: Modifiers = if cfg!(target_os = "macos") {
-    Modifiers::SUPER
-} else {
-    Modifiers::CONTROL
-};
+/// A shortcut another application already owns cannot be registered, and until
+/// this was surfaced the only sign was a line in a console nobody has open —
+/// leaving a user with no way to summon a note and no idea why.
+#[derive(Default)]
+pub struct ShortcutStatus(Mutex<Option<String>>);
 
-/// Open a new note from anywhere.
-///
-/// Deliberately not a `Ctrl+Alt` combination and deliberately not a chord any
-/// browser claims. Space rather than a letter because a global registration
-/// takes the chord away from every other application on the machine, and a
-/// common letter combination would be a rude thing to claim.
-fn new_note_shortcut() -> Shortcut {
-    Shortcut::new(Some(PRIMARY | Modifiers::SHIFT), Code::Space)
+impl ShortcutStatus {
+    fn set(&self, problem: Option<String>) {
+        if let Ok(mut held) = self.0.lock() {
+            *held = problem;
+        }
+    }
+
+    /// The problem to show the user, if there is one.
+    pub fn problem(&self) -> Option<String> {
+        self.0.lock().ok().and_then(|held| held.clone())
+    }
 }
 
-/// Register the global shortcuts.
+/// Register the global shortcuts, reporting what happened rather than failing.
 ///
-/// A shortcut another application already holds cannot be registered, and that
-/// is not a failure worth stopping for: the app runs fine without it, and the
-/// remedy is for the user to choose a different one. It is reported, not
-/// raised.
-pub fn register(app: &AppHandle) {
-    let new_note = new_note_shortcut();
+/// The application runs perfectly well without a shortcut; it is simply less
+/// convenient. Refusing to start over one would be the wrong trade.
+pub fn register(app: &AppHandle, status: &ShortcutStatus) {
+    let configured = settings::load(app).new_note_shortcut;
+
+    let (shortcut, parse_problem) = match Shortcut::from_str(&configured) {
+        Ok(shortcut) => (shortcut, None),
+        Err(_) => (
+            Shortcut::from_str(DEFAULT_NEW_NOTE_SHORTCUT).expect("the default shortcut must parse"),
+            Some(format!("\"{configured}\" is not a shortcut sticky.md understands")),
+        ),
+    };
+
+    let handled = shortcut;
 
     let plugin = tauri_plugin_global_shortcut::Builder::new()
-        .with_handler(move |app, shortcut, event| {
-            // Fire on press. Without this check the handler runs twice, once
-            // on the way down and once on the way up.
-            if event.state() != ShortcutState::Pressed || shortcut != &new_note {
+        .with_handler(move |app, pressed, event| {
+            // Fire on press. Without this the handler runs twice, once on the
+            // way down and once on the way up.
+            if event.state() != ShortcutState::Pressed || pressed != &handled {
                 return;
             }
 
@@ -58,14 +70,14 @@ pub fn register(app: &AppHandle) {
         .build();
 
     if let Err(error) = app.plugin(plugin) {
-        eprintln!("sticky.md: global shortcuts are unavailable: {error}");
+        status.set(Some(format!("global shortcuts are unavailable: {error}")));
         return;
     }
 
-    if let Err(error) = app.global_shortcut().register(new_note_shortcut()) {
-        eprintln!(
-            "sticky.md: could not claim the new-note shortcut, most likely because another \
-             application already holds it: {error}"
-        );
+    match app.global_shortcut().register(shortcut) {
+        Ok(()) => status.set(parse_problem),
+        Err(_) => status.set(Some(format!(
+            "{configured} is already held by another application"
+        ))),
     }
 }

@@ -49,6 +49,7 @@ src/                      Svelte frontend
 src-tauri/                Rust backend
   src/
     notes.rs              note file I/O
+    settings.rs           application settings, in the config directory
     index.rs              the sidecar index
     windows.rs            window lifecycle
     shortcuts.rs          global and in-app shortcuts
