@@ -116,3 +116,21 @@ body {
     opacity: 0;
   }
 }
+
+/*
+ * The seated disc: the window's controls and the tint swatches alike.
+ *
+ * A rim and a bezel, and nothing else — size and fill belong to whatever is
+ * using it. Shared here rather than in either component because the moment the
+ * second one wanted it, it stopped being one component's styling.
+ *
+ * The rim reads `currentColor`, so a control coloured by its own tint rims
+ * itself. See ADR-026.
+ */
+.lozenge {
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--swatch-rim);
+  box-shadow: var(--bezel);
+  cursor: pointer;
+}

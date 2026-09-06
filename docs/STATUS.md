@@ -479,6 +479,8 @@ History:
 Notes: ADR-026. What the Aqua traffic lights are actually made of is a rim in the fill's own hue, a bezel seating the disc, and going grey when the window is not in use — the gloss is the least of it. All three are taken; the gloss is not, because it would be the only glossy object in the application and it is the language ADR-025 had just removed.
   `--swatch-rim` is a `color-mix` against `currentColor`, so one declaration rims every tint and an eighth would need no new value. Verified in the running application rather than assumed: `color-mix` resolves in WebView2 and all seven rims come out as darkened versions of their own hue.
   Greying out while the chrome recedes was already what principle 2 asked for; the traffic lights just do it too.
+  The founder then said one bezelled control among flat ones felt off, which it did. The pin and the close button are seated discs as well now, and the swatch grew to `--space-6` to sit level with them — the three together are the cluster the reference was reaching for. Pinned inverts rather than filling harder: once both were discs a stronger fill was too close to hover to tell apart. The disc moved to `src/app.css` as `.lozenge` when the second component wanted it.
+  Checked in the browser against the running dev server, in both themes: all three controls measure 24px, the rims resolve per hue, and the pin's inversion stays legible on dark. An earlier reading in that session said the controls were 14px — that was a stale stylesheet in the harness, not a defect, and nothing was changed on account of it.
 
 ### [SMD-055] Palette dismissal, and bold at a lighter weight
 Type:    feature

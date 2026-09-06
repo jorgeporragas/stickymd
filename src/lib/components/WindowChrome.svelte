@@ -47,7 +47,7 @@
 
   {#if onAlwaysOnTop}
     <button
-      class="control"
+      class="lozenge control"
       class:revealed
       class:active={alwaysOnTop}
       type="button"
@@ -62,7 +62,7 @@
     </button>
   {/if}
 
-  <button class="control" class:revealed type="button" aria-label={closeLabel} onclick={close}>
+  <button class="lozenge control" class:revealed type="button" aria-label={closeLabel} onclick={close}>
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
       <path d="M3.5 3.5 L8.5 8.5 M8.5 3.5 L3.5 8.5" />
     </svg>
@@ -81,17 +81,23 @@
     flex: 0 0 auto;
   }
 
+  /*
+    Seated discs, like the tint swatch beside them — one bezelled control in a
+    row of flat ones reads as an accident rather than as an emphasis. The disc
+    itself is `.lozenge`, in src/app.css.
+
+    The rim is the exception to reading `currentColor`: these are not coloured
+    by a tint, and mixing a rim out of the glyph's own ink would draw a hard
+    ring around a control whose job is to stay quiet.
+  */
   .control {
     display: grid;
     place-items: center;
     width: var(--space-6);
     height: var(--space-6);
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-chip);
-    background: transparent;
+    border-color: var(--rule);
+    background: var(--control-hover);
     color: var(--ink-muted);
-    cursor: pointer;
 
     /* Small control, not a glass surface: fading is cheap and correct.
        See docs/DESIGN.md section 'Never Allowed'. */
@@ -108,18 +114,21 @@
     opacity: 1;
   }
 
-  .control.active {
+  .control:hover {
     color: var(--ink-primary);
     background: var(--control-active);
   }
 
-  .control:hover {
-    color: var(--ink-primary);
-    background: var(--control-hover);
-  }
-
+  /*
+    Pinned inverts rather than fills a little harder. Filling was too close to
+    hover to tell apart once both were discs, and an inverted control is the
+    plainest "held down" there is — no colour required to say it.
+  */
+  .control.active,
   .control.active:hover {
-    color: var(--ink-primary);
+    color: var(--surface-solid);
+    background: var(--ink-primary);
+    border-color: var(--ink-primary);
   }
 
   .control svg {

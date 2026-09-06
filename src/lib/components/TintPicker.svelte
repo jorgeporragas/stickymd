@@ -91,22 +91,20 @@
   }
 
   /*
-    The disc, shared by the closed swatch and the seven in the palette. Its
-    colour arrives as `color`, so the fill, the rim and the greyed-out state
-    all follow from one declaration per tint.
+    Both discs take their colour as `color`, so the fill, the rim and the
+    greyed-out state all follow from one declaration per tint. The disc itself
+    is `.lozenge`, in src/app.css — the window's controls wear it too.
   */
-  .lozenge {
-    width: var(--space-4);
-    height: var(--space-4);
-    padding: 0;
-    border-radius: 50%;
-    border: 1px solid var(--swatch-rim);
+  .swatch,
+  .dot {
     background: currentColor;
-    box-shadow: var(--bezel);
-    cursor: pointer;
   }
 
+  /* The swatch is one of the window's controls and is sized with them. The
+     palette's dots are a menu rather than controls, and stay smaller. */
   .swatch {
+    width: var(--space-6);
+    height: var(--space-6);
     /* Small control, not a glass surface: fading is cheap and correct. */
     opacity: 0;
     transition:
@@ -186,6 +184,11 @@
       opacity: 0;
       transform: scale(0.92);
     }
+  }
+
+  .dot {
+    width: var(--space-4);
+    height: var(--space-4);
   }
 
   .dot.selected {

@@ -100,8 +100,8 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | Token | Role |
 |---|---|
 | `--signal-danger` | A control that takes something away |
-| `--bezel` | The seat under a tint swatch: a bright hairline along its top inside edge, a soft shade along its bottom |
-| `--swatch-rim` | A swatch's edge — its own hue darkened, via `currentColor`, never a neutral border |
+| `--bezel` | The seat under any of the window's discs — a control or a tint swatch: a bright hairline along its top inside edge, a soft shade along its bottom |
+| `--swatch-rim` | A swatch's edge — its own hue darkened, via `currentColor`, never a neutral border. A control carrying no tint overrides it with `--rule`. |
 | `--focus-ring` | The focus indicator |
 | `--selection` | The wash behind selected text |
 
@@ -231,6 +231,7 @@ Every entry lands in the same commit as the component it describes.
 | Component | Role | Notes |
 |---|---|---|
 | `WindowChrome` | The drag region and window controls for any window. Takes `revealed: boolean`, an optional `closeLabel`, and optionally `alwaysOnTop` and `onAlwaysOnTop` for the pin — omit those and no pin is rendered, which is how the hub uses it. | Implements Principle 2, with one deliberate exception: a pinned note keeps its pin visible even when the chrome recedes. A state you cannot see is a state you cannot trust — chrome recedes, chrome that is carrying information does not. Controls fade via `opacity`, permitted for small non-glass elements. |
+| `.lozenge` (`src/app.css`) | The seated disc: a rim and a bezel, no size and no fill. Worn by the window's controls and by every tint swatch. Not a component — a shared treatment, in `app.css` for the same reason `.surface` is: two components wanted it. |
 | `TintPicker` | A note's colour. A swatch that opens the seven tints in a row, sitting with the other controls at the window's trailing edge, before the pin. The palette opens down and to the left, anchored to its right edge — the surface clips what leaves it. Its own surface is opaque `--surface-solid`, not the window's translucent paint, or the note's text reads through the swatches. It arrives over `--dur-settle` and leaves over `--dur-quick`: arriving is the palette presenting itself and is worth the time, while leaving is getting out of the way, and a dismissal as long as the arrival reads as lag. It stays mounted while it leaves and its own `animationend` says when it is gone — which is also what keeps reduced motion correct, since the collapsed duration still fires the event. Each disc is rimmed in its own hue and seated with `--bezel` (ADR-026), carries its colour as `color` rather than `background` so one rule rims all seven, and greys out while the chrome is receded. Clear is rim and bezel with nothing in them. Takes `revealed`, `tint`, `onTint`. | Like the pin, a note whose tint is not Clear keeps its swatch visible when the chrome recedes: the swatch is carrying information, and Principle 2 stops receding at that point. |
 | `NoteRow` | One note in the hub: its title, when it changed, and a delete control. Takes `title`, `when`, `onOpen`, `onDelete`. | The row is not the control — the buttons inside it are. Delete is revealed by hovering the row in CSS rather than through state, which avoids putting a pointer handler on a `div` that would then need an ARIA role it does not deserve. |
 | `Editor` | The note's markdown editing surface. Takes `value?: string` as initial source. Owns the CodeMirror instance and its lifecycle. | Content, not surface — quiet and typographic per Principle 1. No gutters, no active-line highlight, no border. Editor internals live in `src/lib/editor/`. |
