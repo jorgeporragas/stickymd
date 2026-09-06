@@ -10,6 +10,7 @@ mod index;
 mod notes;
 mod shortcuts;
 mod surface;
+mod tray;
 mod windows;
 
 use surface::SurfaceMode;
@@ -40,6 +41,7 @@ fn main() {
                 .register(windows::FIRST_WINDOW, None)?;
 
             shortcuts::register(app.handle());
+            tray::install(app.handle())?;
 
             Ok(())
         })
@@ -60,6 +62,14 @@ fn main() {
                 windows::closed(window.app_handle(), window.label());
             }
         })
-        .run(tauri::generate_context!())
-        .expect("sticky.md failed to start");
+        .build(tauri::generate_context!())
+        .expect("sticky.md failed to start")
+        .run(|_app, event| {
+            // Closing the last note window must not end the application: it is
+            // tray-resident, and the global shortcut has to have something to
+            // reach. An explicit exit carries a code and is honoured.
+            if let tauri::RunEvent::ExitRequested { api, code: None, .. } = event {
+                api.prevent_exit();
+            }
+        });
 }

@@ -80,6 +80,7 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 - Derive filenames here, never in the frontend. The frontend sends a title; Rust slugifies it, deduplicates against the folder, and returns the name the note now has. Deduplication cannot be done without seeing the folder.
 - Apply compositor blur here, through `window-vibrancy`, never from CSS. A web view cannot see the desktop behind it, so `backdrop-filter` is not an alternative — it is a different effect that looks correct only over the app's own content.
 - Treat a window that could not be frosted as Solid, not as an error. Solid is a supported way to run.
+- Never let closing the last window end the application. It is tray-resident, and a summonable note is the product. Only an explicit quit exits.
 
 ## Editor
 

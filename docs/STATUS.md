@@ -10,7 +10,9 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-030 is written and running, awaiting confirmation that `Mod-n` opens a second window and that two windows write two different files. Next in Phase 3 — Windows, Tray & Shortcuts: tray residency and the global hotkey, which is what makes a new note reachable without the app already being in front of you.
+SMD-036 is written and running, awaiting confirmation that the tray icon appears and behaves, and that closing every note window leaves the application alive and still summonable. SMD-030 also still needs confirming: that two windows write two different files.
+
+Next in Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037), the per-note always-on-top toggle, session restore of open windows, and making the shortcut set remappable — which SMD-033 showed is load-bearing rather than a nicety.
 
 ---
 
@@ -331,6 +333,24 @@ History:
   2026-09-05  confirmed by founder — corners read clean at the 8px system radius
 Notes: The compositor draws its backdrop across the whole window rectangle, which is square. `border-radius` rounds only what the web view paints, so the corners outside it showed raw acrylic with none of the CSS tint over it. The window itself is now rounded through `DwmSetWindowAttribute`, which makes the compositor clip its own backdrop.
   Design consequence, recorded in `docs/DESIGN.md § Note window`: Windows chooses the radius and will not accept an arbitrary one, so `--radius-window` dropped from 18px to 8px to match. A generous Post-It radius and compositor glass cannot both be had here.
+
+### [SMD-036] Tray residency
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+Notes: The application lives in the tray so the global shortcut has something to reach — closing the last note window puts it away rather than ending it, which is what lets a note appear a second later without a cold start. Only an explicit quit exits, distinguished by the exit code carried on the request.
+  Left-clicking the tray writes a new note rather than opening a menu; the menu is on the right button. That should become "open the hub" once there is one (Phase 4 — The Hub).
+  Not confirmed: that the tray icon appears, that both its buttons behave, and that closing every window leaves the app running and still summonable.
+
+### [SMD-037] Launch at startup, off by default
+Type:    feature
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 3 — Windows, Tray & Shortcuts
+Notes: `MASTER.md § In Scope` requires it off by default and user-togglable, and MASTER veto 5 forbids enabling it without explicit consent. The tray menu is the natural home for the toggle, since there is no settings surface. Needs `tauri-plugin-autostart`.
 
 ### [SMD-033] A user whose global shortcut is already taken has no remedy
 Type:    bug
