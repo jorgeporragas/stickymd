@@ -37,7 +37,8 @@ pub struct NoteState {
     pub y: Option<i32>,
     pub width: Option<u32>,
     pub height: Option<u32>,
-    pub theme: Option<String>,
+    /// This note's own colour. The theme is application-wide (ADR-024).
+    pub tint: Option<String>,
     pub always_on_top: bool,
     pub open: bool,
 }
@@ -185,6 +186,26 @@ pub fn note_state(
     Ok(load(&dir).notes.get(&name).cloned().unwrap_or_default())
 }
 
+/// Set one note's tint.
+///
+/// Targeted like `set_note_always_on_top`, and for the same reason: the
+/// frontend does not hold the note's geometry, so writing a whole `NoteState`
+/// back from there would erase what it does not know about.
+#[tauri::command]
+pub fn set_note_tint(
+    app: AppHandle,
+    lock: State<'_, IndexLock>,
+    name: String,
+    tint: Option<String>,
+) -> Result<(), NoteError> {
+    let dir = notes_dir(&app)?;
+    let _guard = guard(&lock)?;
+
+    let mut index = load(&dir);
+    index.notes.entry(name).or_default().tint = tint;
+    store(&dir, &index)
+}
+
 /// Set one note's always-on-top flag.
 ///
 /// Targeted rather than writing a whole `NoteState` back: the frontend does not
@@ -248,7 +269,7 @@ mod tests {
             y: Some(120),
             width: Some(320),
             height: Some(320),
-            theme: Some("frost".to_string()),
+            tint: Some("sun".to_string()),
             always_on_top: true,
             open: true,
         };

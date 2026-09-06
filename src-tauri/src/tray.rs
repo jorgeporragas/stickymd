@@ -10,7 +10,7 @@
 
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 use tauri_plugin_autostart::ManagerExt;
 
@@ -20,6 +20,7 @@ use crate::windows;
 
 const NEW_NOTE: &str = "new-note";
 const OPEN_HUB: &str = "open-hub";
+const DARK: &str = "dark";
 const AUTOSTART: &str = "autostart";
 const SHORTCUT_PROBLEM: &str = "shortcut-problem";
 const QUIT: &str = "quit";
@@ -28,6 +29,19 @@ fn new_note(app: &AppHandle) {
     if let Err(error) = windows::open(app, None) {
         eprintln!("sticky.md: the tray could not open a note: {error}");
     }
+}
+
+/// Switch the application-wide theme.
+///
+/// Every open window is told rather than left stale: a theme that only applies
+/// to windows opened afterwards is a setting that appears not to work.
+fn set_dark(app: &AppHandle, item: &CheckMenuItem<tauri::Wry>) {
+    let mut settings = settings::load(app);
+    settings.theme = if settings.theme == "dark" { "frost".into() } else { "dark".into() };
+
+    settings::save(app, &settings);
+    let _ = app.emit("theme-changed", settings.theme.clone());
+    let _ = item.set_checked(settings.theme == "dark");
 }
 
 fn open_hub(app: &AppHandle) {
@@ -66,6 +80,15 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let autostart_item =
         CheckMenuItem::with_id(app, AUTOSTART, "Launch at startup", true, launching, None::<&str>)?;
 
+    let dark_item = CheckMenuItem::with_id(
+        app,
+        DARK,
+        "Dark",
+        true,
+        settings::load(app).theme == "dark",
+        None::<&str>,
+    )?;
+
     let quit_item = MenuItem::with_id(app, QUIT, "Quit sticky.md", true, None::<&str>)?;
 
     // A shortcut that could not be claimed is shown here rather than left in a
@@ -82,16 +105,17 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
             )?;
             Menu::with_items(
                 app,
-                &[&new_note_item, &hub_item, &note, &separator, &autostart_item, &second_separator, &quit_item],
+                &[&new_note_item, &hub_item, &note, &separator, &dark_item, &autostart_item, &second_separator, &quit_item],
             )?
         }
         None => Menu::with_items(
             app,
-            &[&new_note_item, &hub_item, &separator, &autostart_item, &second_separator, &quit_item],
+            &[&new_note_item, &hub_item, &separator, &dark_item, &autostart_item, &second_separator, &quit_item],
         )?,
     };
 
     let autostart_checkbox = autostart_item.clone();
+    let dark_checkbox = dark_item.clone();
 
     let icon = app.default_window_icon().cloned().ok_or_else(|| {
         tauri::Error::Io(std::io::Error::new(
@@ -111,6 +135,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
         .on_menu_event(move |app, event| match event.id.as_ref() {
             NEW_NOTE => new_note(app),
             OPEN_HUB => open_hub(app),
+            DARK => set_dark(app, &dark_checkbox),
             AUTOSTART => set_autostart(app, &autostart_checkbox),
             QUIT => app.exit(0),
             _ => {}

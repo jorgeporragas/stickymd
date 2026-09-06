@@ -42,7 +42,7 @@ A note is a markdown file on disk. The file is the note's identity and its only 
 | Filename | The filesystem | Slugified from the title, deduplicated with a numeric suffix, renamed on a debounce. |
 | Created, modified | The filesystem | Filesystem timestamps. |
 | Window geometry | Sidecar index | Position and size. |
-| Theme | Sidecar index | Per-note. |
+| Tint | Sidecar index | The note's own colour. Per-note, Clear by default. The *theme* is application-wide and is not a property of a note — see ADR-024. |
 | Always-on-top | Sidecar index | Per-note, off by default. |
 | Open | Sidecar index | Whether a window for this note is on screen. |
 

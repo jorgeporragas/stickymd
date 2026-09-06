@@ -29,11 +29,17 @@ pub const DEFAULT_NEW_NOTE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
     pub new_note_shortcut: String,
+    /// The application-wide theme. Notes carry a tint of their own; the theme
+    /// decides ink and accent. See ADR-024.
+    pub theme: String,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { new_note_shortcut: DEFAULT_NEW_NOTE_SHORTCUT.to_string() }
+        Self {
+            new_note_shortcut: DEFAULT_NEW_NOTE_SHORTCUT.to_string(),
+            theme: "frost".to_string(),
+        }
     }
 }
 
@@ -69,6 +75,23 @@ pub fn load(app: &AppHandle) -> Settings {
             }
             settings
         }
+    }
+}
+
+/// Write the settings back.
+///
+/// Best effort: a setting that cannot be saved is a preference lost on the next
+/// launch, not a reason to refuse the change the user just made.
+pub fn save(app: &AppHandle, settings: &Settings) {
+    let Some(path) = settings_path(app) else { return };
+
+    match serde_json::to_string_pretty(settings) {
+        Ok(text) => {
+            if let Err(error) = std::fs::write(&path, text) {
+                eprintln!("sticky.md: could not write {}: {error}", path.display());
+            }
+        }
+        Err(error) => eprintln!("sticky.md: could not serialise the settings: {error}"),
     }
 }
 

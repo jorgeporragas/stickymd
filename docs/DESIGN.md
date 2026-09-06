@@ -110,15 +110,21 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 
 ### Primitive families
 
-Named in `src/lib/tokens/tokens.css`: neutrals, accent ramp, duration (`--dur-*`), easing (`--ease-*`), type families and scale (`--font-*`, `--line-height-*`, `--tracking-*`), the Handjet axes (`--handjet-*`), radius (`--radius-*`), and spacing (`--space-*`).
+Named in `src/lib/tokens/tokens.css`: neutrals, accent ramp, tint swatches (`--swatch-*` — the flat colour that *names* a tint, distinct from the translucent wash the tint paints with, because one token cannot be two values at once), duration (`--dur-*`), easing (`--ease-*`), type families and scale (`--font-*`, `--line-height-*`, `--tracking-*`), the Handjet axes (`--handjet-*`), radius (`--radius-*`), and spacing (`--space-*`).
 
 Spacing and radius outside the scale are not permitted.
 
 ---
 
-## Themes
+## Themes and tints
 
-A theme is a complete set of values for every semantic token, and nothing else.
+Two separate things, and keeping them separate is what lets both exist (ADR-024).
+
+A **theme** is application-wide. It decides ink, accent, edges and shadows, and it is a complete set of values for every semantic token. A **tint** is per-note and decides only what that note's surface is painted with. A note keeps its tint in either theme.
+
+Tint selectors are qualified by theme — `[data-theme='dark'][data-tint='sun']`. A tint block and a theme block carry equal specificity, so an unqualified tint would override the theme's surface entirely and a dark note would come back white.
+
+**Every tint alpha is computed, never chosen.** The tint sits over the compositor's blur, so the ink has to hold 4.5:1 against it over a worst-case wallpaper. In the light theme a coloured tint needs *more* alpha than Clear, because it is darker than white. In the dark theme the worst case inverts to a white wallpaper. A tint whose alpha has not been checked is not a tint yet.
 
 ### Frost — the default
 
@@ -126,7 +132,13 @@ Colourless frosted glass. The tint is present only so that dark wallpapers canno
 
 Values: `src/lib/tokens/tokens.css`, under `:root[data-theme='frost']`.
 
-**Contrast is the binding constraint.** `--ink-primary` against `--surface-tint` over a worst-case wallpaper is what sets the tint's alpha. Body text holds at 4.5:1 or better in both surface modes. A theme that cannot meet that is not shippable.
+### Dark
+
+The inverse of Frost: a faint black tint over the same compositor blur, with warm white ink. The roles are identical and only the values differ, which is what ADR-012 meant by a theme being data.
+
+Values: `src/lib/tokens/tokens.css`, under `:root[data-theme='dark']`.
+
+**Contrast is the binding constraint.** `--ink-primary` against `--surface-tint` over a worst-case wallpaper is what sets the tint's alpha. Body text holds at 4.5:1 or better in both surface modes and under every tint. A theme that cannot meet that is not shippable — and the dark theme's first sketched value could not: 0.45 measured 2.72:1, and it ships at 0.63.
 
 ---
 
@@ -196,5 +208,6 @@ Every entry lands in the same commit as the component it describes.
 | Component | Role | Notes |
 |---|---|---|
 | `WindowChrome` | The drag region and window controls for any window. Takes `revealed: boolean`, an optional `closeLabel`, and optionally `alwaysOnTop` and `onAlwaysOnTop` for the pin — omit those and no pin is rendered, which is how the hub uses it. | Implements Principle 2, with one deliberate exception: a pinned note keeps its pin visible even when the chrome recedes. A state you cannot see is a state you cannot trust — chrome recedes, chrome that is carrying information does not. Controls fade via `opacity`, permitted for small non-glass elements. |
+| `TintPicker` | A note's colour. A swatch that opens the seven tints in a row. Takes `revealed`, `tint`, `onTint`. | Like the pin, a note whose tint is not Clear keeps its swatch visible when the chrome recedes: the swatch is carrying information, and Principle 2 stops receding at that point. |
 | `NoteRow` | One note in the hub: its title, when it changed, and a delete control. Takes `title`, `when`, `onOpen`, `onDelete`. | The row is not the control — the buttons inside it are. Delete is revealed by hovering the row in CSS rather than through state, which avoids putting a pointer handler on a `div` that would then need an ARIA role it does not deserve. |
 | `Editor` | The note's markdown editing surface. Takes `value?: string` as initial source. Owns the CodeMirror instance and its lifecycle. | Content, not surface — quiet and typographic per Principle 1. No gutters, no active-line highlight, no border. Editor internals live in `src/lib/editor/`. |

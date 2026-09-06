@@ -2,8 +2,9 @@
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { onMount } from 'svelte';
   import Editor from '../../lib/components/Editor.svelte';
+  import TintPicker from '../../lib/components/TintPicker.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
-  import { flushSave, queueSave, setAlwaysOnTop } from '../../lib/state/note';
+  import { flushSave, queueSave, setAlwaysOnTop, setTint, type Tint } from '../../lib/state/note';
 
   interface Props {
     /** The note's source. A new window starts empty. */
@@ -13,9 +14,11 @@
      * mount: after that the window owns the setting and writes it back.
      */
     initiallyPinned?: boolean;
+    /** The note's colour when it was last open. Read once, as above. */
+    initialTint?: Tint;
   }
 
-  let { initial = '', initiallyPinned = false }: Props = $props();
+  let { initial = '', initiallyPinned = false, initialTint = 'clear' }: Props = $props();
 
   let revealed = $state(false);
 
@@ -23,6 +26,13 @@
   // from then on the window is authoritative and persists its own changes.
   // svelte-ignore state_referenced_locally
   let alwaysOnTop = $state(initiallyPinned);
+  // svelte-ignore state_referenced_locally
+  let tint = $state<Tint>(initialTint);
+
+  function chooseTint(value: Tint): void {
+    tint = value;
+    void setTint(value);
+  }
 
   function togglePin(value: boolean): void {
     alwaysOnTop = value;
@@ -73,7 +83,11 @@
 />
 
 <div class="surface">
-  <WindowChrome {revealed} {alwaysOnTop} onAlwaysOnTop={togglePin} />
+  <WindowChrome {revealed} {alwaysOnTop} onAlwaysOnTop={togglePin} closeLabel="Close note">
+    {#snippet leading()}
+      <TintPicker {revealed} {tint} onTint={chooseTint} />
+    {/snippet}
+  </WindowChrome>
   <Editor value={initial} onChange={queueSave} />
 </div>
 

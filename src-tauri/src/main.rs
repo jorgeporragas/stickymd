@@ -17,6 +17,13 @@ mod windows;
 use surface::SurfaceMode;
 use tauri::Manager;
 
+/// The application-wide theme. Windows read it once at startup and then
+/// listen for changes, so switching it does not require reopening anything.
+#[tauri::command]
+fn app_theme(app: tauri::AppHandle) -> String {
+    settings::load(&app).theme
+}
+
 /// The surface mode this window ended up in. The frontend reads it once and
 /// sets it on the document root; the design tokens carry the difference from
 /// there, so no component branches on it.
@@ -64,12 +71,14 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             surface_mode,
+            app_theme,
             notes::list_notes,
             notes::read_note,
             notes::save_note,
             notes::delete_note,
             index::note_state,
             index::set_note_always_on_top,
+            index::set_note_tint,
             windows::window_note,
             windows::claim_note,
             windows::new_note_window,

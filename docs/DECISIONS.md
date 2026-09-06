@@ -178,3 +178,13 @@ Context:    A note deleted while its window was open left the window on screen, 
 Decision:   The delete wins. Deleting a note closes the window showing it, and the window is destroyed rather than asked to close.
 Consequences: Destroying skips the frontend's close handler, which flushes a pending save — going through the normal close path would resurrect the file that was just deleted. Unsaved edits in that window are lost, which is correct: the note was deleted.
             The window is closed before the file is trashed rather than after, so a save landing between the two cannot write the note back.
+
+## ADR-024 — A theme is application-wide; a note carries a tint
+Status:     Accepted
+Date:       2026-09-06
+Context:    Phase 5 needed the dark theme, and a dark theme cannot ship alone — without a way to choose it, it is unreachable code. That forced the question of what a theme is here. Two readings of earlier decisions were both defensible: ADR-018's seven note tints and `Note.theme` living per-note in the sidecar index point at per-note themes; `MASTER.md § In Scope` asking for "several built-in themes" points at an application-wide one. The founder was given both plus a third and left the choice to the recommendation.
+Decision:   They are two different things. The **theme** is application-wide and decides ink, accent, edges and shadows — Frost and Dark. A **tint** is per-note and decides only what that note's surface is painted with. A note keeps its tint in either theme.
+Consequences: `MASTER.md § Domain Model` amended: the per-note field is a tint, not a theme. The sidecar index field is renamed to match, and an index written before this reads `tint` as absent, which is Clear — the same as the default.
+            Tint selectors are qualified by theme (`[data-theme='dark'][data-tint='sun']`). A tint block and a theme block carry equal specificity, so an unqualified tint would override the theme's surface entirely and a dark note would come back white.
+            Every tint alpha is computed rather than chosen: the ink must hold 4.5:1 over a worst-case wallpaper. In the light theme a coloured tint needs *more* alpha than Clear, because it is darker than white — 0.58 to 0.63 against Clear's 0.55. In the dark theme the worst case inverts to a white wallpaper and the alphas land near 0.78.
+            The dark theme's tint is 0.63, not the 0.45 sketched when DESIGN was written. Dark ink on light and light ink on dark are not symmetrical problems, and 0.45 measured 2.72:1 — well under AA. The sketch was never checked.

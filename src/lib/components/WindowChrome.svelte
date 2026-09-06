@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { getCurrentWindow } from '@tauri-apps/api/window';
 
   interface Props {
@@ -13,13 +14,17 @@
     onAlwaysOnTop?: (value: boolean) => void;
     /** What the close button is called, for screen readers. */
     closeLabel?: string;
+    /** A control this window puts at the start of the bar, before the drag
+        region's empty space. The hub has none; a note has its tint picker. */
+    leading?: Snippet;
   }
 
   let {
     revealed,
     alwaysOnTop = false,
     onAlwaysOnTop,
-    closeLabel = 'Close window'
+    closeLabel = 'Close window',
+    leading
   }: Props = $props();
 
   function close(): void {
@@ -36,6 +41,10 @@
   carrying information does not.
 -->
 <div class="chrome" data-tauri-drag-region>
+  {#if leading}
+    <div class="leading">{@render leading()}</div>
+  {/if}
+
   {#if onAlwaysOnTop}
     <button
       class="control"
@@ -64,10 +73,18 @@
   .chrome {
     display: flex;
     justify-content: flex-end;
+    /* The leading slot claims the space, so the drag region keeps the whole
+       bar rather than being split by it. */
     align-items: center;
     gap: var(--space-1);
     padding: var(--space-2);
     flex: 0 0 auto;
+  }
+
+  .leading {
+    margin-right: auto;
+    display: flex;
+    align-items: center;
   }
 
   .control {

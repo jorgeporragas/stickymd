@@ -61,10 +61,41 @@ export function noteFileName(): string | undefined {
 export interface LoadedNote {
   body: string;
   alwaysOnTop: boolean;
+  tint: Tint;
+}
+
+/** A note's own colour. `clear` is the theme's own surface. */
+export type Tint = 'clear' | 'sun' | 'spring' | 'aqua' | 'sky' | 'lilac' | 'blush';
+
+export const TINTS: Tint[] = ['clear', 'sun', 'spring', 'aqua', 'sky', 'lilac', 'blush'];
+
+let tint: Tint = 'clear';
+
+/** Paint this window with a tint. `clear` removes the attribute entirely, so
+    the theme's own surface applies rather than a tint that happens to match. */
+function applyTint(): void {
+  if (tint === 'clear') {
+    delete document.documentElement.dataset.tint;
+  } else {
+    document.documentElement.dataset.tint = tint;
+  }
+}
+
+export async function setTint(value: Tint): Promise<void> {
+  tint = value;
+  applyTint();
+
+  if (noteName === undefined) return;
+
+  try {
+    await invoke('set_note_tint', { name: noteName, tint: value === 'clear' ? null : value });
+  } catch (error) {
+    console.error('sticky.md: could not save the note tint', asNoteError(error) ?? error);
+  }
 }
 
 export async function loadNote(): Promise<LoadedNote> {
-  const empty: LoadedNote = { body: '', alwaysOnTop: false };
+  const empty: LoadedNote = { body: '', alwaysOnTop: false, tint: 'clear' };
 
   try {
     noteName = (await invoke<string | null>('window_note')) ?? undefined;
@@ -90,15 +121,19 @@ export async function loadNote(): Promise<LoadedNote> {
   }
 
   try {
-    const state = await invoke<{ alwaysOnTop: boolean }>('note_state', { name: noteName });
+    const state = await invoke<{ alwaysOnTop: boolean; tint: Tint | null }>('note_state', {
+      name: noteName
+    });
     pinned = state.alwaysOnTop;
+    tint = state.tint ?? 'clear';
+    applyTint();
   } catch (error) {
     console.error('sticky.md: could not read the note index', asNoteError(error) ?? error);
   }
 
   if (pinned) await applyPin();
 
-  return { body, alwaysOnTop: pinned };
+  return { body, alwaysOnTop: pinned, tint };
 }
 
 async function applyPin(): Promise<void> {
@@ -171,8 +206,9 @@ export async function flushSave(): Promise<void> {
       // Tell Rust which note this window now holds, so a second window cannot
       // be opened onto the same file and overwrite it.
       await invoke('claim_note', { name: saved });
-      // A note pinned before it had a file gets its pin written now.
+      // Settings chosen before the note had a file get written now.
       if (pinned) await persistPin();
+      if (tint !== 'clear') await setTint(tint);
     }
 
     written = body;

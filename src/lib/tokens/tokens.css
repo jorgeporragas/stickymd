@@ -28,6 +28,17 @@
   --ink-wash-strong: rgba(26, 26, 23, 0.14);
   --ink-wash-soft: rgba(26, 26, 23, 0.06);
 
+  /* Tint swatches — how each note colour is shown in the picker.
+     Distinct from the tint itself: a tint is a translucent wash whose alpha is
+     computed for contrast, while a swatch is the flat colour that names it.
+     One token doing both jobs would have to be two values at once. */
+  --swatch-sun: #ffe9a3;
+  --swatch-spring: #c7f0d8;
+  --swatch-aqua: #b8ecf7;
+  --swatch-sky: #cfe4fd;
+  --swatch-lilac: #dcd4f7;
+  --swatch-blush: #fbd5e0;
+
   /* Accent — the single interactive colour. */
   --aqua-400: #4cc7e6;
   --aqua-500: #2fb6d9;
@@ -149,4 +160,115 @@
 :root[data-surface='glass'] {
   --surface-paint: var(--surface-tint);
   --surface-border: var(--edge-on-glass);
+}
+
+/* ---------------------------------------------------------- theme: Dark
+ *
+ * The inverse of Frost: a faint black tint over the same compositor blur, with
+ * warm white ink. Not a colour scheme swap — the roles are the same, the
+ * values differ, which is what ADR-012 meant by a theme being data.
+ *
+ * The tint's alpha is 0.63 rather than the 0.45 first sketched. Dark ink over a
+ * light surface and light ink over a dark one are not symmetrical problems: the
+ * worst case here is a *white* wallpaper, and 0.45 gave 2.72:1 — well under AA.
+ */
+
+:root[data-theme='dark'] {
+  --surface-tint: rgba(12, 12, 14, 0.63);
+  --surface-solid: #16161a;
+  --surface-grain-opacity: 0.05;
+  --surface-edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  --edge-on-glass: rgba(255, 255, 255, 0.12);
+  --edge-on-solid: rgba(255, 255, 255, 0.10);
+
+  --rule: rgba(242, 239, 232, 0.16);
+  --control-hover: rgba(242, 239, 232, 0.08);
+
+  --ink-primary: #f2efe8;
+  --ink-secondary: #b9b5ac;
+  --ink-muted: #7e7a73;
+  --ink-syntax: #6a6760;
+  --ink-on-accent: #10161a;
+
+  --accent: var(--aqua-400);
+  --accent-hover: #7ee0f4;
+  --accent-glow: rgba(76, 199, 230, 0.32);
+  --focus-ring: var(--aqua-400);
+
+  --shadow-rest: 0 2px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);
+  --shadow-dragging: 0 18px 48px rgba(0, 0, 0, 0.65);
+}
+
+/* ------------------------------------------------------------- note tints
+ *
+ * A note's own colour. The theme decides ink and accent; a tint decides what
+ * this one note is painted with (ADR-024).
+ *
+ * Selectors are qualified by theme deliberately. A tint block and a theme block
+ * carry equal specificity, so an unqualified tint would override the theme's
+ * surface entirely and a dark note would come back white. Qualifying also means
+ * a note keeps its colour in either theme rather than losing it in one.
+ *
+ * Every alpha is computed, not chosen by eye: the tint sits over the
+ * compositor's blur, so the ink has to hold 4.5:1 against it over a worst-case
+ * wallpaper. A coloured tint is darker than white, so in the light theme it
+ * needs *more* alpha than Clear, not less.
+ *
+ * Clear is the default and comes from the theme itself.
+ */
+:root[data-theme='frost'][data-tint='sun'] {
+  --surface-tint: rgba(255, 233, 163, 0.58);
+  --surface-solid: #fbf0cf;
+}
+
+:root[data-theme='dark'][data-tint='sun'] {
+  --surface-tint: rgba(65, 61, 47, 0.78);
+  --surface-solid: #383429;
+}
+:root[data-theme='frost'][data-tint='spring'] {
+  --surface-tint: rgba(199, 240, 216, 0.59);
+  --surface-solid: #e1f3e7;
+}
+
+:root[data-theme='dark'][data-tint='spring'] {
+  --surface-tint: rgba(53, 62, 58, 0.78);
+  --surface-solid: #2e3532;
+}
+:root[data-theme='frost'][data-tint='aqua'] {
+  --surface-tint: rgba(184, 236, 247, 0.6);
+  --surface-solid: #dbf2f5;
+}
+
+:root[data-theme='dark'][data-tint='aqua'] {
+  --surface-tint: rgba(50, 61, 65, 0.77);
+  --surface-solid: #2b3438;
+}
+:root[data-theme='frost'][data-tint='sky'] {
+  --surface-tint: rgba(207, 228, 253, 0.6);
+  --surface-solid: #e5eef8;
+}
+
+:root[data-theme='dark'][data-tint='sky'] {
+  --surface-tint: rgba(55, 60, 67, 0.78);
+  --surface-solid: #2f3339;
+}
+:root[data-theme='frost'][data-tint='lilac'] {
+  --surface-tint: rgba(220, 212, 247, 0.63);
+  --surface-solid: #ebe7f5;
+}
+
+:root[data-theme='dark'][data-tint='lilac'] {
+  --surface-tint: rgba(58, 56, 65, 0.77);
+  --surface-solid: #313038;
+}
+:root[data-theme='frost'][data-tint='blush'] {
+  --surface-tint: rgba(251, 213, 224, 0.61);
+  --surface-solid: #f9e7ea;
+}
+
+:root[data-theme='dark'][data-tint='blush'] {
+  --surface-tint: rgba(65, 56, 60, 0.77);
+  --surface-solid: #373034;
 }

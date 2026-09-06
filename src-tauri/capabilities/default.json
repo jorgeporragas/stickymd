@@ -5,6 +5,7 @@
   "windows": ["note", "note-*", "hub"],
   "permissions": [
     "core:default",
+    "core:event:allow-listen",
     "core:window:allow-start-dragging",
     "core:window:allow-close",
     "core:window:allow-destroy",
