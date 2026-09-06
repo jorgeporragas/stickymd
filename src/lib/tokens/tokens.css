@@ -68,8 +68,14 @@
   --handjet-elsh: 2;
   --handjet-weight: 500;
 
-  /* Geometry */
-  --radius-window: 18px;
+  /* Geometry
+   *
+   * --radius-window is 8px because Windows chooses it, not us: the window is
+   * rounded by the compositor so that its backdrop is clipped too, and the
+   * system radius cannot be set to an arbitrary value. A larger CSS radius
+   * would leave a ring of untinted acrylic in each corner. See docs/FIXES.md.
+   */
+  --radius-window: 8px;
   --radius-control: 10px;
   --radius-chip: 6px;
 

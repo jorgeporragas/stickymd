@@ -127,3 +127,27 @@ Never:    Never bind a `Ctrl+Alt` combination, in the editor or globally. It
           users, which is the worst kind of bug: invisible to whoever wrote it.
           Check a chord against both hazards before choosing it — browser
           accelerators and AltGr — or register it globally, which avoids both.
+
+### A CSS radius does not round a window that has a compositor backdrop
+Area:     Window transparency, vibrancy, and compositor blur setup
+Date:     2026-09-05
+Commit:   pending
+Problem:  With acrylic applied, the note window showed grey triangles in each
+          corner. The compositor draws its backdrop across the whole window
+          rectangle, which is square; `border-radius` only rounds what the web
+          view paints, so the corners outside it showed raw acrylic with none
+          of the CSS tint over it.
+Fix:      The window itself is rounded, through
+          `DwmSetWindowAttribute(DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND)`
+          in `src-tauri/src/surface.rs`, which makes the compositor clip its
+          own backdrop. `--radius-window` was reduced to match the radius
+          Windows chooses, and `shadow` was turned on in `tauri.conf.json`
+          because a CSS shadow is drawn inside the window and is clipped away.
+Never:    Never raise `--radius-window` above the system radius while glass is
+          on — the difference reappears as untinted acrylic in the corners.
+          Windows does not accept an arbitrary radius, only its own; a rounder
+          note means giving up compositor glass, which is a product decision
+          rather than a styling one.
+          Tauri's `hwnd()` returns an HWND from its own version of the windows
+          crate. Carry the raw handle value across rather than forcing the
+          versions to match.

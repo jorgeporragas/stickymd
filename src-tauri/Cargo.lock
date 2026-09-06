@@ -2955,6 +2955,7 @@ dependencies = [
  "tauri-plugin-global-shortcut",
  "trash",
  "window-vibrancy",
+ "windows 0.56.0",
 ]
 
 [[package]]

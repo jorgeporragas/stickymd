@@ -304,7 +304,27 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
 Notes: `Ctrl+Shift+Space`, registered with the operating system from Rust, per ADR-021. Space rather than a letter because a global registration takes the chord from every application on the machine. Failing to claim it is reported, not raised: another application may already hold it, and the app runs fine without it.
-  Not confirmed: that the shortcut fires and opens a window. Needs someone at the keyboard.
+  Confirmed by the founder on 2026-09-05: `Ctrl+Shift+Space` opens a note window.
+
+### [SMD-034] Note windows could not be dragged
+Type:    bug
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  reported by founder — the window could not be moved from anywhere, including the drag strip
+  2026-09-05  active — cause found
+Notes: The project had no `src-tauri/capabilities/` directory. It was hand-scaffolded rather than generated, and Tauri v2 gates *core plugin* commands behind capabilities while leaving application-defined commands ungated — which is exactly why every custom command worked and nothing from `core:window` did. `core:window:default` is read-only: it grants `allow-is-*`, `allow-title` and the monitor queries, and not `allow-start-dragging`, `allow-close` or `allow-destroy`.
+  Three things were silently denied, not one: dragging, the close button, and the flush-before-close wired into `onCloseRequested` — which means a note's last few characters could have been lost on close and nothing would have said so.
+
+### [SMD-035] Grey triangles in the window corners
+Type:    bug
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  reported by founder
+  2026-09-05  active — cause found
+Notes: The compositor draws its backdrop across the whole window rectangle, which is square. `border-radius` rounds only what the web view paints, so the corners outside it showed raw acrylic with none of the CSS tint over it. The window itself is now rounded through `DwmSetWindowAttribute`, which makes the compositor clip its own backdrop.
+  Design consequence, recorded in `docs/DESIGN.md § Note window`: Windows chooses the radius and will not accept an arbitrary one, so `--radius-window` dropped from 18px to 8px to match. A generous Post-It radius and compositor glass cannot both be had here.
 
 ### [SMD-033] A user whose global shortcut is already taken has no remedy
 Type:    bug
