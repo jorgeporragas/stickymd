@@ -73,6 +73,8 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 - Send files to the trash through the `trash` crate. Never call a platform-specific delete.
 - Return typed errors across the Tauri command boundary. Do not surface a raw `String` error to the frontend.
 - Debounce writes. Never write a note file on every keystroke.
+- Apply compositor blur here, through `window-vibrancy`, never from CSS. A web view cannot see the desktop behind it, so `backdrop-filter` is not an alternative — it is a different effect that looks correct only over the app's own content.
+- Treat a window that could not be frosted as Solid, not as an error. Solid is a supported way to run.
 
 ## Editor
 

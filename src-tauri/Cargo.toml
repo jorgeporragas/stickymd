@@ -10,6 +10,13 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+
+# Compositor blur. The frosted surface is a window property applied here, not a
+# CSS filter -- a web view cannot see the desktop behind it.
+# See docs/DESIGN.md principle 3.
+[target.'cfg(windows)'.dependencies]
+window-vibrancy = "0.6"
 
 # Bundle size is a stated product priority. See MASTER.md section 'Stack'.
 [profile.release]

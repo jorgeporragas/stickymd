@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Wire compositor glass and the Glass/Solid mode switch (SMD-015). `window-vibrancy` is already in the dependency tree as a transitive dependency of Tauri, so it needs promoting to a direct one. This is the first Rust work in the project.
+SMD-015 is written and running but **unconfirmed** — whether the window is actually frosted is a visual fact that cannot be read from the code. Waiting on founder confirmation before it ships. Next after that: the README (SMD-008), the last open item in Phase 1 — Foundation & Editor Core.
 
 ---
 
@@ -155,11 +155,21 @@ Notes: `tauri-build` requires `icons/icon.ico` to generate the Windows resource 
 
 ### [SMD-015] Compositor glass and the Glass/Solid mode switch
 Type:    feature
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: Acrylic applied to the transparent window from Rust, per `docs/DESIGN.md` principle 3. Adds a dependency, which owes a CLAUDE.md entry. Must degrade to Solid when the system disables transparency effects.
+  2026-09-05  active — written, running, awaiting founder confirmation
+Notes: Acrylic applied to the transparent window from Rust via `window-vibrancy`, per `docs/DESIGN.md` principle 3. The resulting mode is reported to the frontend by the `surface_mode` command and lands on the document root as `data-surface`; `--surface-paint` and `--surface-border` resolve from it, so no component branches on the mode. A window that cannot be frosted is Solid, which is a supported way to run rather than an error.
+  Not shipped: whether the window is genuinely frosted is a visual fact and cannot be verified from the code. The machine reports `EnableTransparency = 1`, and the application runs without error, but neither proves the compositor applied the effect.
+
+### [SMD-022] Respond to the system transparency setting changing at runtime
+Type:    bug
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: Compositor blur is applied once, at window creation. If the user turns transparency off afterwards — or Windows does it for them under battery saver — the window stays in Glass mode with nothing behind the tint, which will read as a washed-out surface rather than a deliberate Solid one. Needs a listener on the setting and a way to re-resolve `data-surface` in a live window.
 
 ### [SMD-016] Inline rendering layer
 Type:    feature

@@ -74,11 +74,12 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 
 | Token | Role |
 |---|---|
+| `--surface-paint` | What a surface is painted with. Resolves to the opaque surface or the tint over compositor blur, according to `data-surface` on the document root. **Components read this one** — they never read the two below directly, and never branch on the mode. |
 | `--surface-tint` | The colour layered over the compositor blur in Glass mode |
 | `--surface-solid` | The opaque surface in Solid mode |
 | `--surface-grain-opacity` | Fine noise; keeps glass reading as frosted paper |
 | `--surface-edge-highlight` | The gloss line along the top edge |
-| `--surface-border` | The hairline containing the window |
+| `--surface-border` | The hairline containing the window. Resolves per surface mode: a light hairline catching the blur on glass, an ink hairline on solid, where a white line would be invisible. |
 
 ### Semantic — ink
 

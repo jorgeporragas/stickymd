@@ -93,7 +93,12 @@
   --surface-solid: var(--neutral-050);
   --surface-grain-opacity: 0.035;
   --surface-edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  --surface-border: rgba(255, 255, 255, 0.35);
+  /* The window's edge against what is behind it. Two values, because the two
+     surface modes have different things behind them: on glass the edge is a
+     light hairline catching the compositor's blur, on solid there is no
+     desktop showing and a white line would be invisible. */
+  --edge-on-glass: rgba(255, 255, 255, 0.35);
+  --edge-on-solid: var(--ink-wash-strong);
 
   /* Rules and fills *inside* the surface. Distinct from --surface-border,
      which is the window's own edge against the desktop: that one is a light
@@ -118,4 +123,24 @@
   --shadow-rest: 0 2px 12px rgba(0, 0, 0, 0.12);
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.18);
   --shadow-dragging: 0 18px 48px rgba(0, 0, 0, 0.24);
+}
+
+/* --------------------------------------------------------------- surface mode
+ *
+ * Whether the compositor frosted this window. Rust decides and sets
+ * `data-surface` on the document root; components read the tokens below and
+ * never branch on the mode themselves (docs/DESIGN.md principle 4).
+ *
+ * Solid is the default because it is the mode that always works: a window that
+ * could not be frosted still has to look deliberate.
+ */
+
+:root {
+  --surface-paint: var(--surface-solid);
+  --surface-border: var(--edge-on-solid);
+}
+
+:root[data-surface='glass'] {
+  --surface-paint: var(--surface-tint);
+  --surface-border: var(--edge-on-glass);
 }

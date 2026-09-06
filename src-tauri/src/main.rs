@@ -6,8 +6,30 @@
 // Release builds must not open a console window behind the app.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod surface;
+
+use surface::SurfaceMode;
+use tauri::Manager;
+
+/// The surface mode this window ended up in. The frontend reads it once and
+/// sets it on the document root; the design tokens carry the difference from
+/// there, so no component branches on it.
+#[tauri::command]
+fn surface_mode(mode: tauri::State<'_, SurfaceMode>) -> SurfaceMode {
+    *mode
+}
+
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            let window = app
+                .get_webview_window("note")
+                .ok_or("the note window is missing from tauri.conf.json")?;
+
+            app.manage(surface::apply(&window));
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![surface_mode])
         .run(tauri::generate_context!())
         .expect("sticky.md failed to start");
 }

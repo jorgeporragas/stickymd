@@ -35,9 +35,11 @@
     border-radius: var(--radius-window);
     border: 1px solid var(--surface-border);
 
-    /* Solid surface mode. The window itself is transparent so the corners can
-       round; the surface is painted here. See docs/DESIGN.md principle 4. */
-    background: var(--surface-solid);
+    /* The window itself is transparent so the corners can round; the surface is
+       painted here. --surface-paint resolves to the opaque surface or the tint
+       over compositor blur, per data-surface. No branching here — the token
+       carries the difference. See docs/DESIGN.md principle 4. */
+    background: var(--surface-paint);
     box-shadow:
       var(--shadow-rest),
       var(--surface-edge-highlight);
