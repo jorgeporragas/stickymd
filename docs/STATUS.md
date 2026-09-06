@@ -695,7 +695,7 @@ Notes: Phase 5's second half. What it mostly produced was a constraint. `docs/DE
 
 ### [SMD-038] Radial glass menu on right-click
 Type:    idea
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea (founder)
@@ -703,6 +703,9 @@ Notes: A ring of glass bubbles opening from the pointer on right-click, each app
   Feasible, with one nuance worth recording before anyone builds it: the bubbles cannot carry *compositor* glass, which is a per-window property. They would use `backdrop-filter`, and that is legitimate here — DESIGN's never-allowed rule forbids it for the *primary window surface*, because a web view cannot see the desktop. Over the app's own content, which is what a bubble sits on, it is the correct tool, and a popover blur token would be the thing to add for it. (An earlier version of this note said `--blur-popover` already existed in the contract. It never did — checked, in the course of SMD-053, which needed a popover surface and found nothing to read.)
   The stagger must animate `transform` and `opacity` per bubble with a delay, never blur. Small non-glass elements may fade; that is already allowed.
   Also needs the web view's own context menu suppressed, or the native menu will appear alongside it.
+  Shipped (ADR-034) with four actions that all exist elsewhere: New note, All notes, Settings, and the pin. Built as a mechanism first on purpose — which actions are in the ring is one array, so the founder can change the contents without touching any of the work.
+  One thing this note got wrong: the bubbles do not need `backdrop-filter`. The reasoning here was that a bubble sits over the app's own content, where the filter is legitimate — true, but beside the point, because the seated lozenge is an opaque gloss. There is nothing to see through.
+  Verified in the browser: four bubbles at the right ring geometry with staggered delays, the centre clamped so a right-click in either corner keeps every bubble inside the window. The stagger itself was not observed — the pane freezes animations partway, so only the bubbles whose delay had elapsed were drawn.
 
 ### [SMD-039] Verify dead-key and accented input in the editor
 Type:    chore

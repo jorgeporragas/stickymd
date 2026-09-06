@@ -2,6 +2,7 @@
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { onMount } from 'svelte';
   import Editor from '../../lib/components/Editor.svelte';
+  import RadialMenu, { type RadialAction } from '../../lib/components/RadialMenu.svelte';
   import SaveTrouble from '../../lib/components/SaveTrouble.svelte';
   import TintPicker from '../../lib/components/TintPicker.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
@@ -13,6 +14,7 @@
     setTint,
     type Tint
   } from '../../lib/state/note';
+  import { openNewNoteWindow, showHub, showSettings } from '../../lib/state/windows';
 
   interface Props {
     /** The note's source. A new window starts empty. */
@@ -48,6 +50,41 @@
   }
 
   let trouble = $state<string | undefined>(undefined);
+
+  /** Where the radial menu is open, if it is. */
+  let menuAt = $state<{ x: number; y: number } | undefined>(undefined);
+
+  const menuActions = $derived<RadialAction[]>([
+    { id: 'new', label: 'New note', icon: 'note' },
+    { id: 'hub', label: 'All notes', icon: 'hub' },
+    { id: 'settings', label: 'Settings', icon: 'settings' },
+    { id: 'pin', label: alwaysOnTop ? 'Unpin' : 'Keep on top', icon: 'pin', engaged: alwaysOnTop }
+  ]);
+
+  function openMenu(event: MouseEvent): void {
+    // The web view draws its own context menu otherwise, beside this one.
+    event.preventDefault();
+    menuAt = { x: event.clientX, y: event.clientY };
+  }
+
+  function chooseFromMenu(id: string): void {
+    menuAt = undefined;
+
+    switch (id) {
+      case 'new':
+        void openNewNoteWindow();
+        break;
+      case 'hub':
+        void showHub();
+        break;
+      case 'settings':
+        void showSettings();
+        break;
+      case 'pin':
+        togglePin(!alwaysOnTop);
+        break;
+    }
+  }
 
   function retrySave(): void {
     void flushSave();
@@ -115,7 +152,8 @@
   }}
 />
 
-<div class="surface">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="surface" oncontextmenu={openMenu}>
   <WindowChrome {revealed} {alwaysOnTop} onAlwaysOnTop={togglePin} closeLabel="Close note">
     {#snippet controls()}
       <SaveTrouble reason={trouble} onRetry={retrySave} />
@@ -123,4 +161,13 @@
     {/snippet}
   </WindowChrome>
   <Editor value={initial} onChange={queueSave} />
+
+  {#if menuAt}
+    <RadialMenu
+      actions={menuActions}
+      at={menuAt}
+      onChoose={chooseFromMenu}
+      onDismiss={() => (menuAt = undefined)}
+    />
+  {/if}
 </div>

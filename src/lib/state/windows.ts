@@ -14,3 +14,19 @@ export async function openNewNoteWindow(): Promise<void> {
     console.error('sticky.md: could not open a new note window', error);
   }
 }
+
+export async function showHub(): Promise<void> {
+  try {
+    await invoke('show_hub');
+  } catch (error) {
+    console.error('sticky.md: could not open the notes list', error);
+  }
+}
+
+export async function showSettings(): Promise<void> {
+  try {
+    await invoke('show_settings');
+  } catch (error) {
+    console.error('sticky.md: could not open settings', error);
+  }
+}
