@@ -24,6 +24,7 @@ pub const FIRST_WINDOW: &str = "note";
 /// has one home without a window being made at startup — this is a
 /// tray-resident application and the hub is opened on request.
 pub const HUB: &str = "hub";
+const SETTINGS: &str = "settings";
 
 /// Which note each open window is editing. `None` means a new, unsaved note.
 #[derive(Default)]
@@ -150,6 +151,29 @@ pub fn open_hub(app: &AppHandle) -> Result<(), NoteError> {
 #[tauri::command]
 pub fn show_hub(app: AppHandle) -> Result<(), NoteError> {
     open_hub(&app)
+}
+
+/// Open the settings window, or focus the one already open.
+///
+/// Built from the config entry like every other window, so its geometry lives
+/// in one place. It is not a note and is not tracked as one — nothing about it
+/// is restored, because a settings window left open is not a session worth
+/// bringing back.
+pub fn open_settings(app: &AppHandle) -> Result<(), NoteError> {
+    if let Some(window) = app.get_webview_window(SETTINGS) {
+        let _ = window.show();
+        let _ = window.set_focus();
+        return Ok(());
+    }
+
+    let window = build(app, SETTINGS, SETTINGS)?;
+    let _ = surface::apply(&window);
+    Ok(())
+}
+
+#[tauri::command]
+pub fn show_settings(app: AppHandle) -> Result<(), NoteError> {
+    open_settings(&app)
 }
 
 /// Open a note by name, or focus the window already showing it.

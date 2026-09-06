@@ -38,28 +38,29 @@ impl ShortcutStatus {
     }
 }
 
+/// Re-register after the chord has been changed.
+///
+/// The plugin holds one registration; asking it again with the stored chord is
+/// what swaps them. Failure is reported through `ShortcutStatus` exactly as it
+/// is at startup, so the settings window and the tray say the same thing.
+pub fn reregister(app: &AppHandle, status: &ShortcutStatus) {
+    register_chord(app, status);
+}
+
 /// Register the global shortcuts, reporting what happened rather than failing.
 ///
 /// The application runs perfectly well without a shortcut; it is simply less
 /// convenient. Refusing to start over one would be the wrong trade.
 pub fn register(app: &AppHandle, status: &ShortcutStatus) {
-    let configured = settings::load(app).new_note_shortcut;
-
-    let (shortcut, parse_problem) = match Shortcut::from_str(&configured) {
-        Ok(shortcut) => (shortcut, None),
-        Err(_) => (
-            Shortcut::from_str(DEFAULT_NEW_NOTE_SHORTCUT).expect("the default shortcut must parse"),
-            Some(format!("\"{configured}\" is not a shortcut sticky.md understands")),
-        ),
-    };
-
-    let handled = shortcut;
-
+    // The handler does not check *which* chord fired. Only one is ever
+    // registered, and the plugin can only be installed once — so a handler
+    // that compared against a captured shortcut would go deaf the moment the
+    // user changed it, since the new chord is not the one it captured.
     let plugin = tauri_plugin_global_shortcut::Builder::new()
-        .with_handler(move |app, pressed, event| {
+        .with_handler(move |app, _pressed, event| {
             // Fire on press. Without this the handler runs twice, once on the
             // way down and once on the way up.
-            if event.state() != ShortcutState::Pressed || pressed != &handled {
+            if event.state() != ShortcutState::Pressed {
                 return;
             }
 
@@ -73,6 +74,26 @@ pub fn register(app: &AppHandle, status: &ShortcutStatus) {
         status.set(Some(format!("global shortcuts are unavailable: {error}")));
         return;
     }
+
+    register_chord(app, status);
+}
+
+/// Hold the configured chord, replacing whatever was held before.
+///
+/// Separate from `register` because the plugin installs once and the chord can
+/// change any number of times afterwards.
+fn register_chord(app: &AppHandle, status: &ShortcutStatus) {
+    let configured = settings::load(app).new_note_shortcut;
+
+    let (shortcut, parse_problem) = match Shortcut::from_str(&configured) {
+        Ok(shortcut) => (shortcut, None),
+        Err(_) => (
+            Shortcut::from_str(DEFAULT_NEW_NOTE_SHORTCUT).expect("the default shortcut must parse"),
+            Some(format!("\"{configured}\" is not a shortcut sticky.md understands")),
+        ),
+    };
+
+    let _ = app.global_shortcut().unregister_all();
 
     match app.global_shortcut().register(shortcut) {
         Ok(()) => status.set(parse_problem),

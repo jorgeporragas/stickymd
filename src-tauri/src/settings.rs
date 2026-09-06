@@ -30,8 +30,13 @@ pub const DEFAULT_NEW_NOTE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 pub struct Settings {
     pub new_note_shortcut: String,
     /// The application-wide theme. Notes carry a tint of their own; the theme
-    /// decides ink and accent. See ADR-024.
+    /// decides the ink. See ADR-024.
     pub theme: String,
+    /// Where notes live. Absent means the default, which is worked out from
+    /// the user's Documents folder — stored as absent rather than resolved so
+    /// that a user who has never chosen one keeps following the default if
+    /// their Documents folder ever moves.
+    pub notes_folder: Option<String>,
 }
 
 impl Default for Settings {
@@ -39,6 +44,7 @@ impl Default for Settings {
         Self {
             new_note_shortcut: DEFAULT_NEW_NOTE_SHORTCUT.to_string(),
             theme: "frost".to_string(),
+            notes_folder: None,
         }
     }
 }

@@ -5,7 +5,8 @@ import { resolve } from 'node:path';
 // One entry point per window type. See CLAUDE.md section 'Project structure'.
 const windows = {
   note: resolve(import.meta.dirname, 'src/windows/note/index.html'),
-  hub: resolve(import.meta.dirname, 'src/windows/hub/index.html')
+  hub: resolve(import.meta.dirname, 'src/windows/hub/index.html'),
+  settings: resolve(import.meta.dirname, 'src/windows/settings/index.html')
 };
 
 export default defineConfig({

@@ -54,7 +54,7 @@ Notes: Depends on the token architecture being right from the first commit, whic
 
 ### [SMD-003] Configurable notes folder location
 Type:    feature
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea — cut from V1 during Planning
@@ -472,7 +472,7 @@ Notes: Every note listed newest first, opened by clicking, deleted from the row.
 
 ### [SMD-046] A settings surface
 Type:    idea
-State:   idea
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea
@@ -579,6 +579,20 @@ History:
 Notes: The swatch was at the leading edge of the chrome; the founder asked for it beside the other controls, before the pin. `WindowChrome`'s `leading` snippet becomes `controls` and no longer claims the space at the start, so the drag region is now the whole bar in one piece rather than split around something.
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
+
+### [SMD-064] The settings window
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  accepted into the second autonomous bundle by the founder, who chose a window of its own and "ask at the time" for the folder
+  2026-09-06  shipped
+Notes: ADR-033. Closes SMD-046 and SMD-003 together — the notes folder is a setting, and it had no home. A third window type, opened from the tray, carrying theme, notes folder, the new-note shortcut and launch-at-startup, and naming the settings file for anyone who would still rather edit it.
+  A bug found while building it, which no one would have hit until the shortcut became changeable: the global shortcut's handler compared the pressed chord against one captured when the plugin was installed. The plugin installs once, so changing the chord would have registered a new one the handler then ignored — the shortcut would have gone silently deaf. The handler no longer checks which chord fired, since only one is ever registered.
+  The folder move renames first and copies only across volumes, and never removes an original before its copy succeeds: an interrupted move leaves the note in the old folder rather than nowhere. Names already taken in the destination are not overwritten.
+  `notes_dir` deliberately does not fall back to the default when a configured folder has gone. Writing notes somewhere the user is not looking is worse than saying the folder is missing.
+  One defect caught by looking: the shortcut field clipped the last letter of the default chord at 11rem. It is 13rem.
+  Verified in the browser against the running dev server — the window renders, both toggles and all four fields are present. The commands behind it are type-checked and compile, but nothing exercised them: a plain browser has no backend, so the picker, the move and the shortcut change are on the founder's list.
 
 ### [SMD-063] Monospaced text still reads larger than prose
 Type:    bug

@@ -79,6 +79,18 @@ fn safe_name(name: &str) -> Result<&str, NoteError> {
 /// the folder something the user opens, and a folder they cannot find is not
 /// one they can grep or point another editor at.
 pub fn notes_dir(app: &AppHandle) -> Result<PathBuf, NoteError> {
+    // A configured folder wins, and is not second-guessed beyond existing: the
+    // user chose it through a folder picker, so it was real when they picked
+    // it. If it has since gone — an unplugged drive, a renamed folder — that
+    // is reported rather than silently papered over by falling back to the
+    // default, because writing notes somewhere the user is not looking is
+    // worse than saying the folder is missing.
+    if let Some(configured) = crate::settings::load(app).notes_folder {
+        let dir = PathBuf::from(configured);
+        std::fs::create_dir_all(&dir)?;
+        return Ok(dir);
+    }
+
     let dir = app
         .path()
         .document_dir()

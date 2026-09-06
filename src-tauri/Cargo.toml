@@ -23,6 +23,10 @@ trash = "5"
 # place a chord survives both browser accelerators and AltGr. See docs/FIXES.md.
 tauri-plugin-global-shortcut = "2"
 
+# The folder picker in the settings window. A native dialog rather than a text
+# field: a notes folder typed by hand is a notes folder that can be wrong.
+tauri-plugin-dialog = "2"
+
 # Launch at startup, off unless the user turns it on. MASTER veto 5 forbids
 # enabling it without explicit consent, so nothing here ever calls enable()
 # except the tray toggle.

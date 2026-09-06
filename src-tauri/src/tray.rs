@@ -20,6 +20,7 @@ use crate::windows;
 
 const NEW_NOTE: &str = "new-note";
 const OPEN_HUB: &str = "open-hub";
+const OPEN_SETTINGS: &str = "open-settings";
 const DARK: &str = "dark";
 const AUTOSTART: &str = "autostart";
 const SHORTCUT_PROBLEM: &str = "shortcut-problem";
@@ -50,6 +51,12 @@ fn open_hub(app: &AppHandle) {
     }
 }
 
+fn open_settings(app: &AppHandle) {
+    if let Err(error) = windows::open_settings(app) {
+        eprintln!("sticky.md: the tray could not open settings: {error}");
+    }
+}
+
 /// Turn launching at startup on or off.
 ///
 /// The checkbox is set from what the system reports afterwards, not from what
@@ -71,6 +78,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     // Bound separately: a slice needs one type, and these are several.
     let new_note_item = MenuItem::with_id(app, NEW_NOTE, "New note", true, None::<&str>)?;
     let hub_item = MenuItem::with_id(app, OPEN_HUB, "All notes", true, None::<&str>)?;
+    let settings_item = MenuItem::with_id(app, OPEN_SETTINGS, "Settings", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
     let second_separator = PredefinedMenuItem::separator(app)?;
 
@@ -105,12 +113,12 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
             )?;
             Menu::with_items(
                 app,
-                &[&new_note_item, &hub_item, &note, &separator, &dark_item, &autostart_item, &second_separator, &quit_item],
+                &[&new_note_item, &hub_item, &settings_item, &note, &separator, &dark_item, &autostart_item, &second_separator, &quit_item],
             )?
         }
         None => Menu::with_items(
             app,
-            &[&new_note_item, &hub_item, &separator, &dark_item, &autostart_item, &second_separator, &quit_item],
+            &[&new_note_item, &hub_item, &settings_item, &separator, &dark_item, &autostart_item, &second_separator, &quit_item],
         )?,
     };
 
@@ -135,6 +143,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
         .on_menu_event(move |app, event| match event.id.as_ref() {
             NEW_NOTE => new_note(app),
             OPEN_HUB => open_hub(app),
+            OPEN_SETTINGS => open_settings(app),
             DARK => set_dark(app, &dark_checkbox),
             AUTOSTART => set_autostart(app, &autostart_checkbox),
             QUIT => app.exit(0),

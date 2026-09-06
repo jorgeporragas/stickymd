@@ -8,6 +8,7 @@
 
 mod index;
 mod notes;
+mod preferences;
 mod settings;
 mod shortcuts;
 mod surface;
@@ -34,6 +35,7 @@ fn surface_mode(current: tauri::State<'_, surface::Current>) -> SurfaceMode {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Checked rather than used: the surface is applied to every open
             // window by `surface::refresh` below. This is here so a missing
@@ -91,7 +93,14 @@ fn main() {
             windows::claim_note,
             windows::new_note_window,
             windows::open_note_window,
-            windows::show_hub
+            windows::show_hub,
+            windows::show_settings,
+            preferences::read_preferences,
+            preferences::set_theme,
+            preferences::set_launch_at_startup,
+            preferences::set_new_note_shortcut,
+            preferences::inspect_notes_folder,
+            preferences::set_notes_folder
         ])
         .on_window_event(|window, event| match event {
             // Closing means this note should not come back next time.

@@ -2,7 +2,12 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "What a note window may ask the core plugins to do. Commands this application defines itself are not gated by capabilities; core plugin commands are, and are denied unless listed here.",
-  "windows": ["note", "note-*", "hub"],
+  "windows": [
+    "note",
+    "note-*",
+    "hub",
+    "settings"
+  ],
   "permissions": [
     "core:default",
     "core:event:allow-listen",
@@ -10,6 +15,7 @@
     "core:window:allow-close",
     "core:window:allow-destroy",
     "core:window:allow-set-focus",
-    "core:window:allow-set-always-on-top"
+    "core:window:allow-set-always-on-top",
+    "dialog:allow-open"
   ]
 }
