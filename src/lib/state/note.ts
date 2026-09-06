@@ -6,6 +6,10 @@ import { invoke } from '@tauri-apps/api/core';
  * Writes are debounced. A note file is never written on a keystroke
  * (CLAUDE.md section 'Backend') — the disk, and any sync client watching the
  * folder, would be doing work on every character typed.
+ *
+ * The file's *name* comes from its first line, and Rust owns that: working out
+ * a free name needs to see the folder. Each save reports back the name the
+ * note now has, which is how the next save finds the same file.
  */
 
 /** How long typing must stop before the note is written. */
@@ -25,38 +29,23 @@ function asNoteError(value: unknown): NoteError | undefined {
   return undefined;
 }
 
-let noteName = 'untitled.md';
+/** Undefined until the note has been written once and has a file. */
+let noteName: string | undefined;
+
 let timer: ReturnType<typeof setTimeout> | undefined;
 let pending: string | undefined;
 
 /** What is currently on disk, so an unchanged buffer is never rewritten. */
 let written: string | undefined;
 
-export function noteFileName(): string {
+export function noteFileName(): string | undefined {
   return noteName;
 }
 
-/**
- * Read this window's note. A note that does not exist yet is empty, not an
- * error — which is why the Rust side distinguishes `not_found` from `io`.
- */
-export async function loadNote(): Promise<string> {
-  try {
-    const body = await invoke<string>('read_note', { name: noteName });
-    written = body;
-    return body;
-  } catch (error) {
-    const noteError = asNoteError(error);
-
-    if (noteError?.kind === 'not_found' || noteError === undefined) {
-      // Either a new note, or no backend at all — the window is being served
-      // in a plain browser for testing. Both start empty.
-      return '';
-    }
-
-    console.error('sticky.md: could not read the note', noteError);
-    return '';
-  }
+/** The note's title: its first line, which Rust slugifies into the filename. */
+function titleOf(body: string): string {
+  const lineEnd = body.indexOf('\n');
+  return lineEnd === -1 ? body : body.slice(0, lineEnd);
 }
 
 /** Note that the buffer changed. The write happens once typing stops. */
@@ -84,10 +73,14 @@ export async function flushSave(): Promise<void> {
 
   // A window opened and closed without typing leaves no file behind. Once a
   // note exists, emptying it is an edit like any other and is written.
-  if (body.trim() === '' && written === undefined) return;
+  if (body.trim() === '' && noteName === undefined) return;
 
   try {
-    await invoke('write_note', { name: noteName, body });
+    noteName = await invoke<string>('save_note', {
+      current: noteName ?? null,
+      title: titleOf(body),
+      body
+    });
     written = body;
   } catch (error) {
     // Keep the text queued so the next flush tries again rather than

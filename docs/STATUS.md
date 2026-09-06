@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-024 is written and running, awaiting confirmation that typing produces a file. Next in Phase 2 — Files & Persistence: filenames slugified from the first line with deduplication and debounced renaming (ADR-006), which replaces the fixed `untitled.md` the window currently uses.
+Next in Phase 2 — Files & Persistence: the sidecar index (ADR-002), holding window geometry, theme, always-on-top and open state beside the notes, keyed by filename. Then delete-to-trash through the `trash` crate, which closes the phase.
 
 ---
 
@@ -239,12 +239,14 @@ Notes: Rust owns reading, writing and listing note files; the frontend never tou
 
 ### [SMD-024] Debounced autosave
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 2 — Files & Persistence
+  2026-09-05  shipped — commit b91b32d
+  2026-09-05  confirmed on device (founder) — folder empty, then the note appeared after typing
 Notes: The editor reports every change; the note is written 600ms after typing stops, and again when the window loses focus or is closed. Closing is intercepted so a pending write completes before the window is destroyed — otherwise the last few characters typed would be lost. An unchanged buffer is never rewritten, and a window opened and closed without typing leaves no file behind, which is verified: launching the application creates `Documents/sticky.md` and leaves it empty.
-  Not confirmed: that typing actually produces a file. That needs someone at the keyboard.
+  Confirmed by the founder on 2026-09-05: the folder was empty, and the note appeared after typing and a short pause.
 
 ### [SMD-025] Surface save failures in the window
 Type:    bug
@@ -253,6 +255,23 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as idea
 Notes: A failed write is logged to the console and the text stays queued for the next flush, so nothing is lost while the window is open. But the user is told nothing, and if the window closes the queued text goes with it. A full disk or a permissions problem should be visible in the window rather than only in a console nobody has open.
+
+### [SMD-026] Slugified filenames with deduplication and renaming
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 2 — Files & Persistence
+Notes: ADR-006 implemented. The frontend sends a title; Rust slugifies it, finds a free name, renames the file if the title changed, and returns the name the note now has. Leading `#` characters are stripped, so notes do not all sort under `-`. Windows reserved stems get a `-note` suffix. A title that still slugifies to the stem a note already holds does not trigger a rename, so editing never churns the folder. Twelve unit tests, six of them against a real scratch folder, covering the two properties that move a user's file: retitling leaves nothing behind, and retitling onto a name another note holds does not clobber it.
+  Replaces the fixed `untitled.md`, which meant a second window would have overwritten the first.
+
+### [SMD-027] read_note and list_notes have no frontend consumer
+Type:    chore
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: Both commands are written, tested through `safe_name`, and registered — but nothing calls them. Reopening an existing note arrives with session restore (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file API those phases consume; logged so the gap is visible rather than assumed.
 
 ---
 

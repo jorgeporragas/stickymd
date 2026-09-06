@@ -6,11 +6,12 @@
   import { flushSave, queueSave } from '../../lib/state/note';
 
   interface Props {
-    /** The note's source, read before this window mounted. */
-    initial: string;
+    /** The note's source. A new window starts empty; reopening an existing
+        note arrives with session restore, which is Phase 3 work. */
+    initial?: string;
   }
 
-  let { initial }: Props = $props();
+  let { initial = '' }: Props = $props();
 
   let revealed = $state(false);
 

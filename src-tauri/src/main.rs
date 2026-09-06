@@ -34,7 +34,7 @@ fn main() {
             surface_mode,
             notes::list_notes,
             notes::read_note,
-            notes::write_note
+            notes::save_note
         ])
         .run(tauri::generate_context!())
         .expect("sticky.md failed to start");
