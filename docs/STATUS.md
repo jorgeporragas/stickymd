@@ -381,10 +381,9 @@ Created: 2026-09-05
 History:
   2026-09-05  reported by founder after a session restore
   2026-09-05  active — cause found
-Notes: SMD-041 stored geometry in physical pixels, recorded at the time as a deliberate trade. It was not a sound one. A physical size does not divide evenly into CSS pixels at a fractional DPI scale, so a restored window is a sliver wider than the web view inside it, and that strip is painted by nothing — a pale line down the right edge and along the bottom.
-  Geometry is now logical pixels, the units the page itself thinks in, so nothing is left over. That also fixes the cross-display problem the original note wrote off: logical units carry correctly onto a monitor with a different scale factor.
-  Also corrected while here: the size measured was the *outer* size while `set_size` sets the *inner* one, so a window would have grown slightly on every session.
-  Entries written before this change hold physical values. They are rewritten the first time each window loses focus, so at worst one restore is off on a scaled display.
+Notes: The cause was `.surface` being sized `height: 100%`, which resolves to a fractional pixel — measured at 433.6px inside a 434px viewport. The window is transparent over acrylic, so the strip the surface did not cover was painted by the backdrop. The same failure as the corner artefacts. `.surface` is now `position: fixed; inset: 0`; the gap on both axes measures exactly 0.
+  A first diagnosis blamed fractional DPI and was wrong: the machine runs at scale 1.0, where physical and logical pixels are identical. Recorded because the wrong theory was plausible and nearly shipped as the explanation.
+  Two real bugs were fixed on the way to the right answer, both in SMD-041's geometry handling: the size measured was the *outer* size while `set_size` sets the *inner* one, so windows grew on every session — visible in the founder's index, 418×410 becoming 436×433 — and geometry is now stored in logical rather than physical pixels, which is what carries correctly onto a display with a different scale factor.
 
 ### [SMD-042] Apostrophes were turned into separators in filenames
 Type:    bug

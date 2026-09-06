@@ -81,7 +81,16 @@
   .surface {
     display: flex;
     flex-direction: column;
-    height: 100%;
+
+    /* Pinned to the viewport rather than sized at 100%.
+       A percentage height resolves to a fractional pixel, leaving the surface a
+       sliver short of the window — and because the window is transparent over
+       compositor blur, an unpainted sliver shows raw acrylic as a pale line
+       down the right edge and along the bottom. The same failure as the corner
+       artefacts: anything this surface does not cover, the backdrop does.
+       See docs/FIXES.md. */
+    position: fixed;
+    inset: 0;
     border-radius: var(--radius-window);
     border: 1px solid var(--surface-border);
 

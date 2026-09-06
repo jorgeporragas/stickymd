@@ -151,3 +151,23 @@ Never:    Never raise `--radius-window` above the system radius while glass is
           Tauri's `hwnd()` returns an HWND from its own version of the windows
           crate. Carry the raw handle value across rather than forcing the
           versions to match.
+
+### Any sliver the surface does not cover shows the compositor backdrop
+Area:     Window transparency, vibrancy, and compositor blur setup
+Date:     2026-09-05
+Commit:   pending
+Problem:  Pale lines appeared down the right edge and along the bottom of
+          restored note windows. `.surface` was sized `height: 100%`, which
+          resolves to a fractional pixel — measured at 433.6px inside a 434px
+          viewport. The window is transparent over acrylic, so the 0.4px the
+          surface did not cover was painted by the backdrop rather than by
+          nothing, and read as a pale line.
+Fix:      `.surface` is `position: fixed; inset: 0`, which is laid out against
+          the viewport itself and cannot land on a fraction. Verified: the gap
+          on both axes is exactly 0.
+Never:    Never size the note surface with a percentage. This is the same
+          failure as the corner artefacts and has the same rule behind it:
+          anything the surface does not cover, the compositor's backdrop does.
+          A DPI explanation is tempting and was wrong here — the machine it was
+          reported on runs at scale 1.0, where physical and logical pixels are
+          identical. Measure the gap before theorising about why it exists.
