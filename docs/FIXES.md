@@ -195,7 +195,8 @@ Never:    Never turn `shadow` on for a window with `decorations: false`. The
           window it shows as a light border rather than as nothing.
           Turning it off costs nothing visually: Windows draws its own shadow
           for a DWM-rounded window whatever this setting says. A CSS shadow
-          would still be clipped at the window edge, so `--shadow-rest` has no
+          would still be clipped at the window edge. `--shadow-rest` was removed
+          for that reason in 8b72e28 — it had no
           effect on the window itself — the shadow you see is the system's.
           Two wrong diagnoses preceded this one, both from theorising about the
           gap instead of measuring it. One rested on a DPI reading taken from a

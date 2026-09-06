@@ -55,7 +55,7 @@ The split exists so the markdown files stay portable and clean: a note opened in
 **Invariants:**
 
 - A note's `.md` file contains user content and nothing else. No frontmatter, no metadata, no application data.
-- A note with no sidecar entry is valid. It opens centered, with default theme and always-on-top off.
+- A note with no sidecar entry is valid. It opens centered, untinted, with always-on-top off.
 - Deleting a note sends its file to the operating system's trash and removes its sidecar entry.
 - `open` and `exists` are independent. Closing a note's window does not delete the note.
 - Filenames are unique within the notes folder.
@@ -95,7 +95,7 @@ What sticky.md does. Amended by decision as capability is added or removed, and 
 - Copy yields raw markdown source
 - Autosave to the `.md` file on a debounce; no save action exists
 - Filenames slugified from the first line, deduplicated with a numeric suffix, renamed on a debounce
-- A sidecar index holding window geometry, theme, always-on-top, and open state
+- A sidecar index holding window geometry, tint, always-on-top, and open state
 - Open windows restore when the application launches
 - A per-note always-on-top toggle, off by default
 - A hub window listing every note, from which notes are opened, focused, and deleted

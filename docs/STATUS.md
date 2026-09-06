@@ -10,9 +10,11 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-The theme system and its built-in themes. The dark theme (SMD-004) cannot ship alone: without a way to choose it, it is unreachable code. It lands with per-note colour (SMD-021), which is what makes a theme selectable at all — `Note.theme` has been in the domain model and the sidecar index since Phase 2 with nothing writing it.
+Phase 5 is built and awaiting the founder's verification on device. Both halves are in: the theme system with Frost and Dark and the seven per-note tints (SMD-004, SMD-021, ADR-024), and the motion pass (SMD-048).
 
-Then the motion pass (SMD-048). Done — and it ended by dropping SMD-045 rather than building it: animating the written-to-rendered transition means animating a reflow on every cursor move, which would make it worse. Awaiting the founder's confirmation on that call.
+Two calls in it are his to confirm rather than mine. SMD-045 was dropped rather than built — animating the written-to-rendered transition means animating a reflow on every cursor move, which would make it worse, and the fix applied instead is a design one. And `docs/DESIGN.md § Motion` was amended: a note cannot scale into place on a frosted window, so it arrives by the light on it.
+
+The phase's truth check runs once he has verified, not before — a milestone written against unverified work is exactly what the check exists to catch.
 
 ---
 
@@ -405,7 +407,7 @@ History:
   2026-09-05  logged as idea while fixing SMD-043
   2026-09-06  dropped — the premise was false
 Notes: Logged on the inference that `shadow: false` would leave the window casting nothing. The founder observed that it does cast one: Windows draws its own shadow for a DWM-rounded window whatever that setting says. Inferred from code rather than looked at, which is the whole reason on-device confirmation exists.
-  What remains true, and is recorded in `docs/FIXES.md` instead: a CSS shadow is clipped at the window edge, so `--shadow-rest` has no effect on the window itself. The shadow is the system's. If a different one is ever wanted, that is when the window has to be padded — not before.
+  What remains true, and is recorded in `docs/FIXES.md` instead: a CSS shadow is clipped at the window edge, so a shadow on the surface has no effect on the window itself. The shadow is the system's. If a different one is ever wanted, that is when the window has to be padded — not before. `--shadow-rest` was removed on that reasoning in SMD-048.
 
 ### [SMD-042] Apostrophes were turned into separators in filenames
 Type:    bug
