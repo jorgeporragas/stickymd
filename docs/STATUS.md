@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Delete-to-trash through the `trash` crate, which is the last item in Phase 2 — Files & Persistence. Deleting a note must also forget its index entry. Then the truth check and the transition to Phase 3 — Windows, Tray & Shortcuts.
+Closing Phase 2 — Files & Persistence. Every item in the phase is done; the truth check runs next, then `Current Phase` moves to Phase 3 — Windows, Tray & Shortcuts, which is where the five written-but-uncalled commands in SMD-027 finally get their callers.
 
 ---
 
@@ -275,13 +275,22 @@ History:
   2026-09-05  shipped — commit ddc6945
 Notes: ADR-002 implemented as `.sticky-index.json` in the notes folder, keyed by filename, holding geometry, theme, always-on-top and open state. Writes go through a temporary file and a rename; an unreadable index is moved aside rather than overwritten; read-modify-write is serialized by a mutex, because two windows saving at once would otherwise each load, apply their own change, and write back with the last erasing the other. A retitled note carries its entry, since it is the same note. Nine tests.
 
-### [SMD-027] read_note, list_notes and the index commands have no frontend consumer
+### [SMD-029] Delete a note to the operating system's trash
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 2 — Files & Persistence
+Notes: `trash` crate 5.2.7, never an unlink — a note deleted by mistake has to be recoverable, which is why the app has no bin of its own. Deleting also forgets the note's index entry, under the lock. A trash failure is its own error variant rather than a generic IO one: some locations have no trash at all, and offering a permanent delete is a different conversation from reporting a broken disk.
+  Deliberately not unit-tested. Exercising it would put files in the developer's real Recycle Bin, and what it delegates to is the crate's job. The parts worth covering — name validation and forgetting the entry — are tested through `safe_name` and `forget_entry`.
+
+### [SMD-027] read_note, list_notes, delete_note and the index commands have no frontend consumer
 Type:    chore
 State:   idea
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: `read_note`, `list_notes`, `note_state` and `set_note_state` are written, tested and registered — but nothing calls them. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
+Notes: `read_note`, `list_notes`, `delete_note`, `note_state` and `set_note_state` are written, tested where testable, and registered — but nothing calls them. Deleting a note needs somewhere to delete it from, which is the hub. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
 
 ---
 

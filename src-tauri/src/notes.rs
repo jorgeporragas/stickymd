@@ -23,6 +23,11 @@ pub enum NoteError {
     /// The notes folder could not be located on this machine.
     NoNotesFolder,
     NotFound { name: String },
+    /// The file could not be sent to the platform's trash. Distinct from `Io`
+    /// because it has its own remedy — some locations have no trash at all,
+    /// and offering a permanent delete is a different conversation from
+    /// reporting a broken disk.
+    Trash { message: String },
     Io { message: String },
 }
 
@@ -260,6 +265,35 @@ fn save_into(
 
     std::fs::write(dir.join(&name), body)?;
     Ok(name)
+}
+
+/// Send a note to the platform's trash and forget its index entry.
+///
+/// Never an unlink: a note deleted by mistake has to be recoverable, which is
+/// the whole reason the app has no bin of its own — the operating system
+/// already has one.
+///
+/// Deliberately not unit-tested. Exercising it would put files in the
+/// developer's real Recycle Bin, and what it delegates to is the `trash`
+/// crate's job to get right. The parts worth covering — name validation and
+/// forgetting the entry — are tested through `safe_name` and `forget_entry`.
+#[tauri::command]
+pub fn delete_note(
+    app: AppHandle,
+    lock: State<'_, IndexLock>,
+    name: String,
+) -> Result<(), NoteError> {
+    let dir = notes_dir(&app)?;
+    let path = dir.join(safe_name(&name)?);
+
+    if !path.exists() {
+        return Err(NoteError::NotFound { name });
+    }
+
+    trash::delete(&path).map_err(|error| NoteError::Trash { message: error.to_string() })?;
+
+    let _guard = index::guard(&lock)?;
+    index::forget_entry(&dir, &name)
 }
 
 #[cfg(test)]

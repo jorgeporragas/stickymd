@@ -13,6 +13,10 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+# Deletion goes to the platform's trash, never an unlink: a note the user
+# deleted by mistake must be recoverable. See CLAUDE.md, cross-platform.
+trash = "5"
+
 # Compositor blur. The frosted surface is a window property applied here, not a
 # CSS filter -- a web view cannot see the desktop behind it.
 # See docs/DESIGN.md principle 3.

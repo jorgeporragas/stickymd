@@ -37,6 +37,7 @@ fn main() {
             notes::list_notes,
             notes::read_note,
             notes::save_note,
+            notes::delete_note,
             index::note_state,
             index::set_note_state
         ])
