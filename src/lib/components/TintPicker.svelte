@@ -58,7 +58,6 @@
   <button
     class="lozenge swatch"
     class:revealed
-    class:coloured={tint !== 'clear'}
     data-tint-swatch={tint}
     type="button"
     aria-label="Note colour"
@@ -109,25 +108,18 @@
     height: var(--space-4);
     /* Small control, not a glass surface: fading is cheap and correct. */
     opacity: 0;
-    transition:
-      opacity var(--dur-quick) var(--ease-out),
-      filter var(--dur-quick) var(--ease-out);
-  }
-
-  .swatch.revealed,
-  .swatch.coloured,
-  .swatch:focus-visible {
-    opacity: 1;
+    transition: opacity var(--dur-quick) var(--ease-out);
   }
 
   /*
-    Greyed out while the chrome is receded, and coloured again the moment the
-    window is in use — the traffic lights' own behaviour, and principle 2
-    already asked for it. A tinted note keeps its swatch visible either way:
-    the control stays findable without a colour calling for attention.
+    Recedes like every other control, tinted or not. It kept itself visible
+    while a note had a colour — chrome carrying information, by principle 2 —
+    but the founder found a swatch that would not go away worse than one he has
+    to hover for, and the note's colour is already visible: it is the window.
   */
-  .swatch.coloured:not(.revealed):not(:focus-visible) {
-    filter: grayscale(1);
+  .swatch.revealed,
+  .swatch:focus-visible {
+    opacity: 1;
   }
 
   .palette {

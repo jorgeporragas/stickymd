@@ -42,6 +42,21 @@
     color-mix(in oklab, currentColor 84%, var(--rim-shade)) 100%
   );
 
+  /* A window control wears the note's colour. Untinted, these resolve to the
+     neutral disc; the `:root[data-tint]` block below points them at the note's
+     hue instead, so the controls change with the picker rather than staying
+     grey beside a coloured window. One recipe either way. */
+  --gloss-control: var(--gloss-neutral);
+  --rim-control: var(--rim-neutral);
+  --control-glyph: var(--ink-secondary);
+
+  --gloss-from-hue: radial-gradient(
+    circle at 50% 18%,
+    color-mix(in oklab, var(--control-hue) 45%, var(--rim-light)) 0%,
+    var(--control-hue) 52%,
+    color-mix(in oklab, var(--control-hue) 84%, var(--rim-shade)) 100%
+  );
+
   /* The same fill lit from below instead of above: a control pushed in. The
      specular goes with it — a highlight on a surface that is no longer facing
      the light is what makes a "pressed" state look painted on. */
@@ -186,6 +201,7 @@
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
 }
@@ -350,6 +366,48 @@
  *
  * Clear is the default and comes from the theme itself.
  */
+
+/*
+ * A window's controls take the note's colour, in both themes. The disc carries
+ * its own hue and its glyph is derived from that hue, exactly as the lit pin
+ * and the tint swatches do, so neither theme needs a separate answer.
+ *
+ * The bare attribute is the whole condition: `applyTint` removes it for Clear
+ * rather than setting it to 'clear', so its presence means the note has a
+ * colour. Unqualified by theme on purpose — unlike the blocks below, it
+ * declares no surface token, so there is nothing here for a theme block to
+ * lose a fight with.
+ */
+:root[data-tint] {
+  --gloss-control: var(--gloss-from-hue);
+  --rim-control: color-mix(in oklab, var(--control-hue) 62%, var(--rim-shade));
+  --control-glyph: color-mix(in oklab, var(--control-hue) 25%, var(--rim-shade));
+}
+
+:root[data-tint='sun'] {
+  --control-hue: var(--swatch-sun);
+}
+
+:root[data-tint='spring'] {
+  --control-hue: var(--swatch-spring);
+}
+
+:root[data-tint='aqua'] {
+  --control-hue: var(--swatch-aqua);
+}
+
+:root[data-tint='sky'] {
+  --control-hue: var(--swatch-sky);
+}
+
+:root[data-tint='lilac'] {
+  --control-hue: var(--swatch-lilac);
+}
+
+:root[data-tint='blush'] {
+  --control-hue: var(--swatch-blush);
+}
+
 :root[data-theme='frost'][data-tint='sun'] {
   --surface-tint: rgba(255, 233, 163, 0.58);
   --surface-solid: #fbf0cf;

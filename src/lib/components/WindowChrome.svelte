@@ -95,10 +95,10 @@
     place-items: center;
     width: var(--space-4);
     height: var(--space-4);
-    border-color: var(--rim-neutral);
-    --lozenge-fill: var(--gloss-neutral);
+    border-color: var(--rim-control);
+    --lozenge-fill: var(--gloss-control);
     --lozenge-pressed: var(--gloss-pressed);
-    color: var(--ink-secondary);
+    color: var(--control-glyph);
 
     /* Small control, not a glass surface: fading is cheap and correct.
        See docs/DESIGN.md section 'Never Allowed'. */
@@ -115,6 +115,9 @@
     opacity: 1;
   }
 
+  /* Hover darkens the glyph rather than colouring it: on a tinted control the
+     glyph is already the note's hue taken most of the way to black, and there
+     is nowhere darker for it to go that means anything. */
   .control:hover {
     color: var(--ink-primary);
   }

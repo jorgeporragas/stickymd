@@ -60,8 +60,8 @@ export const editorTheme = EditorView.theme({
   '.cm-md-code': {
     backgroundColor: 'var(--code-surface)',
     color: 'var(--code-ink)',
-    paddingLeft: 'var(--space-3)',
-    paddingRight: 'var(--space-3)',
+    paddingLeft: 'var(--space-4)',
+    paddingRight: 'var(--space-4)',
 
     // The face and size belong here rather than on a highlight tag. `monospace`
     // only tags *inline* code; the contents of a fenced block are tagged by the
@@ -77,13 +77,13 @@ export const editorTheme = EditorView.theme({
   },
 
   '.cm-md-code-open': {
-    paddingTop: 'var(--space-2)',
+    paddingTop: 'var(--space-3)',
     borderTopLeftRadius: 'var(--radius-control)',
     borderTopRightRadius: 'var(--radius-control)'
   },
 
   '.cm-md-code-close': {
-    paddingBottom: 'var(--space-2)',
+    paddingBottom: 'var(--space-3)',
     borderBottomLeftRadius: 'var(--radius-control)',
     borderBottomRightRadius: 'var(--radius-control)'
   },

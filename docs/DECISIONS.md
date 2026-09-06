@@ -204,7 +204,7 @@ Consequences: `--accent`, `--accent-hover`, `--accent-glow`, `--ink-on-accent` a
             `docs/DESIGN.md` principle 1 no longer says the surface is Aero. The frosted surface itself is unchanged and is not what this decision is about: glass here is a window property (principle 3), and dropping a visual philosophy does not un-frost a window.
 
 ## ADR-026 — The tint swatches take the Aqua bezel, not the Aqua gloss
-Status:     Accepted; the refusal of the gloss is superseded by ADR-027. Everything else stands.
+Status:     Accepted; the refusal of the gloss is superseded by ADR-027, and the greying-out behaviour by ADR-031. The rim and the seat stand.
 Date:       2026-09-06
 Context:    The founder asked for the tint picker to look like the Mac OS X Aqua traffic lights. Three treatments were put to him a commit after ADR-025 dropped Aero: the flat dots as built, a bezel, and full candy — radial fill, specular highlight, drop shadow. He chose the bezel, in his words liking the candy and picking the other anyway.
 Decision:   What the traffic lights are actually made of, in the order it matters: a rim in the fill's own hue rather than a neutral border; a bezel seating the disc in the surface; and going grey when the window is not in use. All three are taken. The gloss is not.
@@ -263,3 +263,14 @@ Consequences: Two of the three complaints were defects rather than taste. `--fon
             The panel is darker than the note on Frost and *lighter* than it on Dark. On a dark surface a darker panel reads as a hole rather than as a block set into the page.
             It is painted with line decorations, not a block widget. A widget would replace the source and the block would stop being editable in place, which breaks the rule that markdown stays in the buffer at all times. That is also why this can be a `ViewPlugin` where `tableView.ts` cannot: `docs/FIXES.md` bars decorations that replace line breaks, not classes on lines that are already there.
             It is a departure from principle 1, which keeps note content quiet, and it is a deliberate one: a fenced block is the one thing in a note that is usually not the user's own prose but something pasted in to be read as code.
+
+## ADR-031 — The seated controls are the window's; the hub's are not
+Status:     Accepted
+Date:       2026-09-06
+Context:    Three reports from the founder using the build, which turned out to be one question: what belongs to the family of seated Aqua controls. He found the tint swatch staying visible on a coloured note wrong; he found the hub's delete button, which had just joined the family, wrong in it; and he found the window's controls staying grey beside a coloured window wrong the other way.
+Decision:   The family is the note window's own chrome, and it wears the note's colour. Every control on a note window takes its hue from the note's tint — disc, rim and glyph — as the swatches and the lit pin already did. Nothing outside that window joins the family: the hub's delete control is flat, and larger, and secondary.
+            The tint swatch recedes with the rest of the chrome.
+Consequences: This reverses two things decided earlier, both on the founder's own report, and both were mine rather than his to begin with. ADR-026 had the swatch grey out while staying visible, on the reasoning that a tinted note's swatch was chrome carrying information. It was — but the information is already there in full view: the note is the colour. A control that will not go away is a worse trade than one you hover for, and `docs/DESIGN.md` principle 2's exemption is narrower than I read it.
+            SMD-061 had made the delete control a seated one. Wrong family: those are a note's own chrome, and this acts on a row in a list. It is flat, `--space-5` (25% larger — the spacing scale is 4px-based and 18px is not on it, so the founder's 15–20% is rounded up rather than invented), and still answers a press. Pressable and bezelled are different things.
+            `--space-5` is new to the scale. It was simply absent; 20px is a 4px step like every other.
+            A control's hue comes from `:root[data-tint]` — the bare attribute, because `applyTint` removes it for Clear rather than setting it to a value. That block is deliberately *not* qualified by theme, unlike the tint blocks beneath it: it declares no surface token, so there is nothing for a theme block to lose a fight with. Both themes work from one recipe because the disc carries its own hue and the glyph is derived from it, which is the same reason the lit pin needed no per-theme answer.

@@ -22,7 +22,7 @@
   </button>
 
   <button
-    class="lozenge delete"
+    class="delete"
     type="button"
     aria-label="Delete {title}"
     onclick={onDelete}
@@ -85,29 +85,33 @@
   }
 
   /*
-    A seated control like the ones on a window's chrome, and square rather than
-    round — the round ones are the note's own colour and its window's controls,
-    and this is neither. The disc treatment is `.lozenge`, in src/app.css; only
-    the radius and the size differ here.
+    Flat, deliberately. It wore the seated treatment briefly and the founder
+    read it as belonging to the same family as the window's controls, which it
+    should not: those are the note's own chrome, and this acts on a row in a
+    list. A secondary control, and secondary here means unlit.
+
+    It still answers a press — pressable and bezelled are different things.
   */
   .delete {
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    width: var(--space-4);
-    height: var(--space-4);
+    width: var(--space-5);
+    height: var(--space-5);
     margin: var(--space-2) var(--space-2) var(--space-2) 0;
     align-self: center;
+    padding: 0;
+    border: 0;
     border-radius: var(--radius-chip);
-    border-color: var(--rim-neutral);
-    --lozenge-fill: var(--gloss-neutral);
-    --lozenge-pressed: var(--gloss-pressed);
+    background: transparent;
     color: var(--ink-muted);
+    cursor: pointer;
 
     opacity: 0;
     transition:
       opacity var(--dur-quick) var(--ease-out),
-      color var(--dur-quick) var(--ease-out);
+      color var(--dur-quick) var(--ease-out),
+      background-color var(--dur-quick) var(--ease-out);
   }
 
   /* Revealed by hovering the row, in CSS rather than through state. A pointer
@@ -123,14 +127,19 @@
      is ink. */
   .delete:hover {
     color: var(--signal-danger);
+    background: var(--control-hover);
+  }
+
+  /* The press, without a bezel to do it: the fill firms up and the transition
+     shortens so it lands under the finger rather than catching up with it. */
+  .delete:active {
+    background: var(--control-active);
+    transition-duration: var(--dur-instant);
   }
 
   .delete svg {
-    /* Above the specular, as on every other seated control. */
-    position: relative;
-    z-index: 1;
-    width: 9px;
-    height: 9px;
+    width: 12px;
+    height: 12px;
     stroke: currentColor;
     stroke-width: 1.2;
     stroke-linecap: round;
