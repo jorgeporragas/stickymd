@@ -7,7 +7,9 @@
 use std::path::{Component, Path, PathBuf};
 
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, State};
+
+use crate::index::{self, IndexLock};
 
 /// Errors crossing the command boundary, as data rather than prose.
 ///
@@ -205,11 +207,24 @@ fn free_name(dir: &Path, slug: &str) -> String {
 #[tauri::command]
 pub fn save_note(
     app: AppHandle,
+    lock: State<'_, IndexLock>,
     current: Option<String>,
     title: String,
     body: String,
 ) -> Result<String, NoteError> {
-    save_into(&notes_dir(&app)?, current.as_deref(), &title, &body)
+    let dir = notes_dir(&app)?;
+    let name = save_into(&dir, current.as_deref(), &title, &body)?;
+
+    // A retitled note is the same note: its window position and settings
+    // follow the file rather than being stranded under the old key.
+    if let Some(previous) = current.as_deref() {
+        if previous != name {
+            let _guard = index::guard(&lock)?;
+            index::rename_entry(&dir, previous, &name)?;
+        }
+    }
+
+    Ok(name)
 }
 
 /// The naming and writing itself, against a folder rather than an app handle,

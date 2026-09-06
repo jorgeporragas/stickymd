@@ -22,6 +22,7 @@ Date:       2026-09-05
 Context:    A note carries content plus window geometry, theme, always-on-top, and open state. Following ADR-001, content is the file. The remainder had two possible homes: YAML frontmatter inside each note, or a separate index beside them.
 Decision:   One sidecar index file, keyed by filename, holds all application state. The `.md` files contain user content and nothing else.
 Consequences: Note files stay portable and clean; dragging a window never rewrites a note, and a folder under sync does not churn on mouse movement. A note whose sidecar entry is missing must open with sane defaults rather than fail. Moving or renaming a note outside the app orphans its entry.
+            2026-09-05 — Implemented as `.sticky-index.json` in the notes folder. Three properties the decision implied but did not state: writes go through a temporary file and a rename, so an interrupted write cannot leave a half-written index; an unreadable index is moved aside rather than overwritten, because a file we failed to parse may still be recoverable; and read-modify-write cycles are serialized by a mutex, since two note windows saving at once would each load, apply their own change, and write back, with the last one erasing the other. Renaming a note carries its entry — a retitled note is the same note.
 
 ## ADR-003 — Tauri v2 rather than Electron
 Status:     Accepted

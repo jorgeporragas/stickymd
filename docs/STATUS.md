@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Next in Phase 2 — Files & Persistence: the sidecar index (ADR-002), holding window geometry, theme, always-on-top and open state beside the notes, keyed by filename. Then delete-to-trash through the `trash` crate, which closes the phase.
+Delete-to-trash through the `trash` crate, which is the last item in Phase 2 — Files & Persistence. Deleting a note must also forget its index entry. Then the truth check and the transition to Phase 3 — Windows, Tray & Shortcuts.
 
 ---
 
@@ -266,13 +266,21 @@ History:
 Notes: ADR-006 implemented. The frontend sends a title; Rust slugifies it, finds a free name, renames the file if the title changed, and returns the name the note now has. Leading `#` characters are stripped, so notes do not all sort under `-`. Windows reserved stems get a `-note` suffix. A title that still slugifies to the stem a note already holds does not trigger a rename, so editing never churns the folder. Twelve unit tests, six of them against a real scratch folder, covering the two properties that move a user's file: retitling leaves nothing behind, and retitling onto a name another note holds does not clobber it.
   Replaces the fixed `untitled.md`, which meant a second window would have overwritten the first.
 
-### [SMD-027] read_note and list_notes have no frontend consumer
+### [SMD-028] The sidecar index
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 2 — Files & Persistence
+Notes: ADR-002 implemented as `.sticky-index.json` in the notes folder, keyed by filename, holding geometry, theme, always-on-top and open state. Writes go through a temporary file and a rename; an unreadable index is moved aside rather than overwritten; read-modify-write is serialized by a mutex, because two windows saving at once would otherwise each load, apply their own change, and write back with the last erasing the other. A retitled note carries its entry, since it is the same note. Nine tests.
+
+### [SMD-027] read_note, list_notes and the index commands have no frontend consumer
 Type:    chore
 State:   idea
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: Both commands are written, tested through `safe_name`, and registered — but nothing calls them. Reopening an existing note arrives with session restore (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file API those phases consume; logged so the gap is visible rather than assumed.
+Notes: `read_note`, `list_notes`, `note_state` and `set_note_state` are written, tested and registered — but nothing calls them. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
 
 ---
 

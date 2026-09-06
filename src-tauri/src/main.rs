@@ -6,6 +6,7 @@
 // Release builds must not open a console window behind the app.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod index;
 mod notes;
 mod surface;
 
@@ -28,13 +29,16 @@ fn main() {
                 .ok_or("the note window is missing from tauri.conf.json")?;
 
             app.manage(surface::apply(&window));
+            app.manage(index::IndexLock::default());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             surface_mode,
             notes::list_notes,
             notes::read_note,
-            notes::save_note
+            notes::save_note,
+            index::note_state,
+            index::set_note_state
         ])
         .run(tauri::generate_context!())
         .expect("sticky.md failed to start");
