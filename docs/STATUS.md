@@ -144,12 +144,13 @@ Notes: Eight variable woff2 files in `src/assets/fonts/`, 190 kB total, subset t
 
 ### [SMD-014] App icon and bundle configuration
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  scope corrected — blocks the build, not only releases
   2026-09-05  active
+  2026-09-05  shipped — commit e3ac885
 Notes: `tauri-build` requires `icons/icon.ico` to generate the Windows resource file, so `cargo check` fails without it and the application cannot run at all. The earlier note claiming `tauri dev` was unaffected was wrong. Also needs the `bundle` section in `tauri.conf.json` for NSIS and the portable zip. The icon itself is an identity decision for the founder.
 
 ### [SMD-015] Compositor glass and the Glass/Solid mode switch
