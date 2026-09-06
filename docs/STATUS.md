@@ -6,11 +6,13 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Phase
 
-**Build** — Phase 2 — Files & Persistence
+**Build** — Phase 3 — Windows, Tray & Shortcuts
 
 ## Current Active Step
 
-Closing Phase 2 — Files & Persistence. Every item in the phase is done; the truth check runs next, then `Current Phase` moves to Phase 3 — Windows, Tray & Shortcuts, which is where the five written-but-uncalled commands in SMD-027 finally get their callers.
+Multiple note windows: creating a window per note, each with its own file identity. Everything else in the phase builds on it — the global hotkey needs somewhere to put a new note, and session restore needs windows it can reopen. It is also what finally gives `read_note`, `note_state` and `set_note_state` their callers (SMD-027).
+
+The note module's state is currently module-level, which is correct for one window per process and wrong for several. That is the first thing to change.
 
 ---
 
@@ -277,10 +279,11 @@ Notes: ADR-002 implemented as `.sticky-index.json` in the notes folder, keyed by
 
 ### [SMD-029] Delete a note to the operating system's trash
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 2 — Files & Persistence
+  2026-09-05  shipped — commit 6dad028
 Notes: `trash` crate 5.2.7, never an unlink — a note deleted by mistake has to be recoverable, which is why the app has no bin of its own. Deleting also forgets the note's index entry, under the lock. A trash failure is its own error variant rather than a generic IO one: some locations have no trash at all, and offering a permanent delete is a different conversation from reporting a broken disk.
   Deliberately not unit-tested. Exercising it would put files in the developer's real Recycle Bin, and what it delegates to is the crate's job. The parts worth covering — name validation and forgetting the entry — are tested through `safe_name` and `forget_entry`.
 
@@ -295,6 +298,13 @@ Notes: `read_note`, `list_notes`, `delete_note`, `note_state` and `set_note_stat
 ---
 
 ## Completed Milestones
+
+### Phase 2 — Files & Persistence — closed 2026-09-05
+Notes became files. Rust owns note I/O with typed errors and untrusted-name validation; debounced autosave that flushes on blur and intercepts window close; filenames slugified from the first line with deduplication, renaming, Windows reserved-stem handling and no churn on re-save; the sidecar index with atomic writes, corrupt-file salvage and a mutex against concurrent windows; delete to the operating system's trash. Items SMD-023, SMD-024, SMD-026, SMD-028, SMD-029.
+
+Truth check run 2026-09-05 before the transition: retraction grep clean; all fourteen built entries of `MASTER.md § In Scope` verified present in code; no supersession pointers to reconcile; 29 items all carrying a state, a date and a history line, every shipped item citing a commit that exists, and no item left `active`; 117 cross-references checked with one genuine error corrected — an unqualified `index.rs` in CLAUDE. The remaining link-checker hits are paths inside the user's notes folder rather than repository files.
+
+21 Rust tests pass. Nothing in the phase is unverified except what SMD-027 names.
 
 ### Phase 1 — Foundation & Editor Core — closed 2026-09-05
 Tauri v2 + Svelte 5 shell with custom chrome and the design token layer; CodeMirror 6 with the inline-rendering layer, formatting commands, fenced-code highlighting and rendered tables; three vendored OFL typefaces; the application mark; compositor glass with a Solid fallback; the README. Items SMD-006, SMD-007, SMD-008, SMD-012, SMD-013, SMD-014, SMD-015, SMD-016, SMD-017.
