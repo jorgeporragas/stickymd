@@ -175,7 +175,7 @@ Never:    Never size the note surface with a percentage. This is the same
 ### `shadow: true` gives an undecorated window a frame the page cannot paint
 Area:     Window transparency, vibrancy, and compositor blur setup
 Date:     2026-09-05
-Commit:   pending
+Commit:   ab76fe1
 Problem:  Thick pale lines ran down the right edge and along the bottom of every
           note window. Measured from inside the running application, the web
           view filled its viewport exactly — 436x420 CSS in a 436x420 viewport
