@@ -10,9 +10,11 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-036 is written and running, awaiting confirmation that the tray icon appears and behaves, and that closing every note window leaves the application alive and still summonable. SMD-030 also still needs confirming: that two windows write two different files.
+The per-note always-on-top toggle, which is also the first consumer the sidecar index has had: `note_state` and `set_note_state` have been written, tested and registered since Phase 2 with nothing calling them (SMD-027).
 
-Next in Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037), the per-note always-on-top toggle, session restore of open windows, and making the shortcut set remappable — which SMD-033 showed is load-bearing rather than a nicety.
+Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037), session restore of open windows, and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
+
+Waiting on the founder: SMD-039, whether dead keys and accented input work in the editor. Storage is proven by test; composition is not, and the browser harness cannot type.
 
 ---
 
