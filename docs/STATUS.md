@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-015 is written and running but **unconfirmed** — whether the window is actually frosted is a visual fact that cannot be read from the code. Waiting on founder confirmation before it ships. Next after that: the README (SMD-008), the last open item in Phase 1 — Foundation & Editor Core.
+Closing Phase 1 — Foundation & Editor Core. Every item in the phase is done; the truth check runs next, then `Current Phase` moves to Phase 2 — Files & Persistence.
 
 ---
 
@@ -93,11 +93,12 @@ Notes: The canonical text from gnu.org, verbatim, as `LICENSE` in the repository
 
 ### [SMD-008] Write the README
 Type:    chore
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: Must document the SmartScreen warning honestly, per ADR-010. Sits outside FLOW's scheme; may link to FLOW files but must not restate what they own.
+  2026-09-05  active
+Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it appears rather than burying it. Links to the FLOW files rather than restating them: current state points at STATUS, toolchain requirements at CLAUDE. Opens with a notice that the software is unfinished, placed above the feature list so a visitor cannot read the list as a claim about what runs today. The clone URL is deliberately absent — no remote exists yet, and inventing one would be a false instruction.
 
 ### [SMD-009] Chakra Petch as an alternate built-in theme's display face
 Type:    idea
@@ -155,13 +156,15 @@ Notes: `tauri-build` requires `icons/icon.ico` to generate the Windows resource 
 
 ### [SMD-015] Compositor glass and the Glass/Solid mode switch
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active — written, running, awaiting founder confirmation
+  2026-09-05  shipped — commit 1567f90
+  2026-09-05  confirmed frosted on device (founder)
 Notes: Acrylic applied to the transparent window from Rust via `window-vibrancy`, per `docs/DESIGN.md` principle 3. The resulting mode is reported to the frontend by the `surface_mode` command and lands on the document root as `data-surface`; `--surface-paint` and `--surface-border` resolve from it, so no component branches on the mode. A window that cannot be frosted is Solid, which is a supported way to run rather than an error.
-  Not shipped: whether the window is genuinely frosted is a visual fact and cannot be verified from the code. The machine reports `EnableTransparency = 1`, and the application runs without error, but neither proves the compositor applied the effect.
+  Confirmed visually by the founder on 2026-09-05. Code alone could not establish this: a window that silently failed to frost would look like a plain white note and every automated check would still pass.
 
 ### [SMD-022] Respond to the system transparency setting changing at runtime
 Type:    bug
