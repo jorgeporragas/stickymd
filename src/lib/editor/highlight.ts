@@ -31,8 +31,8 @@ export const markdownHighlight = HighlightStyle.define([
   // and including it here renders the whole note in the code face.
   //
   // The size is set here rather than left to inherit. It had been inheriting
-  // --font-size-body, and Martian Mono at that size sets a line half again as
-  // wide as the prose around it. See --font-size-code.
+  // --font-size-body, and a mono face at that size sets a line far wider than
+  // the prose around it. See --font-size-code.
   { tag: t.monospace, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-code)' },
 
   // The syntax characters themselves, shown only on the cursor's line.
@@ -46,7 +46,10 @@ export const markdownHighlight = HighlightStyle.define([
   // --tide-* ramp as the rest of the palette.
   { tag: t.keyword, color: 'var(--code-keyword)' },
   { tag: [t.string, t.special(t.string)], color: 'var(--code-string)' },
-  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--code-muted)', fontStyle: 'italic' },
+  // No italic. The code face ships one style, and `font-synthesis: none` means
+  // an italic that is not in the file does not appear — asking for one would be
+  // a rule that quietly does nothing. Colour carries comments on its own.
+  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--code-muted)' },
   { tag: [t.number, t.bool, t.null], color: 'var(--code-number)' },
   { tag: [t.function(t.variableName), t.definition(t.variableName)], color: 'var(--code-ink)' },
   { tag: [t.typeName, t.className], color: 'var(--code-type)' },

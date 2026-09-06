@@ -46,7 +46,7 @@ Three families, all SIL Open Font License, all vendored into `src/assets/fonts/`
 |---|---|---|
 | Display | **Departure Mono** | App identity and the hub's title. Never inside note content, and not for sentences — an empty state is the application talking, and it takes the content face. |
 | Content | **Geist** | Note body, all UI labels, everything functional. |
-| Mono | **Martian Mono** | Fenced code blocks and inline code, at `--font-size-code`. Never at body size: at the same pixel size it sets a line 52% wider than Geist, so code at body size reads as oversized. |
+| Mono | **JetBrains Mono** | Fenced code blocks and inline code, at `--font-size-code` (13px). At that size it has the same x-height as the prose and runs 16% wider for the same sentence. It replaced Martian Mono, which ran 35% wider at the same height — the glyphs were never taller, there was just far more of them. One weight, no italic. |
 
 **Departure Mono** is a monospaced pixel face drawn on a fixed grid (ADR-029). It ships one weight and no axes, so `font-synthesis: none` is set on the body: a synthesised bold thickens strokes off the grid the glyphs are drawn on, and it stops looking like pixels. Anything using the display face names its weight rather than inheriting a heading's default.
 

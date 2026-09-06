@@ -152,7 +152,7 @@
   /* Type families. Faces are vendored; nothing is fetched at runtime. */
   --font-display: 'Departure Mono', ui-monospace, monospace;
   --font-content: 'Geist', system-ui, sans-serif;
-  --font-mono: 'Martian Mono', ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Type scale */
   --font-size-display: 2rem;
@@ -160,16 +160,14 @@
   --font-size-body: 0.9375rem;
   --font-size-label: 0.8125rem;
   --font-size-caption: 0.75rem;
-  /* Set below the prose on purpose, and by measurement.
-     Martian Mono and Geist have almost exactly the same x-height on screen at
-     13px and 15px — 7.92px against 7.97 — so code was never *taller* than the
-     text around it. It is wider: the same sentence runs 35% longer, and that
-     extra ink is what reads as a larger size.
-     No size fixes both. At 12px the width gap closes to 25% while the glyphs
-     go 8% shorter than the prose, which is the better-looking trade of the
-     two; at 11px it is 14% and 16%, and the code starts to look shrunken.
-     Closing it properly means a narrower mono face, not a smaller size. */
-  --font-size-code: 0.75rem;
+  /* 13px, where JetBrains Mono has the same x-height as the prose around it
+     and runs 16% wider for the same sentence. Martian Mono at the same height
+     ran 35% wider, which is what read as a larger size — the glyphs were never
+     taller, there was just far more of them.
+     Measured for both faces at 12, 13 and 14px with the faces forced to load
+     first: they load lazily, and a measurement taken before they do silently
+     measures a fallback. */
+  --font-size-code: 0.8125rem;
 
   --line-height-prose: 1.6;
   --line-height-ui: 1.35;

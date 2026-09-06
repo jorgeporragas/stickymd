@@ -582,14 +582,15 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
 
 ### [SMD-063] Monospaced text still reads larger than prose
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  reported by the founder a second time, after the size was already reduced once
 Notes: Measured properly this time, and the first measurement was wrong. Martian Mono is loaded lazily, so on a note with no code in it the face is not loaded at all and a canvas measurement silently falls back to another one. The x-height figures taken that way said mono was 15% *smaller* per em; with the face actually loaded it is 15% larger.
   What is true: on screen, code at 13px and prose at 15px have the same x-height — 7.92px against 7.97 — so code was never taller than the text around it. It is wider. The same sentence runs 35% longer, and that extra ink is what reads as a larger size.
   No size fixes both. At 12px the width gap closes to 25% and the glyphs go 8% shorter than the prose; at 11px it is 14% and 16%, and the code starts to look shrunken. 12px is shipped as the better of the two trades.
-  Left `active` rather than shipped, because the size is a compromise and not the answer. Closing the gap properly means a narrower mono face. Martian Mono is a wide design; a mono at a conventional 0.6em advance would sit far closer to the prose at a normal size. That is a swap the founder has to want, and it is on his list of scoping questions.
+  Shipped as a face swap, which the founder chose over living with the compromise: JetBrains Mono at 13px, where it has the same x-height as the prose and runs 16% wider rather than 35%. ADR-032. Both faces were measured at 12, 13 and 14px before choosing.
+  It costs 29 kB — one 92 kB file replacing two subsets totalling 63 kB — and it costs the italic on comments, since the face ships one style and `font-synthesis: none` means an italic that is not in the file would be a rule doing nothing. Colour carries comments alone now.
 
 ### [SMD-062] The seated controls are the window's, and wear the note's colour
 Type:    feature
