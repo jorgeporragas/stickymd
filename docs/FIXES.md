@@ -155,7 +155,7 @@ Never:    Never raise `--radius-window` above the system radius while glass is
 ### Any sliver the surface does not cover shows the compositor backdrop
 Area:     Window transparency, vibrancy, and compositor blur setup
 Date:     2026-09-05
-Commit:   pending
+Commit:   baf4059
 Problem:  Pale lines appeared down the right edge and along the bottom of
           restored note windows. `.surface` was sized `height: 100%`, which
           resolves to a fractional pixel — measured at 433.6px inside a 434px
