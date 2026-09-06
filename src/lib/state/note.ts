@@ -42,6 +42,40 @@ export function noteFileName(): string | undefined {
   return noteName;
 }
 
+/**
+ * Ask which note this window is editing and read it.
+ *
+ * A window with no note is a new one and starts empty. Rust tracks the mapping
+ * by window label, so nothing has to be threaded through the URL.
+ */
+export async function loadNote(): Promise<string> {
+  try {
+    noteName = (await invoke<string | null>('window_note')) ?? undefined;
+  } catch {
+    // No backend — the window is being served in a plain browser for testing.
+    return '';
+  }
+
+  if (noteName === undefined) return '';
+
+  try {
+    const body = await invoke<string>('read_note', { name: noteName });
+    written = body;
+    return body;
+  } catch (error) {
+    const noteError = asNoteError(error);
+
+    if (noteError?.kind === 'not_found') {
+      // The file went away between the window opening and this read — deleted
+      // in Explorer, most likely. Treat it as a new note under that name.
+      return '';
+    }
+
+    console.error('sticky.md: could not read the note', noteError ?? error);
+    return '';
+  }
+}
+
 /** The note's title: its first line, which Rust slugifies into the filename. */
 function titleOf(body: string): string {
   const lineEnd = body.indexOf('\n');
@@ -76,11 +110,19 @@ export async function flushSave(): Promise<void> {
   if (body.trim() === '' && noteName === undefined) return;
 
   try {
-    noteName = await invoke<string>('save_note', {
+    const saved = await invoke<string>('save_note', {
       current: noteName ?? null,
       title: titleOf(body),
       body
     });
+
+    if (saved !== noteName) {
+      noteName = saved;
+      // Tell Rust which note this window now holds, so a second window cannot
+      // be opened onto the same file and overwrite it.
+      await invoke('claim_note', { name: saved });
+    }
+
     written = body;
   } catch (error) {
     // Keep the text queued so the next flush tries again rather than

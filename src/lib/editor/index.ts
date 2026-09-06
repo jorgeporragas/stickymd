@@ -2,7 +2,7 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { syntaxHighlighting } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import { EditorView, drawSelection, keymap, placeholder } from '@codemirror/view';
+import { EditorView, drawSelection, keymap, placeholder, type KeyBinding } from '@codemirror/view';
 
 import { formattingKeymap } from './commands';
 import { markdownHighlight } from './highlight';
@@ -27,9 +27,22 @@ export interface EditorOptions {
   doc: string;
   /** Called with the full source whenever the document changes. */
   onDocChange?: (body: string) => void;
+  /**
+   * Window-level bindings the editor should serve.
+   *
+   * They live here rather than on a DOM listener because CodeMirror's `Mod-`
+   * prefix is the platform abstraction for modifier keys, and CLAUDE.md
+   * forbids hardcoding Ctrl or Cmd.
+   */
+  extraKeymap?: readonly KeyBinding[];
 }
 
-export function createEditor({ parent, doc, onDocChange }: EditorOptions): EditorView {
+export function createEditor({
+  parent,
+  doc,
+  onDocChange,
+  extraKeymap = []
+}: EditorOptions): EditorView {
   return new EditorView({
     parent,
     state: EditorState.create({
@@ -61,7 +74,7 @@ export function createEditor({ parent, doc, onDocChange }: EditorOptions): Edito
 
         // Formatting bindings come first so they win over any default sharing
         // a chord.
-        keymap.of([...formattingKeymap, ...historyKeymap, ...defaultKeymap])
+        keymap.of([...extraKeymap, ...formattingKeymap, ...historyKeymap, ...defaultKeymap])
       ]
     })
   });

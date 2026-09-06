@@ -10,9 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Multiple note windows: creating a window per note, each with its own file identity. Everything else in the phase builds on it — the global hotkey needs somewhere to put a new note, and session restore needs windows it can reopen. It is also what finally gives `read_note`, `note_state` and `set_note_state` their callers (SMD-027).
-
-The note module's state is currently module-level, which is correct for one window per process and wrong for several. That is the first thing to change.
+SMD-030 is written and running, awaiting confirmation that `Mod-n` opens a second window and that two windows write two different files. Next in Phase 3 — Windows, Tray & Shortcuts: tray residency and the global hotkey, which is what makes a new note reachable without the app already being in front of you.
 
 ---
 
@@ -287,13 +285,32 @@ History:
 Notes: `trash` crate 5.2.7, never an unlink — a note deleted by mistake has to be recoverable, which is why the app has no bin of its own. Deleting also forgets the note's index entry, under the lock. A trash failure is its own error variant rather than a generic IO one: some locations have no trash at all, and offering a permanent delete is a different conversation from reporting a broken disk.
   Deliberately not unit-tested. Exercising it would put files in the developer's real Recycle Bin, and what it delegates to is the crate's job. The parts worth covering — name validation and forgetting the entry — are tested through `safe_name` and `forget_entry`.
 
-### [SMD-027] read_note, list_notes, delete_note and the index commands have no frontend consumer
+### [SMD-030] Multiple note windows
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+Notes: One window per note. Which note a window holds is tracked in Rust by window label, so nothing is threaded through the URL and a window can simply ask. A window with no note is a new, unsaved one; it reports the name it takes on its first save, which is what stops a second window being opened onto the same file and the two overwriting each other. `Mod-n` opens a new window, bound through CodeMirror because its `Mod-` prefix is the platform abstraction and a DOM listener would mean writing Ctrl literally.
+  Every window is built from the window entry in `src-tauri/tauri.conf.json`, so geometry has one home.
+  Not confirmed: that `Mod-n` opens a second window and that two windows write two different files. Needs someone at the keyboard.
+  Known sloppiness: `surface_mode` returns the mode measured on the first window. A second window has acrylic applied and its result discarded. In practice every window on a machine resolves the same way, but it is an assumption rather than a measurement.
+
+### [SMD-031] Deleting a note whose window is open does not stick
+Type:    bug
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: The window keeps the note's content and filename in memory, so the next autosave writes the file straight back. Reachable today by deleting in Explorer while a window is open, and it becomes reachable from inside the app once the hub can delete (Phase 4 — The Hub). Confirmed by reading `save_into`: the rename is skipped because the old file is gone, then `fs::write` recreates it. "The open window wins" is defensible, but it should be a decision rather than an accident — the alternative is that deleting a note closes its window.
+
+### [SMD-027] list_notes, delete_note and the index commands have no frontend consumer
 Type:    chore
 State:   idea
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: `read_note`, `list_notes`, `delete_note`, `note_state` and `set_note_state` are written, tested where testable, and registered — but nothing calls them. Deleting a note needs somewhere to delete it from, which is the hub. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
+Notes: `list_notes`, `delete_note`, `note_state` and `set_note_state` are written, tested where testable, and registered — but nothing calls them. `read_note` and `window_note` gained their callers with SMD-030. The index commands wait on the always-on-top toggle and session restore; `list_notes` and `delete_note` wait on the hub, since deleting a note needs somewhere to delete it from. Their consumers are session restore and the always-on-top toggle (Phase 3 — Windows, Tray & Shortcuts) and the hub (Phase 4 — The Hub). Kept rather than deleted because they are the file and state API those phases consume; logged so the gap is visible rather than assumed. The index does have one live consumer: renaming a note moves its entry, which happens on every retitle today.
 
 ---
 

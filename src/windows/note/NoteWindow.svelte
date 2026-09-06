@@ -4,6 +4,7 @@
   import Editor from '../../lib/components/Editor.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
   import { flushSave, queueSave } from '../../lib/state/note';
+  import { openNewNoteWindow } from '../../lib/state/windows';
 
   interface Props {
     /** The note's source. A new window starts empty; reopening an existing
@@ -14,6 +15,18 @@
   let { initial = '' }: Props = $props();
 
   let revealed = $state(false);
+
+  // Mod- resolves to Ctrl or Cmd per platform. Never write either literally
+  // (CLAUDE.md section 'Cross-platform discipline').
+  const windowKeymap = [
+    {
+      key: 'Mod-n',
+      run: () => {
+        void openNewNoteWindow();
+        return true;
+      }
+    }
+  ];
 
   function reveal(): void {
     revealed = true;
@@ -60,7 +73,7 @@
 
 <div class="surface">
   <WindowChrome {revealed} />
-  <Editor value={initial} onChange={queueSave} />
+  <Editor value={initial} onChange={queueSave} keymap={windowKeymap} />
 </div>
 
 <style>

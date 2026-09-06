@@ -31,6 +31,20 @@ pub enum NoteError {
     Io { message: String },
 }
 
+impl std::fmt::Display for NoteError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NoteError::UnsafeName { name } => write!(f, "unsafe note name: {name}"),
+            NoteError::NoNotesFolder => write!(f, "the notes folder could not be located"),
+            NoteError::NotFound { name } => write!(f, "no such note: {name}"),
+            NoteError::Trash { message } => write!(f, "could not send the note to the trash: {message}"),
+            NoteError::Io { message } => write!(f, "{message}"),
+        }
+    }
+}
+
+impl std::error::Error for NoteError {}
+
 impl From<std::io::Error> for NoteError {
     fn from(error: std::io::Error) -> Self {
         NoteError::Io { message: error.to_string() }

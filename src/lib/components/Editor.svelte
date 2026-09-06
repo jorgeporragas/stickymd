@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EditorView } from '@codemirror/view';
+  import type { EditorView, KeyBinding } from '@codemirror/view';
   import { onMount } from 'svelte';
   import { createEditor } from '../editor';
 
@@ -8,15 +8,17 @@
     value?: string;
     /** Called with the full source whenever the document changes. */
     onChange?: (body: string) => void;
+    /** Window-level key bindings this editor should serve. */
+    keymap?: readonly KeyBinding[];
   }
 
-  let { value = '', onChange }: Props = $props();
+  let { value = '', onChange, keymap = [] }: Props = $props();
 
   let host!: HTMLDivElement;
   let view: EditorView | undefined;
 
   onMount(() => {
-    view = createEditor({ parent: host, doc: value, onDocChange: onChange });
+    view = createEditor({ parent: host, doc: value, onDocChange: onChange, extraKeymap: keymap });
     view.focus();
 
     return () => {
