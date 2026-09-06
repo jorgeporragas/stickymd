@@ -93,15 +93,44 @@ fn note_path(app: &AppHandle, name: &str) -> Result<PathBuf, NoteError> {
     Ok(notes_dir(app)?.join(safe_name(name)?))
 }
 
-/// Every note file in the folder, newest first.
+/// A note as the hub needs to show it.
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NoteSummary {
+    /// The filename, which is how every other command refers to a note.
+    pub name: String,
+    /// The note's first line. What a person calls it.
+    pub title: String,
+    pub modified_ms: u64,
+}
+
+/// A note's title: its first line with any heading marks removed.
+///
+/// Derived rather than stored (MASTER § Domain Model). An empty note is
+/// "Untitled" here and `untitled.md` on disk, which is the same answer given
+/// twice rather than two different ones.
+fn title_of(body: &str) -> String {
+    let first = body.lines().next().unwrap_or("").trim_start().trim_start_matches('#').trim();
+
+    if first.is_empty() {
+        "Untitled".to_string()
+    } else {
+        first.chars().take(120).collect()
+    }
+}
+
+/// Every note in the folder, newest first.
 ///
 /// Anything that is not a `.md` file is ignored rather than reported: the user
-/// owns this folder and may keep whatever they like in it.
+/// owns this folder and may keep whatever they like in it. A file that cannot
+/// be read is listed by name rather than hidden — a note the hub silently
+/// omits is a note the user cannot recover.
 #[tauri::command]
-pub fn list_notes(app: AppHandle) -> Result<Vec<String>, NoteError> {
-    let mut names: Vec<(std::time::SystemTime, String)> = Vec::new();
+pub fn list_notes(app: AppHandle) -> Result<Vec<NoteSummary>, NoteError> {
+    let dir = notes_dir(&app)?;
+    let mut notes: Vec<NoteSummary> = Vec::new();
 
-    for entry in std::fs::read_dir(notes_dir(&app)?)? {
+    for entry in std::fs::read_dir(&dir)? {
         let entry = entry?;
         let name = entry.file_name().to_string_lossy().into_owned();
 
@@ -109,12 +138,23 @@ pub fn list_notes(app: AppHandle) -> Result<Vec<String>, NoteError> {
             continue;
         }
 
-        let modified = entry.metadata().and_then(|m| m.modified()).unwrap_or(std::time::UNIX_EPOCH);
-        names.push((modified, name));
+        let modified_ms = entry
+            .metadata()
+            .and_then(|meta| meta.modified())
+            .ok()
+            .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|since| since.as_millis() as u64)
+            .unwrap_or(0);
+
+        let title = std::fs::read_to_string(dir.join(&name))
+            .map(|body| title_of(&body))
+            .unwrap_or_else(|_| name.clone());
+
+        notes.push(NoteSummary { name, title, modified_ms });
     }
 
-    names.sort_by(|a, b| b.0.cmp(&a.0));
-    Ok(names.into_iter().map(|(_, name)| name).collect())
+    notes.sort_by(|a, b| b.modified_ms.cmp(&a.modified_ms));
+    Ok(notes)
 }
 
 #[tauri::command]

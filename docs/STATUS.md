@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-The hub window: every note listed, opened, focused and deleted from one place. It is the last unbuilt entry in `MASTER.md § In Scope` apart from the theme and motion work, and it gives `list_notes` and `delete_note` their first callers — both written and tested since Phase 2 with nothing calling them (SMD-027).
+SMD-047 is written and building, awaiting confirmation that the hub opens from the tray, lists notes by title, opens one on click, and deletes to the Recycle Bin.
 
 ---
 
@@ -423,6 +423,18 @@ Notes: A checkable "Launch at startup" item in the tray menu, since there is no 
   The checkbox is read from what the system reports, both when the menu is built and after every toggle, rather than from a remembered value. The user may have removed the entry outside the application, and a menu that claims a change succeeded when it failed is worse than one that shows nothing.
   Verified from the registry rather than by inference: with the box unticked `HKCU\...\CurrentVersion\Run` has no sticky.md value, and ticking it adds one pointing at the executable. A dev build registers the dev binary, which is correct — an installed build would register the installed one.
 
+### [SMD-047] The hub
+Type:    feature
+State:   active
+Created: 2026-09-06
+History:
+  2026-09-06  logged as active — Phase 4 — The Hub
+Notes: Every note listed newest first, opened by clicking, deleted from the row. Opened by clicking the tray, or from its menu. `list_notes` now returns a title and a modified time rather than a filename: the hub shows what a person calls a note, which is its first line, while every command still refers to notes by filename.
+  Deleting asks for no confirmation. The file goes to the operating system's trash, so it is already undoable — a dialog guarding something the OS made recoverable is friction with no benefit.
+  A note that cannot be read is listed under its filename rather than hidden. A note the hub silently omits is a note the user cannot recover.
+  The list refreshes whenever the hub is focused. Notes change in other windows and in the folder itself, and a list that is only right when it was opened is worse than one that is right when you look at it.
+  Not confirmed: that the hub opens, lists, opens notes, and deletes to the Recycle Bin.
+
 ### [SMD-046] A settings surface
 Type:    idea
 State:   idea
@@ -482,7 +494,7 @@ Notes: The window keeps the note's content and filename in memory, so the next a
 
 ### [SMD-027] list_notes, delete_note and the index commands have no frontend consumer
 Type:    chore
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea

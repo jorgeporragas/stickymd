@@ -19,6 +19,7 @@ use crate::shortcuts::ShortcutStatus;
 use crate::windows;
 
 const NEW_NOTE: &str = "new-note";
+const OPEN_HUB: &str = "open-hub";
 const AUTOSTART: &str = "autostart";
 const SHORTCUT_PROBLEM: &str = "shortcut-problem";
 const QUIT: &str = "quit";
@@ -26,6 +27,12 @@ const QUIT: &str = "quit";
 fn new_note(app: &AppHandle) {
     if let Err(error) = windows::open(app, None) {
         eprintln!("sticky.md: the tray could not open a note: {error}");
+    }
+}
+
+fn open_hub(app: &AppHandle) {
+    if let Err(error) = windows::open_hub(app) {
+        eprintln!("sticky.md: the tray could not open the hub: {error}");
     }
 }
 
@@ -49,6 +56,7 @@ fn set_autostart(app: &AppHandle, item: &CheckMenuItem<tauri::Wry>) {
 pub fn install(app: &AppHandle) -> tauri::Result<()> {
     // Bound separately: a slice needs one type, and these are several.
     let new_note_item = MenuItem::with_id(app, NEW_NOTE, "New note", true, None::<&str>)?;
+    let hub_item = MenuItem::with_id(app, OPEN_HUB, "All notes", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
     let second_separator = PredefinedMenuItem::separator(app)?;
 
@@ -74,12 +82,12 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
             )?;
             Menu::with_items(
                 app,
-                &[&new_note_item, &note, &separator, &autostart_item, &second_separator, &quit_item],
+                &[&new_note_item, &hub_item, &note, &separator, &autostart_item, &second_separator, &quit_item],
             )?
         }
         None => Menu::with_items(
             app,
-            &[&new_note_item, &separator, &autostart_item, &second_separator, &quit_item],
+            &[&new_note_item, &hub_item, &separator, &autostart_item, &second_separator, &quit_item],
         )?,
     };
 
@@ -98,10 +106,11 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
         .menu(&menu)
         // The menu belongs on the right button. Left-clicking a tray icon to be
         // shown a menu is a Windows convention this app has no reason to
-        // follow — the useful thing to do with one click is write something.
+        // follow — one click opens the notes.
         .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id.as_ref() {
             NEW_NOTE => new_note(app),
+            OPEN_HUB => open_hub(app),
             AUTOSTART => set_autostart(app, &autostart_checkbox),
             QUIT => app.exit(0),
             _ => {}
@@ -113,7 +122,10 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
                 ..
             } = event
             {
-                new_note(tray.app_handle());
+                // One click opens the hub. The founder confirmed this is what
+                // left-click should do once a hub exists; before that it wrote
+                // a new note, which the menu still offers.
+                open_hub(tray.app_handle());
             }
         })
         .build(app)?;

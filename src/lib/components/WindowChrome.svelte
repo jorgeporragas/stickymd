@@ -6,11 +6,21 @@
     revealed: boolean;
     /** Whether this note floats above other windows. */
     alwaysOnTop?: boolean;
-    /** Called when the pin is clicked, with the value it should take. */
+    /**
+     * Called when the pin is clicked, with the value it should take. Omit it
+     * and no pin is rendered — the hub is a window, but not a note.
+     */
     onAlwaysOnTop?: (value: boolean) => void;
+    /** What the close button is called, for screen readers. */
+    closeLabel?: string;
   }
 
-  let { revealed, alwaysOnTop = false, onAlwaysOnTop }: Props = $props();
+  let {
+    revealed,
+    alwaysOnTop = false,
+    onAlwaysOnTop,
+    closeLabel = 'Close window'
+  }: Props = $props();
 
   function close(): void {
     void getCurrentWindow().close();
@@ -26,22 +36,24 @@
   carrying information does not.
 -->
 <div class="chrome" data-tauri-drag-region>
-  <button
-    class="control"
-    class:revealed
-    class:active={alwaysOnTop}
-    type="button"
-    aria-label="Keep this note on top"
-    aria-pressed={alwaysOnTop}
-    onclick={() => onAlwaysOnTop?.(!alwaysOnTop)}
-  >
-    <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-      <path d="M4.6 1.5h2.8l-.4 2.7 1.7 1.7v.9H3.3v-.9l1.7-1.7z" />
-      <path d="M6 6.8V10.5" />
-    </svg>
-  </button>
+  {#if onAlwaysOnTop}
+    <button
+      class="control"
+      class:revealed
+      class:active={alwaysOnTop}
+      type="button"
+      aria-label="Keep this note on top"
+      aria-pressed={alwaysOnTop}
+      onclick={() => onAlwaysOnTop(!alwaysOnTop)}
+    >
+      <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+        <path d="M4.6 1.5h2.8l-.4 2.7 1.7 1.7v.9H3.3v-.9l1.7-1.7z" />
+        <path d="M6 6.8V10.5" />
+      </svg>
+    </button>
+  {/if}
 
-  <button class="control" class:revealed type="button" aria-label="Close note" onclick={close}>
+  <button class="control" class:revealed type="button" aria-label={closeLabel} onclick={close}>
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
       <path d="M3.5 3.5 L8.5 8.5 M8.5 3.5 L3.5 8.5" />
     </svg>

@@ -72,7 +72,9 @@ fn main() {
             index::set_note_always_on_top,
             windows::window_note,
             windows::claim_note,
-            windows::new_note_window
+            windows::new_note_window,
+            windows::open_note_window,
+            windows::show_hub
         ])
         .on_window_event(|window, event| match event {
             // Closing means this note should not come back next time.

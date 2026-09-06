@@ -20,6 +20,11 @@ use crate::surface;
 /// The label of the window Tauri creates from `tauri.conf.json` at startup.
 pub const FIRST_WINDOW: &str = "note";
 
+/// The hub. Defined in `tauri.conf.json` with `create: false`, so its geometry
+/// has one home without a window being made at startup — this is a
+/// tray-resident application and the hub is opened on request.
+pub const HUB: &str = "hub";
+
 /// Which note each open window is editing. `None` means a new, unsaved note.
 #[derive(Default)]
 pub struct OpenNotes(Mutex<HashMap<String, Option<String>>>);
@@ -64,16 +69,16 @@ fn next_label() -> String {
 /// The window's geometry lives in `tauri.conf.json` (docs/DESIGN.md section
 /// 'Note window'), so every window is built from that entry rather than from
 /// values repeated here. Two sources for one size is how they drift.
-fn build(app: &AppHandle, label: &str) -> Result<WebviewWindow, NoteError> {
+fn build(app: &AppHandle, template: &str, label: &str) -> Result<WebviewWindow, NoteError> {
     let mut config = app
         .config()
         .app
         .windows
         .iter()
-        .find(|window| window.label == FIRST_WINDOW)
+        .find(|window| window.label == template)
         .cloned()
         .ok_or_else(|| NoteError::Io {
-            message: format!("tauri.conf.json has no window labelled '{FIRST_WINDOW}'"),
+            message: format!("tauri.conf.json has no window labelled '{template}'"),
         })?;
 
     // The builder takes its label from the config, so the label is set here
@@ -118,12 +123,39 @@ pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> 
     }
 
     let label = next_label();
-    let window = build(app, &label)?;
+    let window = build(app, FIRST_WINDOW, &label)?;
 
     let _ = surface::apply(&window);
     open_notes.register(&label, note)?;
 
     Ok(label)
+}
+
+/// Open the hub, or focus it if it is already open.
+///
+/// There is only ever one: a second list of the same notes would be two things
+/// to keep in step for no gain.
+pub fn open_hub(app: &AppHandle) -> Result<(), NoteError> {
+    if let Some(window) = app.get_webview_window(HUB) {
+        let _ = window.show();
+        let _ = window.set_focus();
+        return Ok(());
+    }
+
+    let window = build(app, HUB, HUB)?;
+    let _ = surface::apply(&window);
+    Ok(())
+}
+
+#[tauri::command]
+pub fn show_hub(app: AppHandle) -> Result<(), NoteError> {
+    open_hub(&app)
+}
+
+/// Open a note by name, or focus the window already showing it.
+#[tauri::command]
+pub fn open_note_window(app: AppHandle, name: String) -> Result<String, NoteError> {
+    open(&app, Some(name))
 }
 
 /// Which note the calling window is editing, if it has one yet.
