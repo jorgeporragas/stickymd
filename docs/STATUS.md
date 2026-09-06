@@ -10,9 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Note file I/O: Rust commands to read and write a note in the notes folder, and the folder's default location. Everything else in the phase — debounced autosave, slugified filenames, the sidecar index, delete-to-trash — depends on it.
-
-This is the first work that touches a user's disk. Nothing in the phase may write a note file on every keystroke (`CLAUDE.md § Backend`), and deletion goes through the `trash` crate rather than any platform call.
+SMD-024 is written and running, awaiting confirmation that typing produces a file. Next in Phase 2 — Files & Persistence: filenames slugified from the first line with deduplication and debounced renaming (ADR-006), which replaces the fixed `untitled.md` the window currently uses.
 
 ---
 
@@ -232,11 +230,29 @@ Notes: The note tints from ADR-018 — Clear, Sun, Spring, Aqua, Sky, Lilac, Blu
 
 ### [SMD-023] Note file I/O
 Type:    feature
+State:   shipped
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 2 — Files & Persistence
+  2026-09-05  shipped — commit 691c402
+Notes: Rust owns reading, writing and listing note files; the frontend never touches the filesystem. Errors cross the boundary as typed data — `unsafe_name`, `no_notes_folder`, `not_found`, `io` — so the frontend can tell a missing note from a full disk without parsing prose. Note names arrive from the frontend and are untrusted: a name is accepted only if it is a single ordinary path component ending in `.md`, which is what stops `../` and Windows stream names from escaping the folder. Three unit tests cover that validation and are the first tests in the project.
+
+### [SMD-024] Debounced autosave
+Type:    feature
 State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 2 — Files & Persistence
-Notes: Rust owns reading, writing and listing note files; the frontend never touches the filesystem. Errors cross the boundary as typed data — `unsafe_name`, `no_notes_folder`, `not_found`, `io` — so the frontend can tell a missing note from a full disk without parsing prose. Note names arrive from the frontend and are untrusted: a name is accepted only if it is a single ordinary path component ending in `.md`, which is what stops `../` and Windows stream names from escaping the folder. Three unit tests cover that validation and are the first tests in the project.
+Notes: The editor reports every change; the note is written 600ms after typing stops, and again when the window loses focus or is closed. Closing is intercepted so a pending write completes before the window is destroyed — otherwise the last few characters typed would be lost. An unchanged buffer is never rewritten, and a window opened and closed without typing leaves no file behind, which is verified: launching the application creates `Documents/sticky.md` and leaves it empty.
+  Not confirmed: that typing actually produces a file. That needs someone at the keyboard.
+
+### [SMD-025] Surface save failures in the window
+Type:    bug
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: A failed write is logged to the console and the text stays queued for the next flush, so nothing is lost while the window is open. But the user is told nothing, and if the window closes the queued text goes with it. A full disk or a permissions problem should be visible in the window rather than only in a console nobody has open.
 
 ---
 

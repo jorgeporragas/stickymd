@@ -1,6 +1,16 @@
 <script lang="ts">
+  import { getCurrentWindow } from '@tauri-apps/api/window';
+  import { onMount } from 'svelte';
   import Editor from '../../lib/components/Editor.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
+  import { flushSave, queueSave } from '../../lib/state/note';
+
+  interface Props {
+    /** The note's source, read before this window mounted. */
+    initial: string;
+  }
+
+  let { initial }: Props = $props();
 
   let revealed = $state(false);
 
@@ -11,6 +21,22 @@
   function recede(): void {
     revealed = false;
   }
+
+  onMount(() => {
+    // Closing the window must not lose the last few characters typed: the
+    // debounce may still be pending. Take over the close, write, then close.
+    const unlisten = getCurrentWindow()
+      .onCloseRequested(async (event) => {
+        event.preventDefault();
+        await flushSave();
+        await getCurrentWindow().destroy();
+      })
+      .catch(() => undefined);
+
+    return () => {
+      void unlisten.then((stop) => stop?.());
+    };
+  });
 </script>
 
 <!--
@@ -18,13 +44,22 @@
   window losing focus — docs/DESIGN.md principle 2. These belong on the window
   and body rather than on the surface element: entering the *window* is the
   gesture, and the surface is not an interactive control.
+
+  Losing focus also flushes any pending write. Switching away from a note is
+  the moment a user expects it to be saved.
 -->
 <svelte:body onpointerenter={reveal} onpointerleave={recede} />
-<svelte:window onfocus={reveal} onblur={recede} />
+<svelte:window
+  onfocus={reveal}
+  onblur={() => {
+    recede();
+    void flushSave();
+  }}
+/>
 
 <div class="surface">
   <WindowChrome {revealed} />
-  <Editor />
+  <Editor value={initial} onChange={queueSave} />
 </div>
 
 <style>

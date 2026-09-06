@@ -6,15 +6,17 @@
   interface Props {
     /** Initial markdown source. */
     value?: string;
+    /** Called with the full source whenever the document changes. */
+    onChange?: (body: string) => void;
   }
 
-  let { value = '' }: Props = $props();
+  let { value = '', onChange }: Props = $props();
 
   let host!: HTMLDivElement;
   let view: EditorView | undefined;
 
   onMount(() => {
-    view = createEditor(host, value);
+    view = createEditor({ parent: host, doc: value, onDocChange: onChange });
     view.focus();
 
     return () => {

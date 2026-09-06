@@ -21,12 +21,26 @@ export { toggleBold, toggleInlineCode, toggleItalic, toggleStrikethrough } from 
  * source and always has been, which is what makes copy yield raw source for
  * free.
  */
-export function createEditor(parent: HTMLElement, doc: string): EditorView {
+export interface EditorOptions {
+  parent: HTMLElement;
+  /** Initial markdown source. */
+  doc: string;
+  /** Called with the full source whenever the document changes. */
+  onDocChange?: (body: string) => void;
+}
+
+export function createEditor({ parent, doc, onDocChange }: EditorOptions): EditorView {
   return new EditorView({
     parent,
     state: EditorState.create({
       doc,
       extensions: [
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            onDocChange?.(update.state.doc.toString());
+          }
+        }),
+
         history(),
         drawSelection(),
         EditorView.lineWrapping,
