@@ -205,7 +205,7 @@ Never:    Never turn `shadow` on for a window with `decorations: false`. The
 ### A window surface cannot scale, so a window cannot arrive by moving
 Area:     Window transparency, vibrancy, and compositor blur setup
 Date:     2026-09-06
-Commit:   fb2324e
+Commit:   8b72e28
 Problem:  `docs/DESIGN.md § Motion` called for a note to scale slightly into
           place as it appears. It cannot. `.surface` covers the window exactly,
           over a transparent window with compositor acrylic behind it: scaled
