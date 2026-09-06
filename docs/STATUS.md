@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-041 is written and running, awaiting confirmation that closing the app with notes open and reopening it brings those notes back, in the same places, and that a note closed deliberately stays closed.
+SMD-018 — verifying that copy yields raw markdown source. It has been open since Phase 1 and is the single property the product exists to provide, so it should not close the phase still unchecked.
 
 Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037) and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
 
@@ -364,23 +364,27 @@ Notes: A pin in the window chrome, off by default per `MASTER.md § In Scope`. T
 
 ### [SMD-041] Session restore of open windows
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+  2026-09-05  shipped — commit 5426939
+  2026-09-05  confirmed on device (founder)
 Notes: Notes that were open when the application stopped come back where they were. The index carries `open` and the geometry; a note is marked open when it takes a name, and closed when its window is closed deliberately. Position is written when a window loses focus and again as it closes — the two moments it is worth writing. Writing on every drag frame would put the disk to work for the whole gesture.
   The window Tauri builds from the config is reused for the first restored note rather than left empty beside them, or every restored session would come back with one more note than it had.
   Geometry is in logical pixels. Physical ones were tried first and were wrong — see SMD-043. Placement failures are ignored: a saved position can be off-screen after a monitor is unplugged, and a note that opens in the wrong place beats one that refuses to open.
   A restore that fails does not stop the application starting. The notes are still on disk and an empty window is a working app.
-  Not confirmed: that a session comes back, and that a deliberately closed note stays closed.
+  Confirmed by the founder on 2026-09-05: a session comes back.
 
 ### [SMD-043] Pale lines down the right and bottom of a restored window
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  reported by founder after a session restore
   2026-09-05  active — cause found
+  2026-09-05  shipped — commit ab76fe1
+  2026-09-05  confirmed on device (founder) — the lines are gone
 Notes: The cause was `shadow: true`, added in the corner-rounding commit. It gives a window with `decorations: false` a frame the page cannot paint. Measured from inside the application: the web view filled its viewport exactly at 436x420 CSS, while the window was inner 545x525 and outer 563x535. Eighteen physical pixels on the right and ten at the bottom belonged to nothing and rendered white. With `shadow: false`, outer equals inner exactly.
   Two wrong diagnoses came first, both from theorising instead of measuring. The first blamed fractional DPI. The second rejected that on a scale reading of 1.0 taken from a process that was not DPI-aware — the real scale is 1.25, so the theory being dismissed was closer than the correction dismissing it.
   Both attempts are kept, because each fixed something real on its own: geometry is stored in logical pixels rather than physical; `set_size`'s inner size is measured rather than the outer one, which had windows growing every session — 418x410 to 436x433 in the founder's own index; and `.surface` is pinned with `position: fixed; inset: 0` rather than a percentage height.
@@ -397,11 +401,12 @@ Notes: `shadow: false` is required — see SMD-043 — and a CSS shadow is drawn
 
 ### [SMD-042] Apostrophes were turned into separators in filenames
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  found while reading the notes folder after a session-restore test
   2026-09-05  active
+  2026-09-05  shipped — commit c838e8c
 Notes: A note titled "I'm Jorge" produced `i-m-jorge.md`. An apostrophe joins a word rather than separating one, so it is now dropped rather than converted to a hyphen: `im-jorge.md`. Both the typewriter apostrophe and the typographic one, which is what most editors insert.
   Notes already on disk keep the names they have. Editing one's title renames it as normal, and the index entry follows.
 
