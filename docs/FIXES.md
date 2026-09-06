@@ -95,13 +95,35 @@ Problem:  `Mod-n` was bound to "new note window" through CodeMirror and did
           proved the Rust window-creation path worked on its own. WebView2
           claims Ctrl+N as a browser accelerator — Edge's "new window" — and
           swallows it before the page sees it.
-Fix:      The in-app binding is `Mod-Alt-n`. wry exposes
+Fix:      The chord is not bound in the web view at all. It is a global
+          shortcut registered with the operating system from Rust, which sees
+          it before WebView2 can. wry exposes
           `with_browser_accelerator_keys(false)`, which would disable the
           interception, but Tauri 2.11.5 does not surface it, so the chord
           cannot be reclaimed through Tauri's API.
+          `Mod-Alt-n` was tried first and failed for an unrelated second
+          reason — see the AltGr entry below.
 Never:    Never "correct" this back to Mod-n because it reads more naturally.
           It is not a preference — the chord does not arrive. The same applies
           to the other accelerators WebView2 keeps: Ctrl+T, Ctrl+W, Ctrl+P,
           Ctrl+F, Ctrl+R, Ctrl+D, Ctrl+Shift+N and F5. A shortcut that must
           use one of those has to be registered as an OS-level global shortcut
           from Rust instead, which bypasses the webview entirely.
+
+### Ctrl+Alt is AltGr on most non-US keyboard layouts
+Area:     Global and in-app shortcut registration, and tray lifecycle
+Date:     2026-09-05
+Commit:   pending
+Problem:  After WebView2 swallowed `Ctrl+N`, the new-note chord was moved to
+          `Ctrl+Alt+N`. That did not fire either. The development machine
+          carries the Latin American layout (`0409:0000080A`), and on Latin
+          American, Spanish and most European layouts Windows treats
+          `Ctrl+Alt` as AltGr: the combination is consumed to compose a
+          character and never arrives as a shortcut.
+Fix:      No `Ctrl+Alt` chord anywhere. The new-note shortcut is registered
+          with the operating system instead, as `Ctrl+Shift+Space`.
+Never:    Never bind a `Ctrl+Alt` combination, in the editor or globally. It
+          works on a US layout and silently does nothing for a large share of
+          users, which is the worst kind of bug: invisible to whoever wrote it.
+          Check a chord against both hazards before choosing it — browser
+          accelerators and AltGr — or register it globally, which avoids both.

@@ -4,7 +4,6 @@
   import Editor from '../../lib/components/Editor.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
   import { flushSave, queueSave } from '../../lib/state/note';
-  import { openNewNoteWindow } from '../../lib/state/windows';
 
   interface Props {
     /** The note's source. A new window starts empty; reopening an existing
@@ -15,21 +14,6 @@
   let { initial = '' }: Props = $props();
 
   let revealed = $state(false);
-
-  // Mod- resolves to Ctrl or Cmd per platform. Never write either literally
-  // (CLAUDE.md section 'Cross-platform discipline').
-  //
-  // Mod-Alt-n rather than the obvious Mod-n: WebView2 keeps Ctrl+N for itself
-  // and the chord never reaches the page. See docs/FIXES.md.
-  const windowKeymap = [
-    {
-      key: 'Mod-Alt-n',
-      run: () => {
-        void openNewNoteWindow();
-        return true;
-      }
-    }
-  ];
 
   function reveal(): void {
     revealed = true;
@@ -76,7 +60,7 @@
 
 <div class="surface">
   <WindowChrome {revealed} />
-  <Editor value={initial} onChange={queueSave} keymap={windowKeymap} />
+  <Editor value={initial} onChange={queueSave} />
 </div>
 
 <style>

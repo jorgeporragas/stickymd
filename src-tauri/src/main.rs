@@ -8,6 +8,7 @@
 
 mod index;
 mod notes;
+mod shortcuts;
 mod surface;
 mod windows;
 
@@ -37,6 +38,8 @@ fn main() {
             // other, so it is tracked like any other.
             app.state::<windows::OpenNotes>()
                 .register(windows::FIRST_WINDOW, None)?;
+
+            shortcuts::register(app.handle());
 
             Ok(())
         })

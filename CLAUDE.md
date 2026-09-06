@@ -108,6 +108,8 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 Windows is the current build target. Hold these from the first commit regardless — retrofitting them costs far more than writing them correctly now.
 
 - Resolve modifier keys through the platform abstraction. Never hardcode `Ctrl` or `Cmd` in a shortcut definition.
+- Never bind a `Ctrl+Alt` chord. On Latin American, Spanish and most European layouts that combination is AltGr, and the shortcut silently never fires. It works on a US layout, which is what makes it dangerous.
+- Register a shortcut globally, from Rust, when the web view would otherwise claim it. WebView2 keeps `Ctrl+N`, `Ctrl+T`, `Ctrl+W`, `Ctrl+P`, `Ctrl+F`, `Ctrl+R`, `Ctrl+D`, `Ctrl+Shift+N` and `F5` for itself. See `docs/FIXES.md`.
 - Never build a path by string concatenation, and never write `\` or `/` as a separator literal.
 - Delete through the trash abstraction. Never call the Windows Recycle Bin directly.
 - Use custom window chrome everywhere. Never rely on native window decorations.

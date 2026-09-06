@@ -293,9 +293,26 @@ History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
 Notes: One window per note. Which note a window holds is tracked in Rust by window label, so nothing is threaded through the URL and a window can simply ask. A window with no note is a new, unsaved one; it reports the name it takes on its first save, which is what stops a second window being opened onto the same file and the two overwriting each other. `Mod-n` opens a new window, bound through CodeMirror because its `Mod-` prefix is the platform abstraction and a DOM listener would mean writing Ctrl literally.
   Every window is built from the window entry in `src-tauri/tauri.conf.json`, so geometry has one home.
-  The in-app chord is `Mod-Alt-n`, not `Mod-n`. WebView2 keeps Ctrl+N for itself and the chord never reaches the page — see `docs/FIXES.md`. Diagnosed rather than guessed: the binding fired correctly when dispatched in a browser, and a temporary probe proved Rust window creation worked on its own, which left the chord not arriving as the only explanation.
-  Not confirmed: that `Mod-Alt-n` opens a second window in the running application, and that two windows write two different files. Needs someone at the keyboard.
+  The in-app chord was removed. It hit two unrelated platform hazards in a row — see ADR-021 — and the global shortcut in SMD-032 is the affordance `MASTER.md § Core Loop` specifies anyway.
+  Window creation itself is verified: a temporary probe opened a second window at startup and reported its label. What remains unconfirmed is that two windows write two different files.
   Known sloppiness: `surface_mode` returns the mode measured on the first window. A second window has acrylic applied and its result discarded. In practice every window on a machine resolves the same way, but it is an assumption rather than a measurement.
+
+### [SMD-032] Global shortcut for a new note
+Type:    feature
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+Notes: `Ctrl+Shift+Space`, registered with the operating system from Rust, per ADR-021. Space rather than a letter because a global registration takes the chord from every application on the machine. Failing to claim it is reported, not raised: another application may already hold it, and the app runs fine without it.
+  Not confirmed: that the shortcut fires and opens a window. Needs someone at the keyboard.
+
+### [SMD-033] A user whose global shortcut is already taken has no remedy
+Type:    bug
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea
+Notes: If another application already holds `Ctrl+Shift+Space`, registration fails, the failure is printed to a console nobody has open, and the only way to summon a note is to click the application. `MASTER.md § In Scope` lists remappable shortcuts, which is the remedy — this records that it is load-bearing rather than a nicety, and that the failure needs to be visible somewhere the user will see it.
 
 ### [SMD-031] Deleting a note whose window is open does not stick
 Type:    bug
