@@ -37,6 +37,7 @@ There is no `docs/SCHEMA.md`. This project has no database.
 ## Project structure
 
 ```
+assets/icon/              the application mark — source SVG, never a generated size
 src/                      Svelte frontend
   assets/fonts/           vendored typefaces, each with its licence text
   lib/

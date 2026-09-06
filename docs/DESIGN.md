@@ -139,6 +139,14 @@ Dimensions are a window property, not a style: they live in `src-tauri/tauri.con
 
 ---
 
+## Application mark
+
+An irregular blob with a spike at the top, lobes down the left, and two leg-like protrusions at the bottom. Rugged rather than smooth: the roughness is what reads as *sticky*, and a clean geometric blob does not.
+
+`assets/icon/stickymd.svg` is the single source. Every platform size is generated from it with `npx tauri icon assets/icon/stickymd.svg`, which writes into `src-tauri/icons/`. Never hand-edit a generated size.
+
+The silhouette is the identity. Any change to the mark is checked by rasterising to a real pixel grid at 16px — scaling the vector down cannot show what is lost, and 16px in a taskbar is where this shape spends most of its life.
+
 ## Motion
 
 Motion is how the Aero personality is expressed without cost. Three rules govern all of it:

@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Draw the application icon and add the bundle configuration (SMD-014). `tauri-build` requires `icons/icon.ico` to generate the Windows resource, so the Rust half does not compile without it — this blocks running the application at all, not only releases. The icon is an identity decision and needs the founder.
+Wire compositor glass and the Glass/Solid mode switch (SMD-015). `window-vibrancy` is already in the dependency tree as a transitive dependency of Tauri, so it needs promoting to a direct one. This is the first Rust work in the project.
 
 ---
 
@@ -144,11 +144,12 @@ Notes: Eight variable woff2 files in `src/assets/fonts/`, 190 kB total, subset t
 
 ### [SMD-014] App icon and bundle configuration
 Type:    chore
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  scope corrected — blocks the build, not only releases
+  2026-09-05  active
 Notes: `tauri-build` requires `icons/icon.ico` to generate the Windows resource file, so `cargo check` fails without it and the application cannot run at all. The earlier note claiming `tauri dev` was unaffected was wrong. Also needs the `bundle` section in `tauri.conf.json` for NSIS and the portable zip. The icon itself is an identity decision for the founder.
 
 ### [SMD-015] Compositor glass and the Glass/Solid mode switch
@@ -192,7 +193,9 @@ State:   idea
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: The note window's main chunk is 552 kB raw, 192 kB gzipped — mostly CodeMirror plus the HTML, CSS and JavaScript grammars that `@codemirror/lang-markdown` pulls in unconditionally (see `docs/FIXES.md`). Loaded from disk, so no network cost, but every open note window parses its own copy. Worth measuring against real memory use before treating it as a problem.
+Notes: The note window's main chunk is 555 kB raw, 193 kB gzipped — mostly CodeMirror plus the HTML, CSS and JavaScript grammars that `@codemirror/lang-markdown` pulls in unconditionally (see `docs/FIXES.md`). Loaded from disk, so no network cost, but every open note window parses its own copy.
+  Measured 2026-09-05, one window, development build: the StickyMD process tree is 381.8 MB across 7 processes — 35.9 MB for the application and 345.9 MB across 6 WebView2 processes. Half the WebView2 processes on the machine belonged to other applications and are excluded.
+  Still unmeasured, and both matter before drawing any conclusion: a release build, and the cost of the second and subsequent windows. Tauri shares one WebView2 environment across windows, so window two should cost a renderer rather than another tree — that is the number that decides whether the many-window architecture is affordable. `MASTER.md § Stack` claims materially lower memory across many windows; that claim is currently unverified in either direction.
 
 ### [SMD-020] Fenced code block presentation
 Type:    feature
@@ -201,6 +204,14 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as idea
 Notes: Fence markers stay visible by design — hiding them leaves a bare language name floating above the block. A proper treatment gives the block its own surface with the language shown deliberately rather than as leftover syntax.
+
+### [SMD-021] Per-note colour
+Type:    feature
+State:   accepted
+Created: 2026-09-05
+History:
+  2026-09-05  logged and accepted into Phase 5 — Theme & Motion
+Notes: The note tints from ADR-018 — Clear, Sun, Spring, Aqua, Sky, Lilac, Blush — as `--note-tint-*` tokens, selectable per note. `Note.theme` already carries it in the domain model and the sidecar index already stores it. Each tint must hold `--ink-primary` at 4.5:1 when layered over frosted glass on an arbitrary wallpaper. Values live in ADR-018 until this ships; `src/lib/tokens/tokens.css` becomes authoritative then.
 
 ---
 

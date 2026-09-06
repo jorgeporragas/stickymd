@@ -121,3 +121,17 @@ Context:    DESIGN.md was drafted during Planning with the full token contract a
 Decision:   `docs/DESIGN.md` is authoritative for which tokens exist and what role each plays. `src/lib/tokens/tokens.css` is the single source for every value. DESIGN links to it and never restates a value.
 Consequences: A reader of DESIGN.md cannot see the palette without opening the code, which is the cost of the rule. Added to DESIGN's never-allowed list so the duplication cannot creep back. Window dimensions are the one value DESIGN still names, because they are a window property in `src-tauri/tauri.conf.json` and JSON carries no comment to point back with — DESIGN records that asymmetry explicitly.
             2026-09-05 — docs/DESIGN.md amended; values removed in commit 2a5b11b.
+
+## ADR-017 — The application mark is the founder's hand-drawn blob
+Status:     Accepted
+Date:       2026-09-05
+Context:    Four directions were proposed from the existing design system — a smooth blob, a peeling blob, a blob carrying Handjet's dot motif, and a glass outline. The founder had independently reached for "blob" from the word *sticky*, asked for something less splattered than the Claude mark, and then supplied a hand drawing: an irregular outline with a spike at the top, lobes down the left, and two leg-like protrusions at the bottom. He asked for the ruggedness to be kept.
+Decision:   The mark is that drawing, traced as a 47-anchor Catmull-Rom spline at tension 0.88 — high enough to smooth the line, low enough to keep the corners from relaxing into a generic blob. Filled with an aqua gradient. `assets/icon/stickymd.svg` is the single source; every platform size is generated from it.
+Consequences: Legibility at 16px was verified by rasterising to a real pixel grid rather than by scaling the vector, which cannot show the loss. The silhouette survives: the top spike and irregular edge remain, so it reads as this blob rather than a generic dot. Android and iOS icon sets that `tauri icon` also produces were deleted — neither platform is in scope, and both regenerate with one command. Regenerate with `npx tauri icon assets/icon/stickymd.svg` after any change to the source.
+
+## ADR-018 — Palette: one aqua accent, seven note tints
+Status:     Accepted
+Date:       2026-09-05
+Context:    The design brief is Frutiger Aero warmth held inside Rams restraint, on a colourless frosted surface. Three accent candidates were put forward — aqua, a greener spring, and a cooler sky blue — alongside a set of note tints. The founder approved the palette as proposed, which carried a recommendation to keep aqua.
+Decision:   `--accent` stays aqua `#2FB6D9`. Spring reads botanical rather than interface and fights the quiet-content rule on a focus ring; sky is the least distinctive of the three. Note tints are Clear (the default), Sun `#FFE9A3`, Spring `#C7F0D8`, Aqua `#B8ECF7`, Sky `#CFE4FD`, Lilac `#DCD4F7`, Blush `#FBD5E0`.
+Consequences: The tints are pale by necessity, not by taste: they are layered over frosted glass, so `--ink-primary` must hold 4.5:1 against a tint sitting over an arbitrary wallpaper. A saturated Post-It yellow fails that the moment it goes translucent. The values land in `src/lib/tokens/tokens.css` when per-note colour is built (STATUS SMD-021); until then this record is the only place they exist, and it is not policy — `docs/DESIGN.md` and the token file become authoritative once implemented.
