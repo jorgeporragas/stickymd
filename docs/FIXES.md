@@ -113,7 +113,7 @@ Never:    Never "correct" this back to Mod-n because it reads more naturally.
 ### Ctrl+Alt is AltGr on most non-US keyboard layouts
 Area:     Global and in-app shortcut registration, and tray lifecycle
 Date:     2026-09-05
-Commit:   pending
+Commit:   997460a
 Problem:  After WebView2 swallowed `Ctrl+N`, the new-note chord was moved to
           `Ctrl+Alt+N`. That did not fire either. The development machine
           carries the Latin American layout (`0409:0000080A`), and on Latin
