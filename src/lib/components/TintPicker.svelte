@@ -88,20 +88,29 @@
   .palette {
     position: absolute;
     top: calc(100% + var(--space-1));
-    left: 0;
+    /* Anchored to its right edge, not its left. The picker sits near the
+       window's trailing edge and the surface clips what leaves it, so a
+       palette opening rightwards would be cut in half. */
+    right: 0;
     z-index: 1;
     display: flex;
     gap: var(--space-1);
     padding: var(--space-2);
     border-radius: var(--radius-control);
     border: 1px solid var(--rule);
-    background: var(--surface-paint);
     box-shadow: var(--shadow-lifted);
+
+    /* Opaque, not the window's own paint. --surface-paint is translucent in
+       Glass mode, and what is behind this popover is the note's text, so the
+       writing showed through the swatches. --surface-solid is the same colour
+       the note would be painted if it were opaque — so the palette reads as
+       part of this note rather than as a panel from somewhere else. */
+    background: var(--surface-solid);
 
     /* Opens out of the swatch rather than appearing over it. A control this
        small sits inside the window's own surface, so it may scale: there is no
        backdrop behind it to show through. */
-    transform-origin: top left;
+    transform-origin: top right;
     animation: palette-open var(--dur-quick) var(--ease-out);
   }
 
@@ -127,7 +136,7 @@
   }
 
   .dot.selected {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--ink-primary);
     outline-offset: 2px;
   }
 

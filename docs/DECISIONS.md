@@ -132,7 +132,7 @@ Decision:   The mark is that drawing, traced as a 47-anchor Catmull-Rom spline a
 Consequences: Legibility at 16px was verified by rasterising to a real pixel grid rather than by scaling the vector, which cannot show the loss. The silhouette survives: the top spike and irregular edge remain, so it reads as this blob rather than a generic dot. Android and iOS icon sets that `tauri icon` also produces were deleted — neither platform is in scope, and both regenerate with one command. Regenerate with `npx tauri icon assets/icon/stickymd.svg` after any change to the source.
 
 ## ADR-018 — Palette: one aqua accent, seven note tints
-Status:     Accepted
+Status:     Accepted; the accent is superseded by ADR-025. The seven tints stand.
 Date:       2026-09-05
 Context:    The design brief is Frutiger Aero warmth held inside Rams restraint, on a colourless frosted surface. Three accent candidates were put forward — aqua, a greener spring, and a cooler sky blue — alongside a set of note tints. The founder approved the palette as proposed, which carried a recommendation to keep aqua.
 Decision:   `--accent` stays aqua `#2FB6D9`. Spring reads botanical rather than interface and fights the quiet-content rule on a focus ring; sky is the least distinctive of the three. Note tints are Clear (the default), Sun `#FFE9A3`, Spring `#C7F0D8`, Aqua `#B8ECF7`, Sky `#CFE4FD`, Lilac `#DCD4F7`, Blush `#FBD5E0`.
@@ -188,3 +188,17 @@ Consequences: `MASTER.md § Domain Model` amended: the per-note field is a tint,
             Tint selectors are qualified by theme (`[data-theme='dark'][data-tint='sun']`). A tint block and a theme block carry equal specificity, so an unqualified tint would override the theme's surface entirely and a dark note would come back white.
             Every tint alpha is computed rather than chosen: the ink must hold 4.5:1 over a worst-case wallpaper. In the light theme a coloured tint needs *more* alpha than Clear, because it is darker than white — 0.58 to 0.63 against Clear's 0.55. In the dark theme the worst case inverts to a white wallpaper and the alphas land near 0.78.
             The dark theme's tint is 0.63, not the 0.45 sketched when DESIGN was written. Dark ink on light and light ink on dark are not symmetrical problems, and 0.45 measured 2.72:1 — well under AA. The sketch was never checked.
+
+## ADR-025 — Aero is dropped; colour becomes functional
+Status:     Accepted
+Date:       2026-09-06
+Context:    The design brief was Frutiger Aero warmth held inside Rams restraint. The founder is moving off Aero as a philosophy, keeping Rams, and naming two effects he wants the app to be built around — typographic scrambling, and line boil. His reading of what exists: it "didn't feel very Aero yet anyways", which matches what was actually built — the frosted surface reads as glass, but nothing else was carrying Aero.
+            He asked for one change now: the colour. Everything else waits until the new direction is worked out.
+Decision:   The Aero accent is removed. There is no brand colour. The interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what something does — traffic-light reading, because it needs no learning.
+            Only red is defined, as `--signal-danger`, on the one control that takes a note away. Amber and green have nothing to say yet and are not defined in advance. A colour with no job is how a palette turns decorative.
+            Note tints are not affected and stay exactly as ADR-018 set them. They are the note's own paper, not interface colour.
+            The two effects the founder named are recorded but not built: STATUS SMD-051 and SMD-052.
+Consequences: `--accent`, `--accent-hover`, `--accent-glow`, `--ink-on-accent` and the aqua ramp are gone from the token contract. What read them now reads ink, with two replacements worth naming: `--selection` for the editor's selection wash, which was the accent glow and is a role of its own; and the always-on-top pin, which showed "on" as a colour and now shows it as a filled chip. That is the better control anyway — a state you can see without knowing what the colour meant.
+            Fenced code loses its hue with everything else. Token classes are told apart by weight and by how dark they are. In a scratchpad a fenced block is something pasted in rather than something being written, so this costs little; if it turns out to cost more than expected, the ADR to write is a narrow one about code, not a return to an accent.
+            Every signal value is computed rather than picked: each clears 4.5:1 against the worst of the seven tints in its own theme — 5.73:1 on Frost, 5.25:1 on Dark — so a signal stays legible on any note.
+            `docs/DESIGN.md` principle 1 no longer says the surface is Aero. The frosted surface itself is unchanged and is not what this decision is about: glass here is a window property (principle 3), and dropping a visual philosophy does not un-frost a window.

@@ -14,9 +14,9 @@
     onAlwaysOnTop?: (value: boolean) => void;
     /** What the close button is called, for screen readers. */
     closeLabel?: string;
-    /** A control this window puts at the start of the bar, before the drag
-        region's empty space. The hub has none; a note has its tint picker. */
-    leading?: Snippet;
+    /** A control this window adds to the set, before the pin. The hub has
+        none; a note has its tint picker. */
+    controls?: Snippet;
   }
 
   let {
@@ -24,7 +24,7 @@
     alwaysOnTop = false,
     onAlwaysOnTop,
     closeLabel = 'Close window',
-    leading
+    controls
   }: Props = $props();
 
   function close(): void {
@@ -41,8 +41,8 @@
   carrying information does not.
 -->
 <div class="chrome" data-tauri-drag-region>
-  {#if leading}
-    <div class="leading">{@render leading()}</div>
+  {#if controls}
+    {@render controls()}
   {/if}
 
   {#if onAlwaysOnTop}
@@ -72,19 +72,13 @@
 <style>
   .chrome {
     display: flex;
+    /* Every control sits at the trailing end, so the drag region is the rest
+       of the bar in one piece rather than split around something. */
     justify-content: flex-end;
-    /* The leading slot claims the space, so the drag region keeps the whole
-       bar rather than being split by it. */
     align-items: center;
     gap: var(--space-1);
     padding: var(--space-2);
     flex: 0 0 auto;
-  }
-
-  .leading {
-    margin-right: auto;
-    display: flex;
-    align-items: center;
   }
 
   .control {
@@ -115,7 +109,8 @@
   }
 
   .control.active {
-    color: var(--accent);
+    color: var(--ink-primary);
+    background: var(--control-active);
   }
 
   .control:hover {
@@ -124,7 +119,7 @@
   }
 
   .control.active:hover {
-    color: var(--accent-hover);
+    color: var(--ink-primary);
   }
 
   .control svg {

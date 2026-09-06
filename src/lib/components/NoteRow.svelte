@@ -111,8 +111,11 @@
     opacity: 1;
   }
 
+  /* The one place a hue is doing work: this control takes a note away, and
+     red is the reading nobody has to learn. Everything else in the interface
+     is ink. */
   .delete:hover {
-    color: var(--ink-primary);
+    color: var(--signal-danger);
   }
 
   .delete svg {

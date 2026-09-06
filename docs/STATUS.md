@@ -469,6 +469,48 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-053] Drop Aero; colour becomes functional
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: The founder is moving off Aero as a philosophy and keeping Rams. He asked for one thing to change in the app now — the colour — with the rest of the new direction to be worked out later. ADR-025 records it.
+  The Aero accent is gone and nothing replaces it: the interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what a control does. That is one control today, delete, in red. Amber and green are deliberately undefined — a colour with no job is how a palette turns decorative.
+  Two things fell out of removing the accent that are improvements on their own. The always-on-top pin showed "on" as a colour and now shows it as a filled chip, which is a state you can see rather than one you have to have learned. And `--accent-glow`, whose only use was the editor's selection wash, became `--selection`, which is what it always was.
+  Fenced code lost its hue too. Token classes are told apart by weight and darkness now. In a scratchpad a fenced block is usually something pasted in rather than something being written, so it costs little — but this is the part of the change most likely to be wrong, and it is a narrow ADR to reverse if it is.
+  Note tints are untouched, as the founder specified. They are the note's paper, not interface colour.
+
+### [SMD-054] Move the tint picker to the trailing edge
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: The swatch was at the leading edge of the chrome; the founder asked for it beside the other controls, before the pin. `WindowChrome`'s `leading` snippet becomes `controls` and no longer claims the space at the start, so the drag region is now the whole bar in one piece rather than split around something.
+  The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
+  The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
+
+### [SMD-051] Typographic scrambling
+Type:    idea
+State:   idea
+Created: 2026-09-06
+History:
+  2026-09-06  logged as idea (founder)
+Notes: One of the two effects the founder named as the new direction's second half — the drafted feel of a scratchpad, against Rams restraint. Not specified yet beyond the name.
+  Worth deciding before it is built: where it is allowed to happen. `docs/DESIGN.md` principle 1 keeps the user's text quiet, so scrambling settling into place on *note content* would fight it — on the hub's title, an empty state, or the mark, it would not. That is a design decision, not an implementation one.
+  Also worth knowing in advance: it must not run on text the user is editing. Anything that rewrites glyphs in the buffer would break the rule that markdown syntax stays in the buffer at all times, so this is a rendering effect over stable text, never a transform of it.
+
+### [SMD-052] Line boil animation
+Type:    idea
+State:   idea
+Created: 2026-09-06
+History:
+  2026-09-06  logged as idea (founder)
+Notes: The other named effect: edges that wobble between a few frames, the way hand-drawn animation does. It is what would make the app look drafted rather than rendered.
+  The constraint to check first is cost, since low resource use is one of the founder's two stated priorities. A boil is per-frame, and doing it to a *window edge* is the expensive case — that edge is the compositor's, and the surface cannot move (`docs/FIXES.md`). Doing it to an SVG stroke inside a window, cycling two or three prepared paths at a low frame rate, is cheap. The cheap version is almost certainly the right one, and it points at the mark and at icons rather than at the window.
+  Not started. Needs the founder's read on where he wants it before any of that matters.
+
 ### [SMD-050] A deleted note could come back as an empty window
 Type:    bug
 State:   shipped
@@ -511,7 +553,7 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as idea (founder)
 Notes: A ring of glass bubbles opening from the pointer on right-click, each appearing staggered after the last. The founder's intent is a home for anything that cannot sit cleanly on the chrome, which is a real problem given `docs/DESIGN.md` principle 2 keeps the chrome minimal.
-  Feasible, with one nuance worth recording before anyone builds it: the bubbles cannot carry *compositor* glass, which is a per-window property. They would use `backdrop-filter`, and that is legitimate here — DESIGN's never-allowed rule forbids it for the *primary window surface*, because a web view cannot see the desktop. Over the app's own content, which is what a bubble sits on, it is the correct tool, and `--blur-popover` already exists in the contract for it.
+  Feasible, with one nuance worth recording before anyone builds it: the bubbles cannot carry *compositor* glass, which is a per-window property. They would use `backdrop-filter`, and that is legitimate here — DESIGN's never-allowed rule forbids it for the *primary window surface*, because a web view cannot see the desktop. Over the app's own content, which is what a bubble sits on, it is the correct tool, and a popover blur token would be the thing to add for it. (An earlier version of this note said `--blur-popover` already existed in the contract. It never did — checked, in the course of SMD-053, which needed a popover surface and found nothing to read.)
   The stagger must animate `transform` and `opacity` per bubble with a delay, never blur. Small non-glass elements may fade; that is already allowed.
   Also needs the web view's own context menu suppressed, or the native menu will appear alongside it.
 

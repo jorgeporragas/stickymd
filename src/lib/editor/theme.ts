@@ -33,7 +33,7 @@ export const editorTheme = EditorView.theme({
 
   '.cm-content': {
     padding: '0',
-    caretColor: 'var(--accent)',
+    caretColor: 'var(--ink-primary)',
     tabSize: '2'
   },
 
@@ -42,15 +42,15 @@ export const editorTheme = EditorView.theme({
   },
 
   '&.cm-focused .cm-cursor': {
-    borderLeftColor: 'var(--accent)'
+    borderLeftColor: 'var(--rule)'
   },
 
   '&.cm-focused .cm-selectionBackground, ::selection': {
-    backgroundColor: 'var(--accent-glow)'
+    backgroundColor: 'var(--selection)'
   },
 
   '.cm-selectionBackground': {
-    backgroundColor: 'var(--accent-glow)'
+    backgroundColor: 'var(--selection)'
   },
 
   // Rendered tables. Wide tables scroll inside their own container so the note

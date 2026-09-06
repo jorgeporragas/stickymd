@@ -8,8 +8,10 @@
 
 ## Principles
 
-**1. The surface is Aero. The content is Rams.**
-Chrome, edges, glass, colour, and motion carry the personality. Everything inside a note — the user's text — is quiet, neutral, and typographic. The app is beautiful *around* the writing, never on top of it.
+**1. The surface carries the personality. The content is Rams.**
+Chrome, edges, glass, and motion carry it — colour does not, since ADR-025. Everything inside a note — the user's text — is quiet, neutral, and typographic. The app is beautiful *around* the writing, never on top of it.
+
+The direction is Rams restraint against the drafted feel of a scratchpad. Two effects belong to that second half and are named here before they are built, so that nothing gets designed in a way that shuts them out: **typographic scrambling** and **line boil**.
 
 **2. Chrome recedes.**
 Controls withdraw when the window is not being used and return on pointer entry or focus. The text is the focal point. Personality lives in the controls; the controls are present only when wanted.
@@ -91,14 +93,23 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | `--ink-syntax` | Markdown syntax characters when revealed |
 | `--ink-on-accent` | Text on an accent-filled surface |
 
-### Semantic — accent
+### Semantic — signals
 
 | Token | Role |
 |---|---|
-| `--accent` | The single interactive colour |
-| `--accent-hover` | Its hover state |
-| `--accent-glow` | The Aero bloom, on focus and active states |
+| `--signal-danger` | A control that takes something away |
 | `--focus-ring` | The focus indicator |
+| `--selection` | The wash behind selected text |
+
+**There is no brand colour** (ADR-025). The interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what something does — traffic-light reading, because it needs no learning. Today that is one control: delete.
+
+Amber and green are deliberately not defined. A colour with no job is how a palette turns decorative, and the moment one has a job it can be added with its contrast computed then.
+
+Every signal value is computed, never picked: it clears 4.5:1 against the worst of the seven tints in its own theme, so it stays legible on any note.
+
+A state is not a colour. "On" is shown by a filled chip — see the always-on-top pin — because a state you can see beats a state you have to have learned.
+
+Note tints are not interface colour. They are the note's own paper, and ADR-025 leaves them untouched.
 
 ### Semantic — elevation
 
@@ -170,7 +181,7 @@ The silhouette is the identity. Any change to the mark is checked by rasterising
 
 ## Motion
 
-Motion is how the Aero personality is expressed without cost. Three rules govern all of it:
+Motion is how the surface's personality is expressed without cost. Three rules govern all of it:
 
 **Objects arrive, they do not fade in.** Something appearing moves into place at full glass throughout. It never fades up from nothing, which reads as an image loading rather than an object arriving.
 
@@ -216,6 +227,6 @@ Every entry lands in the same commit as the component it describes.
 | Component | Role | Notes |
 |---|---|---|
 | `WindowChrome` | The drag region and window controls for any window. Takes `revealed: boolean`, an optional `closeLabel`, and optionally `alwaysOnTop` and `onAlwaysOnTop` for the pin — omit those and no pin is rendered, which is how the hub uses it. | Implements Principle 2, with one deliberate exception: a pinned note keeps its pin visible even when the chrome recedes. A state you cannot see is a state you cannot trust — chrome recedes, chrome that is carrying information does not. Controls fade via `opacity`, permitted for small non-glass elements. |
-| `TintPicker` | A note's colour. A swatch that opens the seven tints in a row. Takes `revealed`, `tint`, `onTint`. | Like the pin, a note whose tint is not Clear keeps its swatch visible when the chrome recedes: the swatch is carrying information, and Principle 2 stops receding at that point. |
+| `TintPicker` | A note's colour. A swatch that opens the seven tints in a row, sitting with the other controls at the window's trailing edge, before the pin. The palette opens down and to the left, anchored to its right edge — the surface clips what leaves it. Its own surface is opaque `--surface-solid`, not the window's translucent paint, or the note's text reads through the swatches. Takes `revealed`, `tint`, `onTint`. | Like the pin, a note whose tint is not Clear keeps its swatch visible when the chrome recedes: the swatch is carrying information, and Principle 2 stops receding at that point. |
 | `NoteRow` | One note in the hub: its title, when it changed, and a delete control. Takes `title`, `when`, `onOpen`, `onDelete`. | The row is not the control — the buttons inside it are. Delete is revealed by hovering the row in CSS rather than through state, which avoids putting a pointer handler on a `div` that would then need an ARIA role it does not deserve. |
 | `Editor` | The note's markdown editing surface. Takes `value?: string` as initial source. Owns the CodeMirror instance and its lifecycle. | Content, not surface — quiet and typographic per Principle 1. No gutters, no active-line highlight, no border. Editor internals live in `src/lib/editor/`. |

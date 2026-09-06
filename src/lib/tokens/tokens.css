@@ -39,10 +39,16 @@
   --swatch-lilac: #dcd4f7;
   --swatch-blush: #fbd5e0;
 
-  /* Accent — the single interactive colour. */
-  --aqua-400: #4cc7e6;
-  --aqua-500: #2fb6d9;
-  --aqua-600: #1fa3c6;
+  /* Signals — the only hues in the interface, and only where colour is
+     carrying the meaning. Traffic-light reading, because it needs no learning:
+     red is the one that takes something away. Amber and green have nothing to
+     say yet and are deliberately absent rather than defined in advance.
+
+     Values are computed, not chosen. Each clears 4.5:1 against the worst of
+     the seven tints in its own theme — worst case 5.73:1 on Frost, 5.25:1 on
+     Dark — so a signal stays a signal on any note. */
+  --red-600: #b3261e;
+  --red-300: #ff8578;
 
   /* Duration */
   --dur-instant: 90ms;
@@ -135,13 +141,11 @@
   --ink-secondary: var(--neutral-700);
   --ink-muted: var(--neutral-500);
   --ink-syntax: var(--neutral-400);
-  --ink-on-accent: var(--white);
 
   /* Accent */
-  --accent: var(--aqua-500);
-  --accent-hover: var(--aqua-600);
-  --accent-glow: rgba(47, 182, 217, 0.35);
-  --focus-ring: var(--aqua-500);
+  --signal-danger: var(--red-600);
+  --focus-ring: var(--neutral-950);
+  --selection: var(--ink-wash-strong);
 
   /* Elevation */
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.18);
@@ -198,19 +202,17 @@
   --ink-secondary: #b9b5ac;
   --ink-muted: #7e7a73;
   --ink-syntax: #6a6760;
-  --ink-on-accent: #10161a;
 
-  --accent: var(--aqua-400);
-  --accent-hover: #7ee0f4;
-  --accent-glow: rgba(76, 199, 230, 0.32);
-  --focus-ring: var(--aqua-400);
+  --signal-danger: var(--red-300);
+  --focus-ring: #f2efe8;
+  --selection: rgba(242, 239, 232, 0.20);
 
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);
 }
 
 /* ------------------------------------------------------------- note tints
  *
- * A note's own colour. The theme decides ink and accent; a tint decides what
+ * A note's own colour. The theme decides the ink; a tint decides what
  * this one note is painted with (ADR-024).
  *
  * Selectors are qualified by theme deliberately. A tint block and a theme block

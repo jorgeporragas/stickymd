@@ -84,7 +84,7 @@
 
 <div class="surface">
   <WindowChrome {revealed} {alwaysOnTop} onAlwaysOnTop={togglePin} closeLabel="Close note">
-    {#snippet leading()}
+    {#snippet controls()}
       <TintPicker {revealed} {tint} onTint={chooseTint} />
     {/snippet}
   </WindowChrome>
