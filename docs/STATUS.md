@@ -670,6 +670,18 @@ Notes: Found by looking rather than by report. The founder's notes folder held a
   Fixed with two independent guards, since either alone leaves a hole: `set_placement` writes nothing for a note that is not in the folder, and `restorable` requires the file to exist as well as the entry to say open. The second one also covers the case no in-process ordering can reach — a note deleted from the folder while the application is not running. Three tests, 27 passing.
   What is *not* claimed: that this is how the founder's orphan got there. Its entry says `open: false`, and the race produces `open: true`. Something else can leave an entry behind and I have not found it. The guards above make an orphan harmless rather than absent, which is the right order to do this in, but the second cause is still open. Not chased further because it is untraceable after the fact — worth watching for a fresh orphan appearing in a folder whose history is known.
 
+### [SMD-065] V1 release readiness
+Type:    chore
+State:   active
+Created: 2026-09-06
+History:
+  2026-09-06  accepted into the second autonomous bundle by the founder
+  2026-09-06  everything testable without a remote, tested
+Notes: The release workflow could not be run — that needs a remote and a tag, and neither exists yet — so what it does was run by hand instead, which catches everything except the Actions runner itself.
+  `npm run tauri build` completes: release profile in 2m45s, NSIS fetched and verified, installer produced at **1.6 MB**. The portable zip was assembled with the workflow's own PowerShell and comes to **1.84 MB**, holding `stickymd.exe` (3.79 MB uncompressed), `LICENSE` and `README.md` in a versioned folder. Both artefacts are what `MASTER.md § Deployment` promises.
+  **One thing will stop the first tag, by design.** Both manifests say `0.1.0`, and the workflow refuses a tag that disagrees with them. Tagging `v1.0.0` fails until `package.json` and `src-tauri/tauri.conf.json` are bumped. That is the check working — an installer named after the wrong version is only ever noticed after someone downloads it — but it is worth knowing before the tag rather than after.
+  Left `active`: the workflow's first real run is still unobserved, and it is the only part of this that has never executed.
+
 ### [SMD-049] The release workflow
 Type:    chore
 State:   shipped
