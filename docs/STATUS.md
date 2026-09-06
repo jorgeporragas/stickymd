@@ -268,10 +268,11 @@ Notes: ADR-006 implemented. The frontend sends a title; Rust slugifies it, finds
 
 ### [SMD-028] The sidecar index
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 2 — Files & Persistence
+  2026-09-05  shipped — commit ddc6945
 Notes: ADR-002 implemented as `.sticky-index.json` in the notes folder, keyed by filename, holding geometry, theme, always-on-top and open state. Writes go through a temporary file and a rename; an unreadable index is moved aside rather than overwritten; read-modify-write is serialized by a mutex, because two windows saving at once would otherwise each load, apply their own change, and write back with the last erasing the other. A retitled note carries its entry, since it is the same note. Nine tests.
 
 ### [SMD-027] read_note, list_notes and the index commands have no frontend consumer
