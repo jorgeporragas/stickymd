@@ -110,6 +110,7 @@ fn place(window: &WebviewWindow, state: &NoteState) {
 /// Open a note window. An already-open note is focused rather than opened
 /// twice — two windows editing one file would overwrite each other.
 pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> {
+    eprintln!("PROBE open: entered, note={note:?}");
     let open_notes = app.state::<OpenNotes>();
 
     if let Some(name) = note.as_deref() {
@@ -123,11 +124,16 @@ pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> 
         }
     }
 
+    eprintln!("PROBE open: past window_showing");
     let label = next_label();
+    eprintln!("PROBE open: building {label}");
     let window = build(app, FIRST_WINDOW, &label)?;
+    eprintln!("PROBE open: built {label}");
 
     let _ = surface::apply(&window);
+    eprintln!("PROBE open: surface applied");
     open_notes.register(&label, note)?;
+    eprintln!("PROBE open: registered, done");
 
     Ok(label)
 }
@@ -242,6 +248,7 @@ fn size_of(window: &WebviewWindow) -> Option<(u32, u32)> {
 /// moments a position is worth writing. Writing on every drag frame would put
 /// the disk to work for the whole gesture.
 pub fn remember(app: &AppHandle, label: &str, still_open: bool) {
+    eprintln!("PROBE remember: entered for {label}");
     let Some(window) = app.get_webview_window(label) else {
         return;
     };
@@ -253,9 +260,12 @@ pub fn remember(app: &AppHandle, label: &str, still_open: bool) {
         return;
     };
 
+    eprintln!("PROBE remember: have name, asking for notes_dir");
     let Ok(dir) = notes_dir(app) else { return };
+    eprintln!("PROBE remember: have dir, asking for the index lock");
     let lock = app.state::<IndexLock>();
     let Ok(_guard) = index::guard(&lock) else { return };
+    eprintln!("PROBE remember: holding the index lock");
 
     if let Err(error) =
         index::set_placement(&dir, &name, position_of(&window), size_of(&window), still_open)

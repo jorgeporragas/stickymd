@@ -64,6 +64,7 @@ pub fn transparency_enabled() -> bool {
     use windows::Win32::Foundation::ERROR_SUCCESS;
     use windows::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
 
+    eprintln!("PROBE transparency_enabled: calling RegGetValueW");
     let mut value: u32 = 1;
     let mut size = std::mem::size_of::<u32>() as u32;
 
@@ -80,6 +81,8 @@ pub fn transparency_enabled() -> bool {
             Some(&mut size),
         )
     };
+
+    eprintln!("PROBE transparency_enabled: RegGetValueW returned");
 
     if status != ERROR_SUCCESS {
         return true;
@@ -139,6 +142,7 @@ fn round_corners(window: &WebviewWindow) {
 /// Never returns an error: a window that cannot be frosted is a Solid window,
 /// which is a supported way to run rather than something to recover from.
 pub fn apply(window: &WebviewWindow) -> SurfaceMode {
+    eprintln!("PROBE surface::apply: entered for {}", window.label());
     #[cfg(target_os = "windows")]
     {
         round_corners(window);
@@ -148,17 +152,23 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
         // compositor then draws nothing behind the window — which is the whole
         // bug: a tint over nothing is a washed-out window rather than a Solid
         // one. See docs/FIXES.md.
+        eprintln!("PROBE surface::apply: rounded, reading the setting");
         if !transparency_enabled() {
+            eprintln!("PROBE surface::apply: transparency off, clearing acrylic");
             let _ = window_vibrancy::clear_acrylic(window);
+            eprintln!("PROBE surface::apply: cleared");
             return SurfaceMode::Solid;
         }
 
         // A fully transparent tint: the CSS layer above supplies the colour, so
         // the compositor contributes blur only. See src/lib/tokens/tokens.css.
-        match window_vibrancy::apply_acrylic(window, Some((0, 0, 0, 0))) {
+        eprintln!("PROBE surface::apply: setting read, applying acrylic");
+        let outcome = match window_vibrancy::apply_acrylic(window, Some((0, 0, 0, 0))) {
             Ok(()) => SurfaceMode::Glass,
             Err(_) => SurfaceMode::Solid,
-        }
+        };
+        eprintln!("PROBE surface::apply: acrylic returned {outcome:?}");
+        outcome
     }
 
     #[cfg(not(target_os = "windows"))]
@@ -174,6 +184,7 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
 /// later get theirs from `apply` on the way up, so this only has to catch the
 /// ones already on screen.
 pub fn refresh(app: &AppHandle) -> SurfaceMode {
+    eprintln!("PROBE surface::refresh: entered");
     let mut mode = if transparency_enabled() {
         SurfaceMode::Glass
     } else {
@@ -264,4 +275,62 @@ pub fn watch(app: AppHandle) {
 #[cfg(not(target_os = "windows"))]
 pub fn watch(app: AppHandle) {
     let _ = app;
+}
+
+#[cfg(all(test, target_os = "windows"))]
+mod tests {
+    use std::sync::mpsc;
+    use std::time::{Duration, Instant};
+
+    /// Does reading the key block while a synchronous notification is pending
+    /// on it from another thread?
+    ///
+    /// This is the shape the application runs in: `watch` parks a thread inside
+    /// `RegNotifyChangeKeyValue` on the Personalize key, and every later
+    /// `apply` reads a value out of that same key. If the read blocks, the
+    /// event loop stops the moment a window is frosted after startup, and every
+    /// window built afterwards waits for a thread that is never coming back.
+    #[test]
+    fn reading_the_key_does_not_block_while_a_notification_is_pending() {
+        use windows::core::w;
+        use windows::Win32::Foundation::{ERROR_SUCCESS, HANDLE};
+        use windows::Win32::System::Registry::{
+            RegNotifyChangeKeyValue, RegOpenKeyExW, HKEY, HKEY_CURRENT_USER, KEY_NOTIFY,
+            REG_NOTIFY_CHANGE_LAST_SET,
+        };
+
+        let (ready, started) = mpsc::channel::<bool>();
+
+        std::thread::spawn(move || {
+            let mut key = HKEY::default();
+            let opened = unsafe {
+                RegOpenKeyExW(HKEY_CURRENT_USER, super::PERSONALIZE, 0, KEY_NOTIFY, &mut key)
+            };
+            let _ = ready.send(opened == ERROR_SUCCESS);
+
+            // Parks here until something writes to the key, exactly as `watch`
+            // does. The thread is deliberately never joined.
+            unsafe {
+                let _ = RegNotifyChangeKeyValue(
+                    key,
+                    false,
+                    REG_NOTIFY_CHANGE_LAST_SET,
+                    HANDLE::default(),
+                    false,
+                );
+            }
+        });
+
+        assert!(started.recv().expect("the watcher thread reported"), "the key opened");
+        std::thread::sleep(Duration::from_millis(250));
+
+        let at = Instant::now();
+        let _ = super::transparency_enabled();
+        let took = at.elapsed();
+
+        assert!(
+            took < Duration::from_secs(2),
+            "reading the transparency setting took {took:?} while a notification was pending"
+        );
+    }
 }

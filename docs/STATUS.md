@@ -650,6 +650,20 @@ Notes: One of the two effects the founder named as the new direction's second ha
   `prefers-reduced-motion` is honoured in JavaScript rather than CSS: the global rule collapses transition and animation durations, and cannot reach a `requestAnimationFrame` loop.
   **Not observed running.** The browser pane runs zero animation frames while it is hidden — measured, 0 in 500ms with the page reporting itself visible and reduced motion off — so nothing rAF-driven can be seen there. That is the same root cause as the stuck opacity transitions and the unobservable press state earlier in the session, and it is worth remembering before chasing another one: **if an effect depends on rAF or on a transition, the pane cannot show it, and a reading taken there means nothing.**
 
+### [SMD-066] The app freezes when a window is frosted after startup
+Type:    bug
+State:   active
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder: the app freezes when opening a note from the hub
+  2026-09-06  traced with probes — the open path is not the cause
+Notes: The founder reported it as "crashes when opening a note from the hub". It is neither a crash nor the open path. Probes in the running application show:
+  `surface::apply` entered for the hub, printed "rounded, reading the setting", and never printed again. `open` for the note then entered, reached `build`, and never returned. Nothing panicked; every thread was in `Wait` with flat CPU.
+  So the sequence is: frosting the hub hangs, that stops the event loop, and the note window's `build` — dispatched to the event loop from a command thread — waits for a thread that is never coming back. Opening a note is the first thing that *needs* the event loop, which is why it looks like the cause.
+  `surface::refresh` never appeared in the trace, so the transparency watcher is not firing and is not involved. Two `refresh` lines later in the log are app restarts caused by icon files landing in `src-tauri/`, which the dev watcher rebuilds on.
+  **One hypothesis raised and disproved.** It looked like the registry read might block while the watcher's synchronous `RegNotifyChangeKeyValue` was pending on the same key — it fit the evidence exactly, including working at startup, because `watch` starts after the first `refresh`. A test that reproduces that shape says otherwise: the read returns in well under a second with a notification pending. The test is kept, in `surface.rs`, because it documents a real hazard that was worth ruling out and would otherwise be re-guessed.
+  That leaves `window_vibrancy::apply_acrylic`. A probe now sits on its far side, so the next occurrence says whether it returns. Not yet confirmed, and not to be treated as confirmed until the trace shows it.
+
 ### [SMD-052] Line boil animation
 Type:    idea
 State:   blocked
