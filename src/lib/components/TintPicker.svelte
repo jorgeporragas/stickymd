@@ -97,6 +97,23 @@
     border: 1px solid var(--rule);
     background: var(--surface-paint);
     box-shadow: var(--shadow-lifted);
+
+    /* Opens out of the swatch rather than appearing over it. A control this
+       small sits inside the window's own surface, so it may scale: there is no
+       backdrop behind it to show through. */
+    transform-origin: top left;
+    animation: palette-open var(--dur-quick) var(--ease-out);
+  }
+
+  @keyframes palette-open {
+    from {
+      opacity: 0;
+      transform: scale(0.88);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .dot {

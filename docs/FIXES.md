@@ -168,9 +168,13 @@ Fix:      `.surface` is `position: fixed; inset: 0`, which is laid out against
 Never:    Never size the note surface with a percentage. This is the same
           failure as the corner artefacts and has the same rule behind it:
           anything the surface does not cover, the compositor's backdrop does.
-          A DPI explanation is tempting and was wrong here — the machine it was
-          reported on runs at scale 1.0, where physical and logical pixels are
-          identical. Measure the gap before theorising about why it exists.
+          A DPI explanation is tempting and was wrong here — but not for the
+          reason first written down. It was recorded that the machine ran at
+          scale 1.0; it runs at 1.25, and the 1.0 came from a PowerShell process
+          that was not DPI-aware and was reporting its own virtualised view.
+          The fractional height was real and had nothing to do with either
+          number. Measure the gap before theorising about why it exists, and
+          measure it from inside the application.
 
 ### `shadow: true` gives an undecorated window a frame the page cannot paint
 Area:     Window transparency, vibrancy, and compositor blur setup
@@ -197,3 +201,24 @@ Never:    Never turn `shadow` on for a window with `decorations: false`. The
           gap instead of measuring it. One rested on a DPI reading taken from a
           process that was not DPI-aware, which returned scale 1.0 when the
           real scale was 1.25. Measure inside the running application.
+
+### A window surface cannot scale, so a window cannot arrive by moving
+Area:     Window transparency, vibrancy, and compositor blur setup
+Date:     2026-09-06
+Commit:   fb2324e
+Problem:  `docs/DESIGN.md § Motion` called for a note to scale slightly into
+          place as it appears. It cannot. `.surface` covers the window exactly,
+          over a transparent window with compositor acrylic behind it: scaled
+          down, the ring it vacates is painted by the backdrop as raw acrylic;
+          scaled up, its rounded corners go past the window's edge and are
+          clipped square. Both are the corner and sliver artefacts again,
+          animated.
+Fix:      The surface never moves. A window arrives by the light on it instead —
+          an overlay pseudo-element carrying a sheen that fades out over
+          `--dur-settle`. One paint, no layout, and nothing that touches the
+          surface's own alpha or blur. DESIGN was amended rather than left
+          describing something unbuildable.
+Never:    Never animate the geometry of the element that covers a glass window.
+          Anything nested *inside* it may scale freely — what is behind a
+          palette is the window, not the desktop. That is the line: the surface
+          is the window's own paint, everything else sits on it.

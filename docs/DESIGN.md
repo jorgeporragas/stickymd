@@ -104,9 +104,9 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 
 | Token | Role |
 |---|---|
-| `--shadow-rest` | A window at rest |
-| `--shadow-lifted` | Hover and focus |
-| `--shadow-dragging` | A window being moved |
+| `--shadow-lifted` | Something raised *inside* a window — a palette, a menu |
+
+There is one shadow, and it is the only one there can be. A window's shadow at rest and while it is dragged belongs to the compositor: the surface fills the window exactly, so a shadow it casts falls outside the window and is never seen. Tokens for those two states existed and were removed rather than left to be reused for something they do not describe.
 
 ### Primitive families
 
@@ -172,9 +172,17 @@ The silhouette is the identity. Any change to the mark is checked by rasterising
 
 Motion is how the Aero personality is expressed without cost. Three rules govern all of it:
 
-**Objects arrive, they do not fade in.** A note appearing scales up slightly into place while its shadow deepens, at full glass throughout. This reads as an object arriving rather than an image loading.
+**Objects arrive, they do not fade in.** Something appearing moves into place at full glass throughout. It never fades up from nothing, which reads as an image loading rather than an object arriving.
 
-**Chrome crossfades; surfaces transform.** Small controls may fade — that is cheap and correct. Large glass surfaces never change alpha.
+**A window's own surface is the exception, and it cannot move at all.** It is pinned to the viewport because anything it does not cover, the compositor paints — a scaled-down surface shows a ring of raw acrylic, and a scaled-up one loses its rounded corners past the window's edge. Its outer shadow is unseeable for the same reason: it falls outside the window. The window's shadow is the compositor's own.
+
+So a window arrives by the light on it rather than by moving: a sheen across the glass that fades as it settles, painted by an overlay and never by the surface's own alpha. Everything *inside* the surface — a palette, a menu, a row — may scale freely, because what is behind it is the window, not the desktop.
+
+**A tint change is a colour change, not a fade.** The surface crossfades between two tints at full glass. The rule below bars fading a surface in or out; it does not bar it changing colour.
+
+**Chrome crossfades; surfaces transform.** Small controls may fade — that is cheap and correct. Large glass surfaces never change alpha, and never animate blur: both force the compositor to recompute the frosting every frame.
+
+**Text is not animated.** Inline rendering switches instantly when the cursor leaves a line. Softening it would mean animating a reflow on every cursor move, which makes the whole document shimmer as you arrow through it and costs a layout per frame. The two states are kept close instead: syntax marks are drawn in `--ink-syntax`, and styled text keeps its size and weight whether or not its marks are showing, so leaving a line changes the marks and nothing else.
 
 **`prefers-reduced-motion` is honoured everywhere.** Under it, transforms collapse to instant state changes. Nothing is left mid-transition.
 

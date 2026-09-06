@@ -54,3 +54,65 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * The window's ground. One rule for both window types — they had the same
+ * block twice, which is the moment CLAUDE.md's DRY rule says to extract.
+ *
+ * Pinned to the viewport rather than sized at 100%. A percentage height
+ * resolves to a fractional pixel, leaving the surface a sliver short of the
+ * window — and because the window is transparent over compositor blur, an
+ * unpainted sliver shows raw acrylic as a pale line down the right edge and
+ * along the bottom. See docs/FIXES.md.
+ *
+ * That same fact is why this element never scales, and why it carries no outer
+ * shadow: anything it does not cover, the backdrop paints, and any shadow it
+ * casts falls outside the window and is never seen. The window's shadow is the
+ * compositor's own.
+ */
+.surface {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  border-radius: var(--radius-window);
+  border: 1px solid var(--surface-border);
+
+  /* --surface-paint resolves to the opaque surface or the tint over
+     compositor blur, per data-surface. No branching here — the token carries
+     the difference. See docs/DESIGN.md principle 4. */
+  background: var(--surface-paint);
+  box-shadow: var(--surface-edge-highlight);
+
+  /* Changing tint is a colour change at full glass, not a fade. */
+  transition:
+    background-color var(--dur-settle) var(--ease-out),
+    border-color var(--dur-settle) var(--ease-out);
+}
+
+/*
+ * Arrival. The surface cannot scale into place, so the light does the arriving:
+ * a sheen across the glass that fades as the window settles. One overlay, one
+ * paint, 240ms, and nothing that touches the surface's own alpha or blur.
+ */
+.surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: var(--surface-sheen);
+  opacity: 0;
+  animation: surface-land var(--dur-settle) var(--ease-out);
+}
+
+@keyframes surface-land {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

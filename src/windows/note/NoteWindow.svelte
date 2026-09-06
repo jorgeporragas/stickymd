@@ -90,33 +90,3 @@
   </WindowChrome>
   <Editor value={initial} onChange={queueSave} />
 </div>
-
-<style>
-  .surface {
-    display: flex;
-    flex-direction: column;
-
-    /* Pinned to the viewport rather than sized at 100%.
-       A percentage height resolves to a fractional pixel, leaving the surface a
-       sliver short of the window — and because the window is transparent over
-       compositor blur, an unpainted sliver shows raw acrylic as a pale line
-       down the right edge and along the bottom. The same failure as the corner
-       artefacts: anything this surface does not cover, the backdrop does.
-       See docs/FIXES.md. */
-    position: fixed;
-    inset: 0;
-    border-radius: var(--radius-window);
-    border: 1px solid var(--surface-border);
-
-    /* The window itself is transparent so the corners can round; the surface is
-       painted here. --surface-paint resolves to the opaque surface or the tint
-       over compositor blur, per data-surface. No branching here — the token
-       carries the difference. See docs/DESIGN.md principle 4. */
-    background: var(--surface-paint);
-    box-shadow:
-      var(--shadow-rest),
-      var(--surface-edge-highlight);
-
-    overflow: hidden;
-  }
-</style>

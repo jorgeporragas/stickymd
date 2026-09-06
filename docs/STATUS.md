@@ -12,7 +12,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 The theme system and its built-in themes. The dark theme (SMD-004) cannot ship alone: without a way to choose it, it is unreachable code. It lands with per-note colour (SMD-021), which is what makes a theme selectable at all — `Note.theme` has been in the domain model and the sidecar index since Phase 2 with nothing writing it.
 
-Then the motion pass, including the transition the founder asked for between written and rendered markdown (SMD-045).
+Then the motion pass (SMD-048). Done — and it ended by dropping SMD-045 rather than building it: animating the written-to-rendered transition means animating a reflow on every cursor move, which would make it worse. Awaiting the founder's confirmation on that call.
 
 ---
 
@@ -60,11 +60,13 @@ Notes: One sane default for V1. Making it configurable brings a settings surface
 
 ### [SMD-004] Dark theme
 Type:    feature
-State:   accepted
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 5 — Theme & Motion (confirmed by founder)
-Notes: A complete set of token values, not a code change — faint black tint over the frosted surface with warm white ink, inverting Frost. Light is the default mode.
+  2026-09-06  shipped in 1fa1059, with SMD-021
+Notes: A complete set of token values, not a code change — faint black tint over the frosted surface with warm white ink, inverting Frost. Light is the default mode. Chosen from the tray, and applied to every open window rather than only to windows opened afterwards.
+  Its tint alpha ships at 0.63, not the 0.45 written here when the theme was sketched: 0.45 measured 2.72:1 against a white wallpaper, well under AA. Dark ink on light and light ink on dark are not symmetrical, and the sketch had never been checked. See ADR-024.
 
 ### [SMD-005] Auto-update via the Tauri updater
 Type:    feature
@@ -225,11 +227,14 @@ Notes: Fence markers stay visible by design — hiding them leaves a bare langua
 
 ### [SMD-021] Per-note colour
 Type:    feature
-State:   accepted
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 5 — Theme & Motion
-Notes: The note tints from ADR-018 — Clear, Sun, Spring, Aqua, Sky, Lilac, Blush — as `--note-tint-*` tokens, selectable per note. `Note.theme` already carries it in the domain model and the sidecar index already stores it. Each tint must hold `--ink-primary` at 4.5:1 when layered over frosted glass on an arbitrary wallpaper. Values live in ADR-018 until this ships; `src/lib/tokens/tokens.css` becomes authoritative then.
+  2026-09-06  shipped in 1fa1059
+Notes: Shipped as `TintPicker`, a swatch on the note's chrome that opens the seven tints. Stored per note in the sidecar index and restored with the window.
+  Two things this item assumed turned out to be wrong. The field is a *tint*, not a theme — the theme is application-wide, and ADR-024 records the split, with `MASTER.md § Domain Model` amended. And the alphas could not be taken from ADR-018 as written: every one was recomputed, and a coloured tint needs *more* alpha than Clear in the light theme, not less, because it is darker than white and lifts the composite less over a dark wallpaper.
+  Original note follows. The note tints from ADR-018 — Clear, Sun, Spring, Aqua, Sky, Lilac, Blush — as `--note-tint-*` tokens, selectable per note. `Note.theme` already carries it in the domain model and the sidecar index already stores it. Each tint must hold `--ink-primary` at 4.5:1 when layered over frosted glass on an arbitrary wallpaper. Values live in ADR-018 until this ships; `src/lib/tokens/tokens.css` becomes authoritative then.
 
 ### [SMD-023] Note file I/O
 Type:    feature
@@ -451,12 +456,27 @@ Notes: Settings are a JSON file the user edits by hand (ADR-022). That satisfies
 
 ### [SMD-045] Animate the transition between written and rendered markdown
 Type:    idea
-State:   idea
+State:   dropped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
+  2026-09-06  dropped in the motion pass — animating it would make it worse
+Dropped because: what changes when the cursor leaves a line is a reflow — the hidden marks stop taking width and the text closes up. Animating a reflow means a layout on every frame, on every cursor move, and arrowing down a document would set the whole page shimmering. The cost is real and the result would be worse than the instant switch.
+  What the motion pass did instead is narrow the gap between the two states so there is less to soften: syntax marks are drawn in `--ink-syntax` rather than at full ink, and styled text keeps its size and weight whether or not its marks are showing — so leaving a line changes the marks and nothing else. Recorded in `docs/DESIGN.md § Motion` as a rule rather than left as a preference.
+  Worth reopening only if the founder finds it harsh in daily use, in which case the honest fix is a design one — quieter marks still — rather than an animation.
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
+
+### [SMD-048] The motion pass
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped
+Notes: Phase 5's second half. What it mostly produced was a constraint. `docs/DESIGN.md § Motion` asked for a note to scale slightly into place as it arrives, and on a frosted window that is unbuildable: the surface covers the window exactly, so scaling it down shows a ring of raw acrylic and scaling it up clips its rounded corners square — the corner and sliver artefacts again, animated. DESIGN was amended rather than left describing something that cannot be built, and `docs/FIXES.md` carries the entry.
+  A window arrives by the light on it instead: an overlay that carries a sheen across the glass and fades over `--dur-settle`. One paint, no layout, and nothing touching the surface's own alpha or blur. Anything nested inside the surface may still scale freely, which is what the tint palette does — what is behind a palette is the window, not the desktop.
+  Two dead things came out with it. `--shadow-rest` was on both window surfaces and could never have been seen: an outer shadow on an element that fills the window falls outside the window. It was tinting the rounded corner notches slightly and doing nothing else. It and `--shadow-dragging` are gone from the token contract, both describing window-level states the compositor owns. One shadow remains, for things raised inside a window.
+  The two window shells had carried the same `.surface` block twice; it is now one rule in `src/app.css`. Second use means extract, and this was the second use.
 
 ### [SMD-038] Radial glass menu on right-click
 Type:    idea

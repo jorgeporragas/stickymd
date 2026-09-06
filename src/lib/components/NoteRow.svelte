@@ -39,10 +39,19 @@
     align-items: stretch;
     gap: var(--space-1);
     border-radius: var(--radius-control);
+    transition: background-color var(--dur-quick) var(--ease-out);
   }
 
   .row:hover {
     background: var(--control-hover);
+  }
+
+  /* The press is a colour, not a scale. Scaling the row would resample its
+     text for the length of the transition, and a note's title is the one thing
+     in the hub that has to stay readable. */
+  .row:has(.open:active) {
+    background: var(--control-active);
+    transition-duration: var(--dur-instant);
   }
 
   .open {

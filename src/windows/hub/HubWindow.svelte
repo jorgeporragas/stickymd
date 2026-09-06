@@ -63,23 +63,6 @@
 </div>
 
 <style>
-  .surface {
-    display: flex;
-    flex-direction: column;
-
-    /* Pinned to the viewport, not sized at 100%: a percentage height resolves
-       to a fractional pixel and the sliver it leaves is painted by the
-       compositor. See docs/FIXES.md. */
-    position: fixed;
-    inset: 0;
-    border-radius: var(--radius-window);
-    border: 1px solid var(--surface-border);
-    background: var(--surface-paint);
-    box-shadow:
-      var(--shadow-rest),
-      var(--surface-edge-highlight);
-    overflow: hidden;
-  }
 
   h1 {
     margin: 0;
