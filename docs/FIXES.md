@@ -88,7 +88,7 @@ Never:    Never add `t.content` to a rule carrying a font family, colour or
 ### Ctrl+N cannot be bound inside the webview
 Area:     Global and in-app shortcut registration, and tray lifecycle
 Date:     2026-09-05
-Commit:   pending
+Commit:   01af465
 Problem:  `Mod-n` was bound to "new note window" through CodeMirror and did
           nothing in the running application. The binding was not at fault:
           dispatching the chord in a browser fired it correctly, and a probe
