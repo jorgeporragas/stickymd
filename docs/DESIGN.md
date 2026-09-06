@@ -44,19 +44,19 @@ Three families, all SIL Open Font License, all vendored into `src/assets/fonts/`
 
 | Role | Face | Used for |
 |---|---|---|
-| Display | **Handjet** | App identity, hub headers, empty states. Never inside note content. |
+| Display | **Departure Mono** | App identity, hub headers, empty states. Never inside note content. |
 | Content | **Geist** | Note body, all UI labels, everything functional. |
 | Mono | **Martian Mono** | Fenced code blocks. |
 
-**Handjet** is a variable face whose glyphs are built from repeated elements on a grid. `ELGR` controls how many elements compose each letter; `ELSH` morphs those elements between square and round. Degradation is therefore continuous, and is set through tokens rather than by choosing a file.
+**Departure Mono** is a monospaced pixel face drawn on a fixed grid (ADR-029). It ships one weight and no axes, so `font-synthesis: none` is set on the body: a synthesised bold thickens strokes off the grid the glyphs are drawn on, and it stops looking like pixels. Anything using the display face names its weight rather than inheriting a heading's default.
 
-Handjet's advance widths are identical at every setting of `ELGR`, `ELSH` and `wght` — the grid it is built on fixes them. Animating its axes therefore reflows nothing, which is what makes degradation usable as motion rather than only as a static choice.
+It replaced Handjet, whose `ELGR`/`ELSH` axes made degradation continuous and animatable. That is gone: degradation is a static property of this face.
 
 Every disc in the window is one diameter, `--space-4`, and a control's glyph is 9px — about 0.58 of it, which is the traffic lights' own proportion. The glyph is drawn *above* the specular: at nine pixels, a highlight across the top of one is the difference between reading it and guessing.
 
 Weight is a token, not a literal. `--weight-emphasis` (600) is what `**bold**` renders as, and `--weight-heading` (650) is every heading level and the hub's table headers. Emphasis sits *below* heading on purpose: bold inside a paragraph is a change of voice, not a change of level, and Geist at 700 was reading as a second heading in the middle of a line.
 
-**Handjet never appears inside a note.** That boundary is Principle 1 made concrete: display type is surface, and note content is content.
+**The display face never appears inside a note.** That boundary is Principle 1 made concrete: display type is surface, and note content is content.
 
 ---
 
@@ -135,7 +135,7 @@ There is one shadow, and it is the only one there can be. A window's shadow at r
 
 ### Primitive families
 
-Named in `src/lib/tokens/tokens.css`: neutrals, accent ramp, tint swatches (`--swatch-*` — the flat colour that *names* a tint, distinct from the translucent wash the tint paints with, because one token cannot be two values at once), duration (`--dur-*`), easing (`--ease-*`), type families and scale (`--font-*`, `--line-height-*`, `--tracking-*`), the Handjet axes (`--handjet-*`), radius (`--radius-*`), and spacing (`--space-*`).
+Named in `src/lib/tokens/tokens.css`: neutrals, the `--tide-*` palette ramp, the signal reds, tint swatches (`--swatch-*` — the flat colour that *names* a tint, distinct from the translucent wash the tint paints with, because one token cannot be two values at once), duration (`--dur-*`), easing (`--ease-*`), type families, scale and weight (`--font-*`, `--line-height-*`, `--tracking-*`, `--weight-*`), radius (`--radius-*`), and spacing (`--space-*`).
 
 Spacing and radius outside the scale are not permitted.
 
@@ -223,7 +223,7 @@ So a window arrives by the light on it rather than by moving: a sheen across the
 | `backdrop-filter` for the primary window surface | OS compositor blur, applied from Rust |
 | A static colour value in a component | A semantic token |
 | Spacing or radius outside the scale | A scale token |
-| Handjet inside note content | Geist |
+| The display face inside note content | Geist |
 | Text over glass without the tint layer beneath it | The tint is load-bearing for contrast, not decoration |
 | One semantic token serving two visual roles | Split it into two named tokens |
 | Fetching a font or any asset over the network | Vendored assets — MASTER veto 2 |

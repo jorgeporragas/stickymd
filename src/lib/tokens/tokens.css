@@ -44,6 +44,10 @@
 
   /* A swatch's rim is its own hue darkened, never a neutral border — a grey
      ring is what made seven tints read as seven generic dots. */
+  /* The glyph on a lit control: its own hue taken most of the way to black,
+     which is how Aqua drew a traffic light's. 7.34:1 against the fill. */
+  --signal-engaged: var(--tide-600-diluted);
+
   --swatch-rim: color-mix(in oklab, currentColor 62%, var(--rim-shade));
   --rim-shade: #000000;
   --rim-light: #ffffff;
@@ -74,6 +78,17 @@
   --tide-900: #1e6091;
   --tide-1000: #184e77;
 
+  /* A control holding a setting on: `--tide-600` diluted toward the light
+     surface, which is the founder's pick from the ramp rendered at strength.
+     Written out rather than mixed at read time so it cannot drift with the
+     note's tint — the disc carries its own colour, and its glyph is derived
+     from that colour, so nothing behind it should change either.
+
+     Not diluted with `opacity`: that would fade the rim, the seat and the
+     specular along with the fill, and a lozenge with a faded rim reads as
+     switched off rather than as quietly on. */
+  --tide-600-diluted: #78bec0;
+
   /* Signals — the only hues in the interface, and only where colour is
      carrying the meaning. Traffic-light reading, because it needs no learning:
      red is the one that takes something away. Amber and green have nothing to
@@ -95,7 +110,7 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* Type families. Faces are vendored; nothing is fetched at runtime. */
-  --font-display: 'Handjet', system-ui, sans-serif;
+  --font-display: 'Departure Mono', ui-monospace, monospace;
   --font-content: 'Geist', system-ui, sans-serif;
   --font-mono: 'Martian Mono', ui-monospace, monospace;
 
@@ -115,14 +130,10 @@
   --tracking-body: 0;
   --tracking-caps: 0.08em;
 
-  /* Handjet variable axes. See docs/DESIGN.md section 'Typography'. */
-  --handjet-elgr: 1;
-  --handjet-elsh: 2;
-  --handjet-weight: 500;
-
   /* Weight. Geist is variable across 100–900, so these are real values rather
      than the nearest named face. Emphasis sits below heading deliberately:
      bold inside a paragraph is a change of voice, not a change of level. */
+  --weight-body: 400;
   --weight-emphasis: 600;
   --weight-heading: 650;
 
@@ -195,11 +206,6 @@
   /* Accent */
   --signal-danger: var(--red-600);
 
-  /* A control holding a setting on. `--tide-600` because the gloss lightens
-     the top of a disc to 45% of its colour over white, which puts a light
-     glyph under 2.3:1 everywhere on this ramp — the glyph has to be dark, and
-     a dark glyph clears 4:1 through the teal stops and fails past them. */
-  --signal-engaged: var(--tide-600);
   --focus-ring: var(--neutral-950);
 
   /* A control carries no tint, so its gloss is named rather than mixed, and
@@ -274,7 +280,6 @@
   --ink-syntax: #6a6760;
 
   --signal-danger: var(--red-300);
-  --signal-engaged: var(--tide-600);
   --focus-ring: #f2efe8;
 
   --gloss-neutral: radial-gradient(circle at 50% 18%, #4a4945 0%, #33322f 60%, #232220 100%);

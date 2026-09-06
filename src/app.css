@@ -32,6 +32,12 @@ body {
 
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+
+  /* Never let the browser fake a weight or a slant. The display face ships one
+     weight, and a synthesised bold on a pixel face thickens strokes off the
+     grid it is drawn on — it stops looking like pixels and starts looking like
+     a smear. */
+  font-synthesis: none;
 }
 
 /* The window itself is the drag surface in places; never let a stray selection

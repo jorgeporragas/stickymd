@@ -69,10 +69,7 @@
     padding: 0 var(--space-4) var(--space-2);
     font-family: var(--font-display);
     font-size: var(--font-size-display);
-    font-weight: var(--handjet-weight);
-    font-variation-settings:
-      'ELGR' var(--handjet-elgr),
-      'ELSH' var(--handjet-elsh);
+    font-weight: var(--weight-body);
     letter-spacing: var(--tracking-display);
     line-height: var(--line-height-ui);
     color: var(--ink-primary);
@@ -92,9 +89,6 @@
     margin: var(--space-4) var(--space-2);
     font-family: var(--font-display);
     font-size: var(--font-size-title);
-    font-variation-settings:
-      'ELGR' var(--handjet-elgr),
-      'ELSH' var(--handjet-elsh);
     color: var(--ink-muted);
   }
 </style>
