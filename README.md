@@ -53,4 +53,4 @@ If you're wondering why a decision was made, ADRs are usually a faster answer th
 
 [GPL-3.0-only](LICENSE). Forks stay open.
 
-The bundled typefaces — [Handjet](https://fonts.google.com/specimen/Handjet), [Geist](https://fonts.google.com/specimen/Geist) and [Martian Mono](https://fonts.google.com/specimen/Martian+Mono) — are under the SIL Open Font License, with each licence text alongside the files in `src/assets/fonts/`.
+The bundled typefaces — [Departure Mono](https://departuremono.com/), [Geist](https://fonts.google.com/specimen/Geist) and [Martian Mono](https://fonts.google.com/specimen/Martian+Mono) — are under the SIL Open Font License, with each licence text alongside the files in `src/assets/fonts/`.

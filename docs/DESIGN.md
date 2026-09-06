@@ -155,7 +155,7 @@ Tint selectors are qualified by theme — `[data-theme='dark'][data-tint='sun']`
 
 ### Frost — the default
 
-Colourless frosted glass. The tint is present only so that dark wallpapers cannot swallow the text; it is not perceived as a colour. Warm neutrals, so the surface never reads clinical, and a single aqua accent.
+Colourless frosted glass. The tint is present only so that dark wallpapers cannot swallow the text; it is not perceived as a colour. Warm neutrals, so the surface never reads clinical, and no accent at all — since ADR-025 the only hues are the signals and the notes' own tints.
 
 Values: `src/lib/tokens/tokens.css`, under `:root[data-theme='frost']`.
 
