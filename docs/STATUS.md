@@ -175,11 +175,18 @@ Notes: Acrylic applied to the transparent window from Rust via `window-vibrancy`
 
 ### [SMD-022] Respond to the system transparency setting changing at runtime
 Type:    bug
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: Compositor blur is applied once, at window creation. If the user turns transparency off afterwards — or Windows does it for them under battery saver — the window stays in Glass mode with nothing behind the tint, which will read as a washed-out surface rather than a deliberate Solid one. Needs a listener on the setting and a way to re-resolve `data-surface` in a live window.
+  2026-09-06  accepted into an autonomous bundle by the founder
+  2026-09-06  shipped
+Notes: Shipped. The setting is read from the registry before the blur is applied, and watched with `RegNotifyChangeKeyValue` on a thread that blocks until something changes — not a poll. When it changes, every open window is re-applied and told, and each re-resolves `data-surface`; windows opened later get their answer on the way up.
+  The root cause was worse than the item assumed, and is now in `docs/FIXES.md`: `apply_acrylic` **succeeds** when transparency is off. The mode was being decided by whether that call errored, so the window stayed in Glass with the compositor drawing nothing behind it. A successful call reports that it was accepted, not that anything is being drawn.
+  A window that cannot be frosted still makes the whole application Solid rather than leaving two windows in different modes side by side.
+  No new dependency: the `windows` crate was already here for the corner rounding and gained a feature.
+  Verified as far as I can without changing a system setting on the founder's machine, which is his to change: with a temporary probe, the app read the real registry value (1) and chose Glass, and the watcher opened the key and blocked. The change path itself is on his verification list — turn transparency off in Settings > Personalisation > Colours with a note open, and the windows should go Solid without being reopened.
+  Original note: Compositor blur is applied once, at window creation. If the user turns transparency off afterwards — or Windows does it for them under battery saver — the window stays in Glass mode with nothing behind the tint, which will read as a washed-out surface rather than a deliberate Solid one. Needs a listener on the setting and a way to re-resolve `data-surface` in a live window.
 
 ### [SMD-016] Inline rendering layer
 Type:    feature

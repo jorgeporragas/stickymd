@@ -37,7 +37,14 @@ window-vibrancy = "0.6"
 # Rounding the window itself, not just the surface painted inside it. The
 # compositor backdrop fills the whole square window, so a CSS radius alone
 # leaves the corners showing raw acrylic. See docs/FIXES.md.
-windows = { version = "0.56", features = ["Win32_Foundation", "Win32_Graphics_Dwm"] }
+# Win32_System_Registry is for the transparency setting: it lives in the
+# registry and the only way to hear it change is to watch the key. No new
+# crate for it -- this dependency is already here for the corner rounding.
+windows = { version = "0.56", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Dwm",
+  "Win32_System_Registry",
+] }
 
 # Bundle size is a stated product priority. See MASTER.md section 'Stack'.
 [profile.release]

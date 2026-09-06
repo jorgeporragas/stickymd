@@ -28,18 +28,21 @@ fn app_theme(app: tauri::AppHandle) -> String {
 /// sets it on the document root; the design tokens carry the difference from
 /// there, so no component branches on it.
 #[tauri::command]
-fn surface_mode(mode: tauri::State<'_, SurfaceMode>) -> SurfaceMode {
-    *mode
+fn surface_mode(current: tauri::State<'_, surface::Current>) -> SurfaceMode {
+    current.get()
 }
 
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let window = app
-                .get_webview_window(windows::FIRST_WINDOW)
+            // Checked rather than used: the surface is applied to every open
+            // window by `surface::refresh` below. This is here so a missing
+            // window entry in the config fails at startup with a sentence
+            // rather than as an empty screen.
+            app.get_webview_window(windows::FIRST_WINDOW)
                 .ok_or("the note window is missing from tauri.conf.json")?;
 
-            app.manage(surface::apply(&window));
+            app.manage(surface::Current::default());
             app.manage(index::IndexLock::default());
             app.manage(windows::OpenNotes::default());
 
@@ -47,6 +50,11 @@ fn main() {
             // other, so it is tracked like any other.
             app.state::<windows::OpenNotes>()
                 .register(windows::FIRST_WINDOW, None)?;
+
+            // Applies the surface to the window Tauri already built, records
+            // the mode, and starts watching for the setting changing under us.
+            surface::refresh(app.handle());
+            surface::watch(app.handle().clone());
 
             // A session that cannot be restored is not a reason to refuse to
             // start: the notes are still on disk, and an empty window is a

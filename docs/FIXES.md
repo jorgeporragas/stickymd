@@ -252,3 +252,31 @@ Never:    Never treat the index as evidence that a note exists. It records what
           different threads and the ordering is the system's to decide, not
           ours — an ordering that happens to work is a race that has not fired
           yet.
+
+### `apply_acrylic` succeeds with transparency switched off
+Area:     Window transparency, vibrancy, and compositor blur setup
+Date:     2026-09-06
+Commit:   pending
+Problem:  Surface mode was decided by whether `apply_acrylic` returned an
+          error. It does not error when the user has transparency effects
+          switched off — it succeeds, and the compositor then draws nothing
+          behind the window. The window stays in Glass mode painting a
+          near-colourless tint over a transparent window with no backdrop, so
+          the desktop shows through a faint wash. That reads as a washed-out
+          window rather than as the deliberate Solid mode, which is exactly
+          what `docs/DESIGN.md` principle 4 exists to prevent. Windows also
+          switches the setting off on the user's behalf under battery saver,
+          so this is reachable without anyone choosing it.
+Fix:      The setting is read before the blur is applied, from
+          `HKCU\...\Themes\Personalize\EnableTransparency`, and a window is
+          Solid when it is off. It is then *watched*, with
+          `RegNotifyChangeKeyValue` on a thread that is asleep the rest of the
+          time, and every open window is re-applied and told when it changes.
+Never:    Never treat a successful `apply_acrylic` as proof there is blur
+          behind the window. The call reports whether it was accepted, not
+          whether the compositor is drawing.
+          And never poll for this. The key notification blocks until something
+          happens, which is the whole reason a thread is acceptable here.
+          The API cannot watch a single value, only a key, so other settings
+          under `Personalize` wake it too — the handler re-reads and may
+          conclude nothing changed, which is why it must be cheap.

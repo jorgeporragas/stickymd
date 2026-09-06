@@ -8,14 +8,89 @@
 //! disables it under battery saver, so some users only ever see Solid. It is
 //! designed to look deliberate — docs/DESIGN.md principle 4.
 
-use serde::Serialize;
-use tauri::WebviewWindow;
+use std::sync::Mutex;
 
-#[derive(Clone, Copy, Debug, Serialize)]
+use serde::Serialize;
+use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SurfaceMode {
     Glass,
     Solid,
+}
+
+/// The mode every window is currently in.
+///
+/// Held rather than computed on demand because it can change while the
+/// application is running: the user can switch transparency off, and Windows
+/// does it for them under battery saver.
+#[derive(Default)]
+pub struct Current(Mutex<Option<SurfaceMode>>);
+
+impl Current {
+    pub fn get(&self) -> SurfaceMode {
+        self.0
+            .lock()
+            .ok()
+            .and_then(|mode| *mode)
+            .unwrap_or(SurfaceMode::Solid)
+    }
+
+    fn set(&self, mode: SurfaceMode) {
+        if let Ok(mut held) = self.0.lock() {
+            *held = Some(mode);
+        }
+    }
+}
+
+/// The event a window listens for to re-resolve its surface.
+pub const CHANGED: &str = "surface-changed";
+
+/// Where Windows keeps the transparency setting.
+#[cfg(target_os = "windows")]
+const PERSONALIZE: windows::core::PCWSTR =
+    windows::core::w!("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
+
+/// Whether transparency effects are switched on.
+///
+/// Unreadable means yes. The setting is normally present, and a missing value
+/// is far more likely to be an unusual install than a user who has turned
+/// transparency off — and guessing Glass is the recoverable guess, because
+/// `apply_acrylic` failing lands on Solid anyway.
+#[cfg(target_os = "windows")]
+pub fn transparency_enabled() -> bool {
+    use windows::core::w;
+    use windows::Win32::Foundation::ERROR_SUCCESS;
+    use windows::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
+
+    let mut value: u32 = 1;
+    let mut size = std::mem::size_of::<u32>() as u32;
+
+    // Safe: the key path is a static wide string, the buffer is a u32 whose
+    // size is passed alongside it, and the call is told to accept only a DWORD.
+    let status = unsafe {
+        RegGetValueW(
+            HKEY_CURRENT_USER,
+            PERSONALIZE,
+            w!("EnableTransparency"),
+            RRF_RT_REG_DWORD,
+            None,
+            Some(std::ptr::addr_of_mut!(value).cast()),
+            Some(&mut size),
+        )
+    };
+
+    if status != ERROR_SUCCESS {
+        return true;
+    }
+
+    value != 0
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn transparency_enabled() -> bool {
+    false
 }
 
 /// Round the window itself.
@@ -68,6 +143,16 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
     {
         round_corners(window);
 
+        // Asked before the blur is applied, not only when it fails. With
+        // transparency off, `apply_acrylic` still reports success and the
+        // compositor then draws nothing behind the window — which is the whole
+        // bug: a tint over nothing is a washed-out window rather than a Solid
+        // one. See docs/FIXES.md.
+        if !transparency_enabled() {
+            let _ = window_vibrancy::clear_acrylic(window);
+            return SurfaceMode::Solid;
+        }
+
         // A fully transparent tint: the CSS layer above supplies the colour, so
         // the compositor contributes blur only. See src/lib/tokens/tokens.css.
         match window_vibrancy::apply_acrylic(window, Some((0, 0, 0, 0))) {
@@ -81,4 +166,102 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
         let _ = window;
         SurfaceMode::Solid
     }
+}
+
+/// Re-apply the surface to every open window and report the mode.
+///
+/// Called at startup and again whenever the setting changes. Windows opened
+/// later get theirs from `apply` on the way up, so this only has to catch the
+/// ones already on screen.
+pub fn refresh(app: &AppHandle) -> SurfaceMode {
+    let mut mode = if transparency_enabled() {
+        SurfaceMode::Glass
+    } else {
+        SurfaceMode::Solid
+    };
+
+    for window in app.webview_windows().values() {
+        // A single window that cannot be frosted decides for all of them:
+        // two windows in different modes side by side is worse than both
+        // being Solid, and Solid is a supported way to run.
+        if matches!(apply(window), SurfaceMode::Solid) {
+            mode = SurfaceMode::Solid;
+        }
+    }
+
+    app.state::<Current>().set(mode);
+
+    // Best effort. A window that missed the event is a window drawn in the
+    // previous mode until it is reopened, which is a blemish rather than a
+    // fault, and there is nothing useful to do about a failed emit.
+    let _ = app.emit(CHANGED, mode);
+
+    mode
+}
+
+/// Watch the transparency setting and re-apply the surface when it changes.
+///
+/// A dedicated thread, because `RegNotifyChangeKeyValue` blocks until
+/// something happens — which is exactly what is wanted, and the reason this is
+/// not a poll. The thread ends when the key can no longer be watched.
+#[cfg(target_os = "windows")]
+pub fn watch(app: AppHandle) {
+    use windows::Win32::Foundation::{ERROR_SUCCESS, HANDLE};
+    use windows::Win32::System::Registry::{
+        RegCloseKey, RegNotifyChangeKeyValue, RegOpenKeyExW, HKEY, HKEY_CURRENT_USER, KEY_NOTIFY,
+        REG_NOTIFY_CHANGE_LAST_SET,
+    };
+
+    std::thread::spawn(move || {
+        let mut key = HKEY::default();
+
+        // Safe: a static key path, and the handle is closed before returning.
+        let opened = unsafe {
+            RegOpenKeyExW(HKEY_CURRENT_USER, PERSONALIZE, 0, KEY_NOTIFY, &mut key)
+        };
+
+        if opened != ERROR_SUCCESS {
+            eprintln!(
+                "sticky.md: cannot watch the transparency setting; the surface will \
+                 be whatever it was when each window opened"
+            );
+            return;
+        }
+
+        loop {
+            // Blocks until the key changes. Synchronous by request — the whole
+            // point of this thread is to be asleep the rest of the time.
+            let waited = unsafe {
+                RegNotifyChangeKeyValue(key, false, REG_NOTIFY_CHANGE_LAST_SET, HANDLE::default(), false)
+            };
+
+            if waited != ERROR_SUCCESS {
+                break;
+            }
+
+            // The whole Personalize key is watched, not one value: the API
+            // cannot watch a single value. Other settings under it change too,
+            // so `refresh` re-reads and may well conclude nothing changed.
+            // Two clones: one for the closure to own and one to call with.
+            let handle = app.clone();
+            let inner = app.clone();
+
+            if handle
+                .run_on_main_thread(move || {
+                    refresh(&inner);
+                })
+                .is_err()
+            {
+                break;
+            }
+        }
+
+        // Safe: the handle was opened above and is not used after this.
+        let _ = unsafe { RegCloseKey(key) };
+    });
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn watch(app: AppHandle) {
+    let _ = app;
 }
