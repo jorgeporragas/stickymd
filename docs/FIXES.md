@@ -256,7 +256,7 @@ Never:    Never treat the index as evidence that a note exists. It records what
 ### `apply_acrylic` succeeds with transparency switched off
 Area:     Window transparency, vibrancy, and compositor blur setup
 Date:     2026-09-06
-Commit:   pending
+Commit:   12ccc32
 Problem:  Surface mode was decided by whether `apply_acrylic` returned an
           error. It does not error when the user has transparency effects
           switched off — it succeeds, and the compositor then draws nothing
