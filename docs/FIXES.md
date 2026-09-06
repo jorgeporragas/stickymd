@@ -131,7 +131,7 @@ Never:    Never bind a `Ctrl+Alt` combination, in the editor or globally. It
 ### A CSS radius does not round a window that has a compositor backdrop
 Area:     Window transparency, vibrancy, and compositor blur setup
 Date:     2026-09-05
-Commit:   pending
+Commit:   33aa6ac
 Problem:  With acrylic applied, the note window showed grey triangles in each
           corner. The compositor draws its backdrop across the whole window
           rectangle, which is square; `border-radius` only rounds what the web
