@@ -419,7 +419,7 @@ Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 3 — Windows, Tray & Shortcuts
   2026-09-06  active
-  2026-09-06  shipped — commit 1f4a0f6
+  2026-09-06  shipped — commit 5211972
   2026-09-06  confirmed — the founder ticked it and the Run key gained `sticky.md`; unticked it is absent
 Notes: A checkable "Launch at startup" item in the tray menu, since there is no settings surface. `tauri-plugin-autostart` is registered but never enables anything on its own — only the toggle does, which is what MASTER veto 5 requires.
   The checkbox is read from what the system reports, both when the menu is built and after every toggle, rather than from a remembered value. The user may have removed the entry outside the application, and a menu that claims a change succeeded when it failed is worse than one that shows nothing.
@@ -465,10 +465,11 @@ Notes: Storage is proven: 23 Rust tests pass, including a real file round-trip w
 
 ### [SMD-033] A user whose global shortcut is already taken has no remedy
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
+  2026-09-06  shipped — commit e69f46a
 Notes: If another application already holds the chord, registration fails. Previously the only sign was a line in a console nobody has open, leaving a user with no way to summon a note and no idea why.
   Both halves are now addressed. The shortcut is read from `settings.json` (ADR-022), so it can be changed. And a failure appears in the tray menu as a disabled line naming both the problem and the file to edit, rather than being swallowed.
   A parse failure is distinguished from a chord already held: a typo falls back to the default shortcut and still says so, rather than leaving the user with nothing.
