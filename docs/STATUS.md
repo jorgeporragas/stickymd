@@ -352,15 +352,17 @@ Notes: The application lives in the tray so the global shortcut has something to
 
 ### [SMD-040] Per-note always-on-top
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+  2026-09-05  shipped — commit c0e413f
+  2026-09-05  confirmed on device (founder)
 Notes: A pin in the window chrome, off by default per `MASTER.md § In Scope`. The setting lives in the sidecar index and survives closing and reopening the note — which makes this the first consumer the index has had since it was built in Phase 2.
   A note can be pinned before it has a file. The setting is held in the window until the note takes a name on its first save, then written.
   `set_note_state` was replaced by `set_note_always_on_top` rather than added to. The frontend does not hold a note's geometry, so writing a whole `NoteState` back from there would erase whatever it did not know about — a targeted command cannot.
   Deliberate exception to `docs/DESIGN.md` principle 2: a pinned note keeps its pin visible when the chrome recedes. A state you cannot see is a state you cannot trust.
-  Not confirmed: that the pin holds the window above others, and that it survives closing and reopening the note.
+  Confirmed by the founder on 2026-09-05.
 
 ### [SMD-037] Launch at startup, off by default
 Type:    feature
@@ -383,12 +385,13 @@ Notes: A ring of glass bubbles opening from the pointer on right-click, each app
 
 ### [SMD-039] Verify dead-key and accented input in the editor
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active
+  2026-09-05  confirmed on device (founder) — dead keys work
 Notes: Storage is proven: 23 Rust tests pass, including a real file round-trip where `# Año nuevo` becomes `año-nuevo.md` with the body byte-identical, and slugs keep accented letters rather than stripping them — a Spanish note should not become an unreadable filename.
-  What is not proven is composition in the editor: dead keys (´ then a, ¨ then u) and the Latin American layout's direct keys. Chromium handles composition natively and CodeMirror 6 is built for IME, but the inline-rendering layer rebuilds decorations on every update, and a decoration that replaces text mid-composition is the plausible way this breaks. The browser harness cannot test it — `execCommand` refuses without OS focus — so it needs someone typing.
+  Composition in the editor was confirmed by the founder on 2026-09-05: dead keys work. The inline-rendering layer rebuilding decorations on every update does not disturb an in-progress composition. No commit — nothing needed changing.
 
 ### [SMD-033] A user whose global shortcut is already taken has no remedy
 Type:    bug
