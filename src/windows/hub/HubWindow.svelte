@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import NoteRow from '../../lib/components/NoteRow.svelte';
+  import Scramble from '../../lib/components/Scramble.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
   import { deleteNote, listNotes, openNote, whenModified, type NoteSummary } from '../../lib/state/hub';
 
@@ -41,7 +42,7 @@
 <div class="surface">
   <WindowChrome {revealed} closeLabel="Close the notes list" />
 
-  <h1>notes</h1>
+  <h1><Scramble text="notes" /></h1>
 
   <div class="list">
     {#if !loaded}

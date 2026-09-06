@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Field from '../../lib/components/Field.svelte';
   import Toggle from '../../lib/components/Toggle.svelte';
+  import Scramble from '../../lib/components/Scramble.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
   import {
     chooseFolder,
@@ -79,7 +80,7 @@
 <div class="surface">
   <WindowChrome {revealed} closeLabel="Close settings" />
 
-  <h1>settings</h1>
+  <h1><Scramble text="settings" /></h1>
 
   <div class="body">
     {#if !prefs}

@@ -635,23 +635,28 @@ Notes: The founder wants it square rather than round, with the grey bezel the wi
 
 ### [SMD-051] Typographic scrambling
 Type:    idea
-State:   idea
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
 Notes: One of the two effects the founder named as the new direction's second half — the drafted feel of a scratchpad, against Rams restraint. Not specified yet beyond the name.
   Worth deciding before it is built: where it is allowed to happen. `docs/DESIGN.md` principle 1 keeps the user's text quiet, so scrambling settling into place on *note content* would fight it — on the hub's title, an empty state, or the mark, it would not. That is a design decision, not an implementation one.
   Also worth knowing in advance: it must not run on text the user is editing. Anything that rewrites glyphs in the buffer would break the rule that markdown syntax stays in the buffer at all times, so this is a rendering effect over stable text, never a transform of it.
+  Shipped as `Scramble`, on the two titles the display face names: the hub's and the settings window's, each settling as its window opens. Both were the "chrome, not content" answer this note asked for.
+  The mechanism this item lost with Handjet turned out not to be needed. Handjet's constant advance widths were what made *axis* animation reflow-free; Departure Mono is monospaced, which gives the same guarantee for substituted characters, for a different reason. The pool is punctuation rather than letters, because letters mid-scramble read as words that are not there.
+  `prefers-reduced-motion` is honoured in JavaScript rather than CSS: the global rule collapses transition and animation durations, and cannot reach a `requestAnimationFrame` loop.
+  **Not observed running.** The browser pane runs zero animation frames while it is hidden — measured, 0 in 500ms with the page reporting itself visible and reduced motion off — so nothing rAF-driven can be seen there. That is the same root cause as the stuck opacity transitions and the unobservable press state earlier in the session, and it is worth remembering before chasing another one: **if an effect depends on rAF or on a transition, the pane cannot show it, and a reading taken there means nothing.**
 
 ### [SMD-052] Line boil animation
 Type:    idea
-State:   idea
+State:   blocked
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
 Notes: The other named effect: edges that wobble between a few frames, the way hand-drawn animation does. It is what would make the app look drafted rather than rendered.
   The constraint to check first is cost, since low resource use is one of the founder's two stated priorities. A boil is per-frame, and doing it to a *window edge* is the expensive case — that edge is the compositor's, and the surface cannot move (`docs/FIXES.md`). Doing it to an SVG stroke inside a window, cycling two or three prepared paths at a low frame rate, is cheap. The cheap version is almost certainly the right one, and it points at the mark and at icons rather than at the window.
-  Not started. Needs the founder's read on where he wants it before any of that matters.
+  Blocked, not skipped, and on something concrete: the subject this item points at is the application mark, and the founder is redrawing it. The mark in `assets/icon/` is also still the old one — it carries the aqua gradient ADR-025 removed and is titled "StickyMD" rather than "sticky.md" (ADR-019).
+  Boiling a mark that is about to be replaced is work thrown away, and every other candidate is worse: the window's glyphs are controls a user looks at constantly, and the titles are text, which is scrambling's job rather than a boil's. This wants the new mark first.
 
 ### [SMD-050] A deleted note could come back as an empty window
 Type:    bug
