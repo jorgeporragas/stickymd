@@ -72,6 +72,8 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 - Build every path with `PathBuf` or Tauri's path APIs. Never concatenate path strings, and never write a separator literal.
 - Send files to the trash through the `trash` crate. Never call a platform-specific delete.
 - Return typed errors across the Tauri command boundary. Do not surface a raw `String` error to the frontend.
+- Treat every name and path arriving from the frontend as untrusted. Validate that it is a single ordinary path component before joining it to anything. A substring check for `..` is not validation — `..` is a legitimate substring of a title.
+- Run the Rust tests with `cargo test` from `src-tauri/`. Path and name validation carries tests; do not change that logic without them.
 - Debounce writes. Never write a note file on every keystroke.
 - Apply compositor blur here, through `window-vibrancy`, never from CSS. A web view cannot see the desktop behind it, so `backdrop-filter` is not an alternative — it is a different effect that looks correct only over the app's own content.
 - Treat a window that could not be frosted as Solid, not as an error. Solid is a supported way to run.
