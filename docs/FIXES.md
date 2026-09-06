@@ -141,8 +141,8 @@ Fix:      The window itself is rounded, through
           `DwmSetWindowAttribute(DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND)`
           in `src-tauri/src/surface.rs`, which makes the compositor clip its
           own backdrop. `--radius-window` was reduced to match the radius
-          Windows chooses, and `shadow` was turned on in `tauri.conf.json`
-          because a CSS shadow is drawn inside the window and is clipped away.
+          Windows chooses. `shadow` was turned on at the same time and had to
+          be turned back off — see the entry below.
 Never:    Never raise `--radius-window` above the system radius while glass is
           on — the difference reappears as untinted acrylic in the corners.
           Windows does not accept an arbitrary radius, only its own; a rounder
@@ -171,3 +171,29 @@ Never:    Never size the note surface with a percentage. This is the same
           A DPI explanation is tempting and was wrong here — the machine it was
           reported on runs at scale 1.0, where physical and logical pixels are
           identical. Measure the gap before theorising about why it exists.
+
+### `shadow: true` gives an undecorated window a frame the page cannot paint
+Area:     Window transparency, vibrancy, and compositor blur setup
+Date:     2026-09-05
+Commit:   pending
+Problem:  Thick pale lines ran down the right edge and along the bottom of every
+          note window. Measured from inside the running application, the web
+          view filled its viewport exactly — 436x420 CSS in a 436x420 viewport
+          — but the window was larger than its own client area: inner 545x525,
+          outer 563x535. Eighteen physical pixels on the right and ten at the
+          bottom belonged to the window and to nothing else, and rendered white.
+          `shadow: true`, added when the corners were rounded, created that
+          frame.
+Fix:      `shadow` is `false` in `src-tauri/tauri.conf.json`. With it off,
+          `outer` equals `inner` exactly and nothing is left unpainted.
+Never:    Never turn `shadow` on for a window with `decorations: false`. The
+          frame it adds is not paintable by the page, and on a transparent
+          window it shows as a light border rather than as nothing.
+          The consequence is that the note casts no shadow at all: a CSS shadow
+          is drawn inside the web view and clipped at the window edge.
+          Restoring one means padding the window and drawing the shadow inside
+          that padding — see STATUS SMD-044. Not a styling tweak.
+          Two wrong diagnoses preceded this one, both from theorising about the
+          gap instead of measuring it. One rested on a DPI reading taken from a
+          process that was not DPI-aware, which returned scale 1.0 when the
+          real scale was 1.25. Measure inside the running application.

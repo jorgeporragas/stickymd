@@ -381,9 +381,19 @@ Created: 2026-09-05
 History:
   2026-09-05  reported by founder after a session restore
   2026-09-05  active — cause found
-Notes: The cause was `.surface` being sized `height: 100%`, which resolves to a fractional pixel — measured at 433.6px inside a 434px viewport. The window is transparent over acrylic, so the strip the surface did not cover was painted by the backdrop. The same failure as the corner artefacts. `.surface` is now `position: fixed; inset: 0`; the gap on both axes measures exactly 0.
-  A first diagnosis blamed fractional DPI and was wrong: the machine runs at scale 1.0, where physical and logical pixels are identical. Recorded because the wrong theory was plausible and nearly shipped as the explanation.
+Notes: The cause was `shadow: true`, added in the corner-rounding commit. It gives a window with `decorations: false` a frame the page cannot paint. Measured from inside the application: the web view filled its viewport exactly at 436x420 CSS, while the window was inner 545x525 and outer 563x535. Eighteen physical pixels on the right and ten at the bottom belonged to nothing and rendered white. With `shadow: false`, outer equals inner exactly.
+  Two wrong diagnoses came first, both from theorising instead of measuring. The first blamed fractional DPI. The second rejected that on a scale reading of 1.0 taken from a process that was not DPI-aware — the real scale is 1.25, so the theory being dismissed was closer than the correction dismissing it.
+  Both attempts are kept, because each fixed something real on its own: geometry is stored in logical pixels rather than physical; `set_size`'s inner size is measured rather than the outer one, which had windows growing every session — 418x410 to 436x433 in the founder's own index; and `.surface` is pinned with `position: fixed; inset: 0` rather than a percentage height.
   Two real bugs were fixed on the way to the right answer, both in SMD-041's geometry handling: the size measured was the *outer* size while `set_size` sets the *inner* one, so windows grew on every session — visible in the founder's index, 418×410 becoming 436×433 — and geometry is now stored in logical rather than physical pixels, which is what carries correctly onto a display with a different scale factor.
+
+### [SMD-044] A note window casts no shadow
+Type:    bug
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea while fixing SMD-043
+Notes: `shadow: false` is required — see SMD-043 — and a CSS shadow is drawn inside the web view, so it is clipped at the window edge. The note therefore casts nothing, and `--shadow-rest` has no visible effect on the window.
+  The usual remedy is to make the window larger than the visible note and draw the shadow in CSS inside that padding, which means the surface no longer fills the window and every geometry calculation has to account for the inset. Belongs with Phase 5 — Theme & Motion rather than as a patch here.
 
 ### [SMD-042] Apostrophes were turned into separators in filenames
 Type:    bug
