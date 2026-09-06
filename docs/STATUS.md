@@ -289,14 +289,16 @@ Notes: `trash` crate 5.2.7, never an unlink — a note deleted by mistake has to
 
 ### [SMD-030] Multiple note windows
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+  2026-09-05  shipped — commit d7726fd
+  2026-09-05  confirmed on device (founder) — two windows write two different files
 Notes: One window per note. Which note a window holds is tracked in Rust by window label, so nothing is threaded through the URL and a window can simply ask. A window with no note is a new, unsaved one; it reports the name it takes on its first save, which is what stops a second window being opened onto the same file and the two overwriting each other. `Mod-n` opens a new window, bound through CodeMirror because its `Mod-` prefix is the platform abstraction and a DOM listener would mean writing Ctrl literally.
   Every window is built from the window entry in `src-tauri/tauri.conf.json`, so geometry has one home.
   The in-app chord was removed. It hit two unrelated platform hazards in a row — see ADR-021 — and the global shortcut in SMD-032 is the affordance `MASTER.md § Core Loop` specifies anyway.
-  Window creation itself is verified: a temporary probe opened a second window at startup and reported its label. What remains unconfirmed is that two windows write two different files.
+  Confirmed by the founder on 2026-09-05: two windows write two different files.
   Known sloppiness: `surface_mode` returns the mode measured on the first window. A second window has acrylic applied and its result discarded. In practice every window on a machine resolves the same way, but it is an assumption rather than a measurement.
 
 ### [SMD-032] Global shortcut for a new note
@@ -336,13 +338,15 @@ Notes: The compositor draws its backdrop across the whole window rectangle, whic
 
 ### [SMD-036] Tray residency
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 3 — Windows, Tray & Shortcuts
+  2026-09-05  shipped — commit e042bcd
+  2026-09-05  confirmed on device (founder) — tray behaves, closing every window leaves the app summonable, quit exits
 Notes: The application lives in the tray so the global shortcut has something to reach — closing the last note window puts it away rather than ending it, which is what lets a note appear a second later without a cold start. Only an explicit quit exits, distinguished by the exit code carried on the request.
   Left-clicking the tray writes a new note rather than opening a menu; the menu is on the right button. That should become "open the hub" once there is one (Phase 4 — The Hub).
-  Not confirmed: that the tray icon appears, that both its buttons behave, and that closing every window leaves the app running and still summonable.
+  Confirmed by the founder on 2026-09-05. The founder also confirmed the intent that left-click should open the hub once one exists.
 
 ### [SMD-037] Launch at startup, off by default
 Type:    feature
@@ -351,6 +355,26 @@ Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 3 — Windows, Tray & Shortcuts
 Notes: `MASTER.md § In Scope` requires it off by default and user-togglable, and MASTER veto 5 forbids enabling it without explicit consent. The tray menu is the natural home for the toggle, since there is no settings surface. Needs `tauri-plugin-autostart`.
+
+### [SMD-038] Radial glass menu on right-click
+Type:    idea
+State:   idea
+Created: 2026-09-05
+History:
+  2026-09-05  logged as idea (founder)
+Notes: A ring of glass bubbles opening from the pointer on right-click, each appearing staggered after the last. The founder's intent is a home for anything that cannot sit cleanly on the chrome, which is a real problem given `docs/DESIGN.md` principle 2 keeps the chrome minimal.
+  Feasible, with one nuance worth recording before anyone builds it: the bubbles cannot carry *compositor* glass, which is a per-window property. They would use `backdrop-filter`, and that is legitimate here — DESIGN's never-allowed rule forbids it for the *primary window surface*, because a web view cannot see the desktop. Over the app's own content, which is what a bubble sits on, it is the correct tool, and `--blur-popover` already exists in the contract for it.
+  The stagger must animate `transform` and `opacity` per bubble with a delay, never blur. Small non-glass elements may fade; that is already allowed.
+  Also needs the web view's own context menu suppressed, or the native menu will appear alongside it.
+
+### [SMD-039] Verify dead-key and accented input in the editor
+Type:    chore
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  logged as active
+Notes: Storage is proven: 23 Rust tests pass, including a real file round-trip where `# Año nuevo` becomes `año-nuevo.md` with the body byte-identical, and slugs keep accented letters rather than stripping them — a Spanish note should not become an unreadable filename.
+  What is not proven is composition in the editor: dead keys (´ then a, ¨ then u) and the Latin American layout's direct keys. Chromium handles composition natively and CodeMirror 6 is built for IME, but the inline-rendering layer rebuilds decorations on every update, and a decoration that replaces text mid-composition is the plausible way this breaks. The browser harness cannot test it — `execCommand` refuses without OS focus — so it needs someone typing.
 
 ### [SMD-033] A user whose global shortcut is already taken has no remedy
 Type:    bug

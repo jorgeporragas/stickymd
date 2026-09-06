@@ -440,6 +440,37 @@ body"
     }
 
     #[test]
+    fn slugify_keeps_the_writer_s_own_language() {
+        // Accented letters are letters. Stripping them would turn a Spanish
+        // note into an unreadable filename, and the folder is meant to be
+        // browsable by the person who wrote it.
+        assert_eq!(slugify("# Año nuevo"), "año-nuevo");
+        assert_eq!(slugify("¿Qué tal?"), "qué-tal");
+        assert_eq!(slugify("# Diseño gráfico"), "diseño-gráfico");
+        assert_eq!(slugify("Cañón — ¡vámonos!"), "cañón-vámonos");
+
+        // The length cap counts characters, not bytes: an accented letter is
+        // two bytes in UTF-8, and truncating by byte would split it.
+        let long = slugify(&"ñá".repeat(80));
+        assert!(long.chars().count() <= 60);
+        assert!(long.chars().all(|c| c.is_alphanumeric()));
+    }
+
+    #[test]
+    fn accented_titles_round_trip_through_a_real_file() {
+        let dir = scratch("accents");
+        let body = "# Año nuevo
+
+Cañón, ¿qué tal? — ¡vámonos! ü ñ á é í ó ú";
+
+        let name = save_into(&dir, None, "# Año nuevo", body).unwrap();
+
+        assert_eq!(name, "año-nuevo.md");
+        assert_eq!(std::fs::read_to_string(dir.join(&name)).unwrap(), body);
+        assert!(safe_name(&name).is_ok(), "the name it chose must survive validation");
+    }
+
+    #[test]
     fn stem_matches_tolerates_the_deduplication_suffix() {
         assert!(stem_matches("prompt.md", "prompt"));
         assert!(stem_matches("prompt-2.md", "prompt"));
