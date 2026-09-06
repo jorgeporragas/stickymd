@@ -374,6 +374,16 @@ Notes: Notes that were open when the application stopped come back where they we
   A restore that fails does not stop the application starting. The notes are still on disk and an empty window is a working app.
   Not confirmed: that a session comes back, and that a deliberately closed note stays closed.
 
+### [SMD-042] Apostrophes were turned into separators in filenames
+Type:    bug
+State:   active
+Created: 2026-09-05
+History:
+  2026-09-05  found while reading the notes folder after a session-restore test
+  2026-09-05  active
+Notes: A note titled "I'm Jorge" produced `i-m-jorge.md`. An apostrophe joins a word rather than separating one, so it is now dropped rather than converted to a hyphen: `im-jorge.md`. Both the typewriter apostrophe and the typographic one, which is what most editors insert.
+  Notes already on disk keep the names they have. Editing one's title renames it as normal, and the index entry follows.
+
 ### [SMD-037] Launch at startup, off by default
 Type:    feature
 State:   accepted

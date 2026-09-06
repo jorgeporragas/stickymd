@@ -152,6 +152,13 @@ fn slugify(title: &str) -> String {
     let mut last_was_dash = true; // suppresses a leading dash
 
     for character in text.chars() {
+        // An apostrophe joins a word rather than separating one. Treating it
+        // as a separator turns "I'm Jorge" into "i-m-jorge", which reads as
+        // three words and sorts as one of them.
+        if matches!(character, '\'' | '\u{2019}') {
+            continue;
+        }
+
         if character.is_alphanumeric() {
             for lowered in character.to_lowercase() {
                 slug.push(lowered);
@@ -437,6 +444,16 @@ body"
         let long = slugify(&"word ".repeat(80));
         assert!(long.chars().count() <= 60, "slug was {} chars", long.chars().count());
         assert!(!long.ends_with('-'));
+    }
+
+    #[test]
+    fn apostrophes_join_words_rather_than_separating_them() {
+        assert_eq!(slugify("I'm Jorge"), "im-jorge");
+        assert_eq!(slugify("# I'm a software developer"), "im-a-software-developer");
+        assert_eq!(slugify("don't stop"), "dont-stop");
+
+        // The typographic apostrophe too, which is what most editors insert.
+        assert_eq!(slugify("I\u{2019}m Jorge"), "im-jorge");
     }
 
     #[test]
