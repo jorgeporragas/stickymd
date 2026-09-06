@@ -13,12 +13,12 @@ import { tags as t } from '@lezer/highlight';
  * Every value is a token reference. A literal here would be a bug.
  */
 export const markdownHighlight = HighlightStyle.define([
-  { tag: t.heading1, fontSize: '1.5em', fontWeight: '650', lineHeight: 'var(--line-height-ui)' },
-  { tag: t.heading2, fontSize: '1.3em', fontWeight: '650', lineHeight: 'var(--line-height-ui)' },
-  { tag: t.heading3, fontSize: '1.15em', fontWeight: '650', lineHeight: 'var(--line-height-ui)' },
-  { tag: [t.heading4, t.heading5, t.heading6], fontWeight: '650' },
+  { tag: t.heading1, fontSize: '1.5em', fontWeight: 'var(--weight-heading)', lineHeight: 'var(--line-height-ui)' },
+  { tag: t.heading2, fontSize: '1.3em', fontWeight: 'var(--weight-heading)', lineHeight: 'var(--line-height-ui)' },
+  { tag: t.heading3, fontSize: '1.15em', fontWeight: 'var(--weight-heading)', lineHeight: 'var(--line-height-ui)' },
+  { tag: [t.heading4, t.heading5, t.heading6], fontWeight: 'var(--weight-heading)' },
 
-  { tag: t.strong, fontWeight: '700' },
+  { tag: t.strong, fontWeight: 'var(--weight-emphasis)' },
   { tag: t.emphasis, fontStyle: 'italic' },
   { tag: t.strikethrough, textDecoration: 'line-through' },
 
@@ -35,7 +35,7 @@ export const markdownHighlight = HighlightStyle.define([
   { tag: t.processingInstruction, color: 'var(--ink-syntax)' },
 
   // Fenced code contents.
-  { tag: t.keyword, color: 'var(--ink-primary)', fontWeight: '600' },
+  { tag: t.keyword, color: 'var(--ink-primary)', fontWeight: 'var(--weight-emphasis)' },
   { tag: [t.string, t.special(t.string)], color: 'var(--ink-secondary)' },
   { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--ink-muted)', fontStyle: 'italic' },
   { tag: [t.number, t.bool, t.null], color: 'var(--ink-secondary)' },

@@ -12,9 +12,37 @@
 
   let open = $state(false);
 
+  /**
+   * Whether the palette is playing its dismissal.
+   *
+   * It has to stay mounted while it leaves — removing it on the click is what
+   * made it vanish rather than close. The animation itself says when it is
+   * done, which is also what keeps reduced motion working: the global rule
+   * collapses the duration, `animationend` still fires, and the palette is
+   * gone at once rather than left mid-transition.
+   */
+  let closing = $state(false);
+
+  function toggle(): void {
+    if (open && !closing) {
+      closing = true;
+    } else {
+      // Clicking again mid-dismissal takes it back rather than queueing a
+      // second open behind the one that is leaving.
+      open = true;
+      closing = false;
+    }
+  }
+
   function choose(value: Tint): void {
     onTint(value);
+    closing = true;
+  }
+
+  function settled(): void {
+    if (!closing) return;
     open = false;
+    closing = false;
   }
 </script>
 
@@ -34,12 +62,12 @@
     data-tint-swatch={tint}
     type="button"
     aria-label="Note colour"
-    aria-expanded={open}
-    onclick={() => (open = !open)}
+    aria-expanded={open && !closing}
+    onclick={toggle}
   ></button>
 
   {#if open}
-    <div class="palette" role="group" aria-label="Note colour">
+    <div class="palette" class:closing role="group" aria-label="Note colour" onanimationend={settled}>
       {#each TINTS as option (option)}
         <button
           class="dot"
@@ -111,7 +139,14 @@
        small sits inside the window's own surface, so it may scale: there is no
        backdrop behind it to show through. */
     transform-origin: top right;
-    animation: palette-open var(--dur-quick) var(--ease-out);
+    animation: palette-open var(--dur-settle) var(--ease-out);
+  }
+
+  /* Leaves faster than it arrives. Arriving is the palette presenting itself
+     and is worth the time; leaving is getting out of the way, and a dismissal
+     that takes as long as the arrival reads as lag. */
+  .palette.closing {
+    animation: palette-close var(--dur-quick) var(--ease-in-out) forwards;
   }
 
   @keyframes palette-open {
@@ -122,6 +157,17 @@
     to {
       opacity: 1;
       transform: scale(1);
+    }
+  }
+
+  @keyframes palette-close {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.92);
     }
   }
 

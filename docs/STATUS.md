@@ -469,6 +469,17 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-055] Palette dismissal, and bold at a lighter weight
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: Three things the founder asked for after using it. The palette's arrival was 160ms and is now 240ms. It had no dismissal at all — `{#if open}` removed it on the click, so it vanished rather than closed; it now stays mounted while it plays out and its own `animationend` reports when it is gone. That is deliberately not a Svelte transition: those run in JavaScript and would keep animating under `prefers-reduced-motion`, where a CSS animation has its duration collapsed by the global rule and still fires the event, so the palette disappears at once as it should.
+  It leaves in 160ms rather than the 240ms it takes to arrive. Arriving is the palette presenting itself; leaving is getting out of the way.
+  `**bold**` was 700 and is now `--weight-emphasis` at 600. Bold inside a paragraph is a change of voice, not a change of level, and 700 was reading as a second heading mid-line.
+  Weight became tokens on the way: 650 was written as a literal in five places across the highlight style and the editor theme, which is the second use twice over.
+
 ### [SMD-053] Drop Aero; colour becomes functional
 Type:    feature
 State:   shipped

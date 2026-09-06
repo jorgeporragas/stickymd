@@ -74,7 +74,7 @@ export const editorTheme = EditorView.theme({
   },
 
   '.cm-md-table th': {
-    fontWeight: '650',
+    fontWeight: 'var(--weight-heading)',
     color: 'var(--ink-secondary)'
   },
 

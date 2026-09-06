@@ -85,6 +85,12 @@
   --handjet-elsh: 2;
   --handjet-weight: 500;
 
+  /* Weight. Geist is variable across 100–900, so these are real values rather
+     than the nearest named face. Emphasis sits below heading deliberately:
+     bold inside a paragraph is a change of voice, not a change of level. */
+  --weight-emphasis: 600;
+  --weight-heading: 650;
+
   /* Geometry
    *
    * --radius-window is 8px because Windows chooses it, not us: the window is
