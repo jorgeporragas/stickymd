@@ -492,11 +492,13 @@ Notes: If another application already holds the chord, registration fails. Previ
 
 ### [SMD-031] Deleting a note whose window is open does not stick
 Type:    bug
-State:   idea
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
-Notes: The window keeps the note's content and filename in memory, so the next autosave writes the file straight back. Reachable today by deleting in Explorer while a window is open, and it becomes reachable from inside the app once the hub can delete (Phase 4 — The Hub). Confirmed by reading `save_into`: the rename is skipped because the old file is gone, then `fs::write` recreates it. "The open window wins" is defensible, but it should be a decision rather than an accident — the alternative is that deleting a note closes its window.
+  2026-09-06  reported by the founder from the hub, and decided: the delete wins (ADR-023)
+  2026-09-06  active
+Notes: The window keeps the note's content and filename in memory, so the next autosave writes the file straight back. Reachable today by deleting in Explorer while a window is open, and it becomes reachable from inside the app once the hub can delete (Phase 4 — The Hub). Confirmed by reading `save_into`: the rename is skipped because the old file is gone, then `fs::write` recreates it. The founder hit it from the hub and chose: deleting a note closes its window (ADR-023). The window is destroyed rather than asked to close, because a close request runs the frontend's flush and would write the note straight back; and it is closed before the file is trashed, so a save landing between the two cannot resurrect it.
 
 ### [SMD-027] list_notes, delete_note and the index commands have no frontend consumer
 Type:    chore

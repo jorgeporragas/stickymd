@@ -334,6 +334,10 @@ fn save_into(
 /// the whole reason the app has no bin of its own — the operating system
 /// already has one.
 ///
+/// A window showing this note is closed first. Deleting a note whose window is
+/// open should not leave the window behind, and the window would otherwise
+/// write the note back on its next save.
+///
 /// Deliberately not unit-tested. Exercising it would put files in the
 /// developer's real Recycle Bin, and what it delegates to is the `trash`
 /// crate's job to get right. The parts worth covering — name validation and
@@ -350,6 +354,11 @@ pub fn delete_note(
     if !path.exists() {
         return Err(NoteError::NotFound { name });
     }
+
+    // Before the file goes, not after: the window still holds the note's text
+    // and its filename, so a save landing between the two would write the note
+    // straight back. Closing first shuts that path.
+    crate::windows::close_showing(&app, &name);
 
     trash::delete(&path).map_err(|error| NoteError::Trash { message: error.to_string() })?;
 

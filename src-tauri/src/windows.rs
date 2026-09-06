@@ -47,7 +47,7 @@ impl OpenNotes {
     }
 
     /// The label of the window already editing this note, if there is one.
-    fn window_showing(&self, note: &str) -> Result<Option<String>, NoteError> {
+    pub fn window_showing(&self, note: &str) -> Result<Option<String>, NoteError> {
         Ok(self
             .lock()?
             .iter()
@@ -272,6 +272,25 @@ pub fn restore(app: &AppHandle) -> Result<(), NoteError> {
 #[tauri::command]
 pub fn new_note_window(app: AppHandle) -> Result<String, NoteError> {
     open(&app, None)
+}
+
+/// Close the window showing a note, if one is open.
+///
+/// Destroys rather than closes: a close request runs the frontend's
+/// close handler, which flushes a pending save — and the window still holds
+/// the text, so the note would be written straight back after being deleted.
+/// Destroying skips that path entirely.
+///
+/// Unsaved edits in that window are lost, which is correct. The note was
+/// deleted.
+pub fn close_showing(app: &AppHandle, note: &str) {
+    let Ok(Some(label)) = app.state::<OpenNotes>().window_showing(note) else {
+        return;
+    };
+
+    if let Some(window) = app.get_webview_window(&label) {
+        let _ = window.destroy();
+    }
 }
 
 /// Stop tracking a window that has closed.

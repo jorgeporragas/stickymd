@@ -170,3 +170,11 @@ Context:    `MASTER.md § In Scope` requires a small set of remappable shortcuts
 Decision:   Application settings live in `settings.json` in the platform's application config directory, resolved through Tauri's path API. The notes folder holds notes and the sidecar index that describes them, and nothing else.
 Consequences: The notes folder stays something a person can open without meeting the application's internals — which is what ADR-001 was for. The settings file is written with defaults the first time it is read, so there is always something to edit rather than a format to guess at. A settings file that cannot be parsed falls back to defaults rather than stopping the application: a typo in a hand-edited file should cost a custom shortcut, not access to notes.
             This is a file, not a settings surface. It satisfies "remappable" but only for someone willing to edit JSON, and the tray now names the file when a shortcut cannot be claimed. A real settings window is not in scope for V1 and is not logged as one — see STATUS SMD-046.
+
+## ADR-023 — Deleting a note closes its window
+Status:     Accepted
+Date:       2026-09-06
+Context:    A note deleted while its window was open left the window on screen, and the window would write the note back on its next save — it still held the text and the filename. Two behaviours were defensible: the open window wins and the note survives, or the delete wins and the window goes. It was logged as STATUS SMD-031 rather than settled quietly, because either is coherent and only the founder could say which the product means.
+Decision:   The delete wins. Deleting a note closes the window showing it, and the window is destroyed rather than asked to close.
+Consequences: Destroying skips the frontend's close handler, which flushes a pending save — going through the normal close path would resurrect the file that was just deleted. Unsaved edits in that window are lost, which is correct: the note was deleted.
+            The window is closed before the file is trashed rather than after, so a save landing between the two cannot write the note back.
