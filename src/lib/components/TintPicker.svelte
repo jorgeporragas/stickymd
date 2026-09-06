@@ -56,7 +56,7 @@
 -->
 <div class="picker">
   <button
-    class="swatch control"
+    class="lozenge swatch"
     class:revealed
     class:coloured={tint !== 'clear'}
     data-tint-swatch={tint}
@@ -70,7 +70,7 @@
     <div class="palette" class:closing role="group" aria-label="Note colour" onanimationend={settled}>
       {#each TINTS as option (option)}
         <button
-          class="dot"
+          class="lozenge dot"
           class:selected={option === tint}
           data-tint-swatch={option}
           type="button"
@@ -90,27 +90,44 @@
     align-items: center;
   }
 
-  .control {
+  /*
+    The disc, shared by the closed swatch and the seven in the palette. Its
+    colour arrives as `color`, so the fill, the rim and the greyed-out state
+    all follow from one declaration per tint.
+  */
+  .lozenge {
     width: var(--space-4);
     height: var(--space-4);
     padding: 0;
     border-radius: 50%;
+    border: 1px solid var(--swatch-rim);
+    background: currentColor;
+    box-shadow: var(--bezel);
     cursor: pointer;
-
-    /* Small control, not a glass surface: fading is cheap and correct. */
-    opacity: 0;
-    transition: opacity var(--dur-quick) var(--ease-out);
   }
 
   .swatch {
-    border: 1px solid var(--rule);
-    background: var(--surface-paint);
+    /* Small control, not a glass surface: fading is cheap and correct. */
+    opacity: 0;
+    transition:
+      opacity var(--dur-quick) var(--ease-out),
+      filter var(--dur-quick) var(--ease-out);
   }
 
   .swatch.revealed,
   .swatch.coloured,
   .swatch:focus-visible {
     opacity: 1;
+  }
+
+  /*
+    Greyed out while the chrome is receded, and coloured again the moment the
+    window is in use — the traffic lights' own behaviour, and principle 2
+    already asked for it. A tinted note keeps its swatch visible either way:
+    the control stays findable without a colour calling for attention.
+  */
+  .swatch.coloured:not(.revealed):not(:focus-visible) {
+    filter: grayscale(1);
   }
 
   .palette {
@@ -171,49 +188,42 @@
     }
   }
 
-  .dot {
-    width: var(--space-4);
-    height: var(--space-4);
-    padding: 0;
-    border-radius: 50%;
-    border: 1px solid var(--rule);
-    cursor: pointer;
-    opacity: 1;
-  }
-
   .dot.selected {
-    outline: 2px solid var(--ink-primary);
+    outline: 1.5px solid var(--ink-primary);
     outline-offset: 2px;
   }
 
-  /* The swatches show the tints themselves. These are the only place a colour
-     is named outside the token file, and they are named *through* tokens: each
-     reads the same --surface-solid the tint paints a window with. */
-  [data-tint-swatch='clear'] {
-    background: var(--surface-solid);
-  }
-
+  /* The tints themselves. These are the only place a colour is named outside
+     the token file, and they are named *through* tokens — and as `color`
+     rather than `background`, which is what lets one rule rim every disc. */
   [data-tint-swatch='sun'] {
-    background: var(--swatch-sun);
+    color: var(--swatch-sun);
   }
 
   [data-tint-swatch='spring'] {
-    background: var(--swatch-spring);
+    color: var(--swatch-spring);
   }
 
   [data-tint-swatch='aqua'] {
-    background: var(--swatch-aqua);
+    color: var(--swatch-aqua);
   }
 
   [data-tint-swatch='sky'] {
-    background: var(--swatch-sky);
+    color: var(--swatch-sky);
   }
 
   [data-tint-swatch='lilac'] {
-    background: var(--swatch-lilac);
+    color: var(--swatch-lilac);
   }
 
   [data-tint-swatch='blush'] {
-    background: var(--swatch-blush);
+    color: var(--swatch-blush);
+  }
+
+  /* Clear is the absence of a tint, so it is drawn as one: rim and bezel with
+     nothing in them. No slash, no label — an empty ring says it. */
+  [data-tint-swatch='clear'] {
+    background: transparent;
+    border-color: var(--rule);
   }
 </style>

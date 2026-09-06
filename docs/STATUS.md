@@ -469,6 +469,17 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-056] The tint swatches take the Aqua bezel
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  proposed to the founder as three treatments; he chose the bezel
+  2026-09-06  shipped
+Notes: ADR-026. What the Aqua traffic lights are actually made of is a rim in the fill's own hue, a bezel seating the disc, and going grey when the window is not in use — the gloss is the least of it. All three are taken; the gloss is not, because it would be the only glossy object in the application and it is the language ADR-025 had just removed.
+  `--swatch-rim` is a `color-mix` against `currentColor`, so one declaration rims every tint and an eighth would need no new value. Verified in the running application rather than assumed: `color-mix` resolves in WebView2 and all seven rims come out as darkened versions of their own hue.
+  Greying out while the chrome recedes was already what principle 2 asked for; the traffic lights just do it too.
+
 ### [SMD-055] Palette dismissal, and bold at a lighter weight
 Type:    feature
 State:   shipped
