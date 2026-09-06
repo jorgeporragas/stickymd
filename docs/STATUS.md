@@ -469,6 +469,17 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-057] The direction is Aqua; the lozenges take the gloss
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: ADR-027. Having seen the bezel running, the founder named what he had been after since the first design conversation: not Aero, Aqua — Rams with personality, and old enough now to read as retro rather than dated. The lozenges take the full gloss and every disc in the window shrinks to `--space-4`, the diameter the palette's dots already were, which he picked as correct.
+  No accent colour comes back with it. ADR-025's colour rule turns out to describe Aqua rather than fight it — neutral chrome, hue reserved for the small round things — so only ADR-026's refusal of the gloss is superseded.
+  Glyphs went to 9px and sit above the specular. At that size a highlight across the top of one is the difference between reading it and guessing.
+  A bug came out of this that was already shipped: ADR-026's tokens had been written into the Frost block, so on Dark `--swatch-rim` was undefined and `border-color` fell back to `currentColor` — every disc rimmed in its own fill. I had looked at a dark screenshot and called it fine. The rule now recorded: a token mixed from `currentColor` is a primitive, a token that depends on what is behind it is theme-level, and neither theme is verified until both have been read. Both are now read from the running application: rims resolve per hue on Dark, and the seat and specular differ per theme as intended.
+
 ### [SMD-056] The tint swatches take the Aqua bezel
 Type:    feature
 State:   shipped

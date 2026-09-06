@@ -97,14 +97,15 @@
   */
   .swatch,
   .dot {
-    background: currentColor;
+    background: var(--gloss-tinted);
   }
 
-  /* The swatch is one of the window's controls and is sized with them. The
-     palette's dots are a menu rather than controls, and stay smaller. */
+  /* One diameter for every disc in the window — the founder's call, and the
+     traffic lights' own proportion: small, and read by colour and position
+     rather than by size. */
   .swatch {
-    width: var(--space-6);
-    height: var(--space-6);
+    width: var(--space-4);
+    height: var(--space-4);
     /* Small control, not a glass surface: fading is cheap and correct. */
     opacity: 0;
     transition:
@@ -223,10 +224,10 @@
     color: var(--swatch-blush);
   }
 
-  /* Clear is the absence of a tint, so it is drawn as one: rim and bezel with
-     nothing in them. No slash, no label — an empty ring says it. */
+  /* Clear is the absence of a tint, so it is drawn as one: a lit rim with
+     nothing in it. No slash, no label — an empty lozenge says it. */
   [data-tint-swatch='clear'] {
     background: transparent;
-    border-color: var(--rule);
+    border-color: var(--rim-neutral);
   }
 </style>

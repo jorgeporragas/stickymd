@@ -204,7 +204,7 @@ Consequences: `--accent`, `--accent-hover`, `--accent-glow`, `--ink-on-accent` a
             `docs/DESIGN.md` principle 1 no longer says the surface is Aero. The frosted surface itself is unchanged and is not what this decision is about: glass here is a window property (principle 3), and dropping a visual philosophy does not un-frost a window.
 
 ## ADR-026 — The tint swatches take the Aqua bezel, not the Aqua gloss
-Status:     Accepted
+Status:     Accepted; the refusal of the gloss is superseded by ADR-027. Everything else stands.
 Date:       2026-09-06
 Context:    The founder asked for the tint picker to look like the Mac OS X Aqua traffic lights. Three treatments were put to him a commit after ADR-025 dropped Aero: the flat dots as built, a bezel, and full candy — radial fill, specular highlight, drop shadow. He chose the bezel, in his words liking the candy and picking the other anyway.
 Decision:   What the traffic lights are actually made of, in the order it matters: a rim in the fill's own hue rather than a neutral border; a bezel seating the disc in the surface; and going grey when the window is not in use. All three are taken. The gloss is not.
@@ -216,3 +216,14 @@ Consequences: `--swatch-rim` is `color-mix(in oklab, currentColor 72%, var(--rim
             Pinned inverts — dark disc, glyph in the note's own paper — rather than filling a little harder. Once both were discs, a stronger fill was too close to hover to tell apart, and an inverted control is the plainest "held down" there is, with no colour needed to say it.
             The disc itself lives in `src/app.css` as `.lozenge`, not in either component. The moment the second one wanted it, it stopped being one component's styling.
             The swatch's palette stays at `--space-4` with `--space-1` gaps. The traffic lights' proportion is nearer 12px with 8px gaps; that was offered and not taken, and it is a one-line change if the proportion turns out to matter more than the size.
+
+## ADR-027 — The direction is Aqua
+Status:     Accepted
+Date:       2026-09-06
+Context:    ADR-025 dropped Aero on the founder's instruction and ADR-026 refused the gloss on the grounds that it was the language just removed. Having seen the bezel in the running application, the founder named what he had been reaching for the whole time: not Aero, Aqua. His argument, and it holds — Aqua *is* Rams with personality. Its chrome descends from Braun: neutral, restrained, colour concentrated in the traffic lights and almost nowhere else. And it is two decades old, which makes it retro rather than dated.
+Decision:   Aqua is the direction. The lozenges take the full gloss: a fill lighter at the top than the bottom, a rim in the disc's own hue, a seat shading the inside of its lower edge, and a specular highlight. Every disc in the window is one diameter — `--space-4`, the size the palette's dots already were, which the founder picked as correct.
+Consequences: This does not restore an accent colour, and nothing in ADR-025's colour rule is reversed. That rule turns out to describe Aqua rather than to fight it: neutral chrome, with hue reserved for the small round things. The two decisions sit together, which is why only ADR-026's refusal is superseded and not ADR-025.
+            The glyph sits *above* the specular, which is where Aqua drew it too. At nine pixels a highlight across the top of a glyph is the difference between reading it and guessing.
+            Controls shrink from `--space-6` to `--space-4`, and their glyphs from 12px to 9px — about 0.58 of the diameter, which is the traffic lights' own proportion. A 16px target is small; it is acceptable here because the bar around them is a drag region, so a miss drags the window rather than doing something else.
+            `--gloss-tinted`, `--swatch-rim`, `--rim-shade` and `--rim-light` are primitives, defined once, because they are mixed from `currentColor` and therefore say the same thing in every theme. `--gloss-seat`, `--gloss-specular` and `--gloss-neutral` are theme-level: a specular at Frost's strength reads as a blown-out spot on a dark panel rather than as a curve.
+            That last point is a rule the hard way. ADR-026's tokens were written into the Frost block, so on Dark they were undefined and `border-color` fell back to its initial value — `currentColor` — rimming each disc in its own fill. It looked plausible in a screenshot and was reported as working. **A token that derives from `currentColor` belongs in the primitives; a token whose value depends on what is behind it belongs in the theme. And a token has to be read in both themes before either is called verified.**

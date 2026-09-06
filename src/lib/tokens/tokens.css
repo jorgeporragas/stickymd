@@ -28,6 +28,26 @@
   --ink-wash-strong: rgba(26, 26, 23, 0.14);
   --ink-wash-soft: rgba(26, 26, 23, 0.06);
 
+  /* Gloss, the parts of it that are the same in every theme because they are
+     mixed from `currentColor`. The seat and the specular are not: those are in
+     the theme blocks.
+
+     The fill of a disc that carries a colour. `currentColor` resolves at
+     whichever disc reads this, so one declaration lights all of them, and an
+     eighth tint would need no new value. */
+  --gloss-tinted: radial-gradient(
+    circle at 50% 18%,
+    color-mix(in oklab, currentColor 45%, var(--rim-light)) 0%,
+    currentColor 52%,
+    color-mix(in oklab, currentColor 84%, var(--rim-shade)) 100%
+  );
+
+  /* A swatch's rim is its own hue darkened, never a neutral border — a grey
+     ring is what made seven tints read as seven generic dots. */
+  --swatch-rim: color-mix(in oklab, currentColor 62%, var(--rim-shade));
+  --rim-shade: #000000;
+  --rim-light: #ffffff;
+
   /* Tint swatches — how each note colour is shown in the picker.
      Distinct from the tint itself: a tint is a translucent wash whose alpha is
      computed for contrast, while a swatch is the flat colour that names it.
@@ -123,20 +143,14 @@
   --surface-grain-opacity: 0.035;
   --surface-edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 
-  /* The bezel on a tint swatch: a bright hairline along the top inside edge
-     and a soft shade along the bottom, so the disc sits *in* the surface
-     rather than on it. This is the whole of what was borrowed from the Aqua
-     traffic lights — the rim and the seat, not the gloss. See ADR-026. */
-  --bezel:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -2px 3px -1px rgba(0, 0, 0, 0.16);
-
-  /* A swatch's rim is its own hue darkened, never a neutral border — a grey
-     ring is what made seven tints read as seven generic dots. `currentColor`
-     resolves at whichever swatch reads this, so one declaration rims all of
-     them. */
-  --swatch-rim: color-mix(in oklab, currentColor 72%, var(--rim-shade));
-  --rim-shade: #000000;
+  /* Gloss — the Aqua lozenge, per ADR-027.
+     Four parts, and a disc needs all four to read as one object: a fill that
+     is lighter at the top than the bottom, a rim in its own hue, a seat that
+     shades the inside of its lower edge, and a specular highlight. */
+  --gloss-seat:
+    inset 0 -2px 4px -1px rgba(0, 0, 0, 0.22),
+    0 1px 1px rgba(0, 0, 0, 0.12);
+  --gloss-specular: rgba(255, 255, 255, 0.92);
 
   /* The light a window catches as it lands. Painted by an overlay that fades
      out, never by the surface's own alpha — see docs/DESIGN.md 'Motion'. */
@@ -166,6 +180,12 @@
   /* Accent */
   --signal-danger: var(--red-600);
   --focus-ring: var(--neutral-950);
+
+  /* A control carries no tint, so its gloss is named rather than mixed, and
+     its rim is neutral — a rim mixed from the glyph's own ink would draw a
+     hard ring around a control whose job is to stay quiet. */
+  --gloss-neutral: radial-gradient(circle at 50% 18%, #ffffff 0%, #f1efe9 60%, #dedbd2 100%);
+  --rim-neutral: rgba(26, 26, 23, 0.3);
   --selection: var(--ink-wash-strong);
 
   /* Elevation */
@@ -212,12 +232,13 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 20px 36px -20px rgba(255, 255, 255, 0.14);
 
-  /* Dimmer than on Frost. The swatches are the same pale tints either way, but
-     the panel under them is dark, so a highlight at Frost's strength reads as
-     a rim light rather than as a bevel. */
-  --bezel:
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -2px 3px -1px rgba(0, 0, 0, 0.34);
+  /* Deeper than on Frost, and a quieter highlight: the discs are the same pale
+     tints either way, but the panel under them is dark, and a specular at
+     Frost's strength reads as a blown-out spot rather than as a curve. */
+  --gloss-seat:
+    inset 0 -2px 4px -1px rgba(0, 0, 0, 0.4),
+    0 1px 1px rgba(0, 0, 0, 0.3);
+  --gloss-specular: rgba(255, 255, 255, 0.8);
 
   --edge-on-glass: rgba(255, 255, 255, 0.12);
   --edge-on-solid: rgba(255, 255, 255, 0.10);
@@ -233,6 +254,9 @@
 
   --signal-danger: var(--red-300);
   --focus-ring: #f2efe8;
+
+  --gloss-neutral: radial-gradient(circle at 50% 18%, #4a4945 0%, #33322f 60%, #232220 100%);
+  --rim-neutral: rgba(255, 255, 255, 0.22);
   --selection: rgba(242, 239, 232, 0.20);
 
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);

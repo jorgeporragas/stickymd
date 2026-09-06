@@ -118,19 +118,37 @@ body {
 }
 
 /*
- * The seated disc: the window's controls and the tint swatches alike.
+ * The Aqua lozenge: the window's controls and the tint swatches alike.
  *
- * A rim and a bezel, and nothing else — size and fill belong to whatever is
- * using it. Shared here rather than in either component because the moment the
- * second one wanted it, it stopped being one component's styling.
+ * Shape, seat and specular — size, fill and rim belong to whatever is using
+ * it, because a disc carrying a tint mixes those from its own colour and a
+ * control cannot. Shared here rather than in either component because the
+ * moment the second one wanted it, it stopped being one component's styling.
  *
- * The rim reads `currentColor`, so a control coloured by its own tint rims
- * itself. See ADR-026.
+ * See ADR-027.
  */
 .lozenge {
+  position: relative;
   padding: 0;
   border-radius: 50%;
   border: 1px solid var(--swatch-rim);
-  box-shadow: var(--bezel);
+  box-shadow: var(--gloss-seat);
   cursor: pointer;
+}
+
+/*
+ * The specular highlight. Placed and sized in percentages so it holds its
+ * proportion at any diameter, and `pointer-events: none` so it never eats the
+ * click meant for the disc under it.
+ */
+.lozenge::after {
+  content: '';
+  position: absolute;
+  top: 12%;
+  left: 22%;
+  width: 56%;
+  height: 28%;
+  border-radius: 50%;
+  background: var(--gloss-specular);
+  pointer-events: none;
 }

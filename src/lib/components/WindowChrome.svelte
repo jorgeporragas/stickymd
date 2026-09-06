@@ -93,11 +93,11 @@
   .control {
     display: grid;
     place-items: center;
-    width: var(--space-6);
-    height: var(--space-6);
-    border-color: var(--rule);
-    background: var(--control-hover);
-    color: var(--ink-muted);
+    width: var(--space-4);
+    height: var(--space-4);
+    border-color: var(--rim-neutral);
+    background: var(--gloss-neutral);
+    color: var(--ink-secondary);
 
     /* Small control, not a glass surface: fading is cheap and correct.
        See docs/DESIGN.md section 'Never Allowed'. */
@@ -116,13 +116,18 @@
 
   .control:hover {
     color: var(--ink-primary);
-    background: var(--control-active);
   }
 
   /*
     Pinned inverts rather than fills a little harder. Filling was too close to
     hover to tell apart once both were discs, and an inverted control is the
     plainest "held down" there is — no colour required to say it.
+  */
+  /*
+    Pinned inverts rather than filling a little harder. Once every control was
+    a lozenge, a stronger fill was too close to hover to tell apart, and an
+    inverted one is the plainest "held down" there is — no colour needed.
+    It keeps its seat and its specular: it is the same object, pressed.
   */
   .control.active,
   .control.active:hover {
@@ -132,8 +137,17 @@
   }
 
   .control svg {
-    width: 12px;
-    height: 12px;
+    /* Proportioned to the disc rather than to the icon: the traffic lights
+       run about 0.58 of their diameter, and the glyph is there to be
+       recognised, not read.
+
+       Above the specular, which is where Aqua drew it too — its glyphs sit on
+       the glass, not under it. At nine pixels a highlight across the top of a
+       glyph is the difference between reading it and guessing. */
+    position: relative;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
     stroke: currentColor;
     stroke-width: 1.5;
     stroke-linecap: round;

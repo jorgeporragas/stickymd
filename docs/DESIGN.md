@@ -8,10 +8,12 @@
 
 ## Principles
 
-**1. The surface carries the personality. The content is Rams.**
-Chrome, edges, glass, and motion carry it — colour does not, since ADR-025. Everything inside a note — the user's text — is quiet, neutral, and typographic. The app is beautiful *around* the writing, never on top of it.
+**1. The surface is Aqua. The content is Rams.**
+Chrome, edges, glass, and motion carry the personality. Everything inside a note — the user's text — is quiet, neutral, and typographic. The app is beautiful *around* the writing, never on top of it.
 
-The direction is Rams restraint against the drafted feel of a scratchpad. Two effects belong to that second half and are named here before they are built, so that nothing gets designed in a way that shuts them out: **typographic scrambling** and **line boil**.
+Aqua is not a contradiction of the Rams half, which is why the two names sit in one sentence (ADR-027): its chrome descends from Braun — neutral, restrained, hue concentrated in the small round things and almost nowhere else. That is also the colour rule, unchanged from ADR-025: a hue appears only where colour is what tells you what something does.
+
+Two effects the founder named are still on the table and are recorded here so nothing gets designed in a way that shuts them out: **typographic scrambling** and **line boil**. Neither is built, and neither is settled against Aqua yet.
 
 **2. Chrome recedes.**
 Controls withdraw when the window is not being used and return on pointer entry or focus. The text is the focal point. Personality lives in the controls; the controls are present only when wanted.
@@ -49,6 +51,8 @@ Three families, all SIL Open Font License, all vendored into `src/assets/fonts/`
 **Handjet** is a variable face whose glyphs are built from repeated elements on a grid. `ELGR` controls how many elements compose each letter; `ELSH` morphs those elements between square and round. Degradation is therefore continuous, and is set through tokens rather than by choosing a file.
 
 Handjet's advance widths are identical at every setting of `ELGR`, `ELSH` and `wght` — the grid it is built on fixes them. Animating its axes therefore reflows nothing, which is what makes degradation usable as motion rather than only as a static choice.
+
+Every disc in the window is one diameter, `--space-4`, and a control's glyph is 9px — about 0.58 of it, which is the traffic lights' own proportion. The glyph is drawn *above* the specular: at nine pixels, a highlight across the top of one is the difference between reading it and guessing.
 
 Weight is a token, not a literal. `--weight-emphasis` (600) is what `**bold**` renders as, and `--weight-heading` (650) is every heading level and the hub's table headers. Emphasis sits *below* heading on purpose: bold inside a paragraph is a change of voice, not a change of level, and Geist at 700 was reading as a second heading in the middle of a line.
 
@@ -100,7 +104,10 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | Token | Role |
 |---|---|
 | `--signal-danger` | A control that takes something away |
-| `--bezel` | The seat under any of the window's discs — a control or a tint swatch: a bright hairline along its top inside edge, a soft shade along its bottom |
+| `--gloss-tinted` | The fill of a disc that carries a colour, mixed from `currentColor` — a primitive, since it says the same thing in every theme |
+| `--gloss-neutral` | The fill of a disc that carries none: the window's own controls |
+| `--gloss-seat` | The shade inside a disc's lower edge, and the contact shadow under it |
+| `--gloss-specular` | The highlight across its top |
 | `--swatch-rim` | A swatch's edge — its own hue darkened, via `currentColor`, never a neutral border. A control carrying no tint overrides it with `--rule`. |
 | `--focus-ring` | The focus indicator |
 | `--selection` | The wash behind selected text |
@@ -231,7 +238,7 @@ Every entry lands in the same commit as the component it describes.
 | Component | Role | Notes |
 |---|---|---|
 | `WindowChrome` | The drag region and window controls for any window. Takes `revealed: boolean`, an optional `closeLabel`, and optionally `alwaysOnTop` and `onAlwaysOnTop` for the pin — omit those and no pin is rendered, which is how the hub uses it. | Implements Principle 2, with one deliberate exception: a pinned note keeps its pin visible even when the chrome recedes. A state you cannot see is a state you cannot trust — chrome recedes, chrome that is carrying information does not. Controls fade via `opacity`, permitted for small non-glass elements. |
-| `.lozenge` (`src/app.css`) | The seated disc: a rim and a bezel, no size and no fill. Worn by the window's controls and by every tint swatch. Not a component — a shared treatment, in `app.css` for the same reason `.surface` is: two components wanted it. |
-| `TintPicker` | A note's colour. A swatch that opens the seven tints in a row, sitting with the other controls at the window's trailing edge, before the pin. The palette opens down and to the left, anchored to its right edge — the surface clips what leaves it. Its own surface is opaque `--surface-solid`, not the window's translucent paint, or the note's text reads through the swatches. It arrives over `--dur-settle` and leaves over `--dur-quick`: arriving is the palette presenting itself and is worth the time, while leaving is getting out of the way, and a dismissal as long as the arrival reads as lag. It stays mounted while it leaves and its own `animationend` says when it is gone — which is also what keeps reduced motion correct, since the collapsed duration still fires the event. Each disc is rimmed in its own hue and seated with `--bezel` (ADR-026), carries its colour as `color` rather than `background` so one rule rims all seven, and greys out while the chrome is receded. Clear is rim and bezel with nothing in them. Takes `revealed`, `tint`, `onTint`. | Like the pin, a note whose tint is not Clear keeps its swatch visible when the chrome recedes: the swatch is carrying information, and Principle 2 stops receding at that point. |
+| `.lozenge` (`src/app.css`) | The Aqua disc: shape, seat and specular, with no size, fill or rim — a disc carrying a tint mixes those from its own colour and a control cannot. Worn by the window's controls and by every tint swatch. Not a component — a shared treatment, in `app.css` for the same reason `.surface` is: two components wanted it. |
+| `TintPicker` | A note's colour. A swatch that opens the seven tints in a row, sitting with the other controls at the window's trailing edge, before the pin. The palette opens down and to the left, anchored to its right edge — the surface clips what leaves it. Its own surface is opaque `--surface-solid`, not the window's translucent paint, or the note's text reads through the swatches. It arrives over `--dur-settle` and leaves over `--dur-quick`: arriving is the palette presenting itself and is worth the time, while leaving is getting out of the way, and a dismissal as long as the arrival reads as lag. It stays mounted while it leaves and its own `animationend` says when it is gone — which is also what keeps reduced motion correct, since the collapsed duration still fires the event. Each disc is rimmed and lit from its own hue (ADR-026, ADR-027), carrying that hue as `color` rather than `background` so one rule fills and rims all seven, and greys out while the chrome is receded. Clear is a lit rim with nothing in it. Takes `revealed`, `tint`, `onTint`. | Like the pin, a note whose tint is not Clear keeps its swatch visible when the chrome recedes: the swatch is carrying information, and Principle 2 stops receding at that point. |
 | `NoteRow` | One note in the hub: its title, when it changed, and a delete control. Takes `title`, `when`, `onOpen`, `onDelete`. | The row is not the control — the buttons inside it are. Delete is revealed by hovering the row in CSS rather than through state, which avoids putting a pointer handler on a `div` that would then need an ARIA role it does not deserve. |
 | `Editor` | The note's markdown editing surface. Takes `value?: string` as initial source. Owns the CodeMirror instance and its lifecycle. | Content, not surface — quiet and typographic per Principle 1. No gutters, no active-line highlight, no border. Editor internals live in `src/lib/editor/`. |
