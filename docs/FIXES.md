@@ -189,10 +189,10 @@ Fix:      `shadow` is `false` in `src-tauri/tauri.conf.json`. With it off,
 Never:    Never turn `shadow` on for a window with `decorations: false`. The
           frame it adds is not paintable by the page, and on a transparent
           window it shows as a light border rather than as nothing.
-          The consequence is that the note casts no shadow at all: a CSS shadow
-          is drawn inside the web view and clipped at the window edge.
-          Restoring one means padding the window and drawing the shadow inside
-          that padding — see STATUS SMD-044. Not a styling tweak.
+          Turning it off costs nothing visually: Windows draws its own shadow
+          for a DWM-rounded window whatever this setting says. A CSS shadow
+          would still be clipped at the window edge, so `--shadow-rest` has no
+          effect on the window itself — the shadow you see is the system's.
           Two wrong diagnoses preceded this one, both from theorising about the
           gap instead of measuring it. One rested on a DPI reading taken from a
           process that was not DPI-aware, which returned scale 1.0 when the

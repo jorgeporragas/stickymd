@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-SMD-018 — verifying that copy yields raw markdown source. It has been open since Phase 1 and is the single property the product exists to provide, so it should not close the phase still unchecked.
+Launch at startup (SMD-037), off by default and toggled from the tray menu, since there is no settings surface.
 
 Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037) and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
 
@@ -198,11 +198,12 @@ Notes: Rendered when the cursor is outside, raw pipes when inside, with column a
 
 ### [SMD-018] Verify copy yields raw markdown in the running application
 Type:    chore
-State:   accepted
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
-Notes: The document holds real markdown and CodeMirror serialises the clipboard from state rather than the DOM, so raw source is expected. Unverified — reading the clipboard was not possible in the browser harness. This is the single property the product exists to provide, so it gets an explicit check.
+  2026-09-06  confirmed on device (founder) — pasting from sticky.md gives raw markdown
+Notes: The document holds real markdown and CodeMirror serialises the clipboard from state rather than the DOM, so raw source was expected. Confirmed by the founder pasting out of a rendered note. No commit — nothing needed changing. This is the single property the product exists to provide, which is why it was checked rather than assumed.
 
 ### [SMD-019] Note window JavaScript weight
 Type:    idea
@@ -392,12 +393,13 @@ Notes: The cause was `shadow: true`, added in the corner-rounding commit. It giv
 
 ### [SMD-044] A note window casts no shadow
 Type:    bug
-State:   idea
+State:   dropped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea while fixing SMD-043
-Notes: `shadow: false` is required — see SMD-043 — and a CSS shadow is drawn inside the web view, so it is clipped at the window edge. The note therefore casts nothing, and `--shadow-rest` has no visible effect on the window.
-  The usual remedy is to make the window larger than the visible note and draw the shadow in CSS inside that padding, which means the surface no longer fills the window and every geometry calculation has to account for the inset. Belongs with Phase 5 — Theme & Motion rather than as a patch here.
+  2026-09-06  dropped — the premise was false
+Notes: Logged on the inference that `shadow: false` would leave the window casting nothing. The founder observed that it does cast one: Windows draws its own shadow for a DWM-rounded window whatever that setting says. Inferred from code rather than looked at, which is the whole reason on-device confirmation exists.
+  What remains true, and is recorded in `docs/FIXES.md` instead: a CSS shadow is clipped at the window edge, so `--shadow-rest` has no effect on the window itself. The shadow is the system's. If a different one is ever wanted, that is when the window has to be padded — not before.
 
 ### [SMD-042] Apostrophes were turned into separators in filenames
 Type:    bug
@@ -417,6 +419,15 @@ Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 3 — Windows, Tray & Shortcuts
 Notes: `MASTER.md § In Scope` requires it off by default and user-togglable, and MASTER veto 5 forbids enabling it without explicit consent. The tray menu is the natural home for the toggle, since there is no settings surface. Needs `tauri-plugin-autostart`.
+
+### [SMD-045] Animate the transition between written and rendered markdown
+Type:    idea
+State:   idea
+Created: 2026-09-06
+History:
+  2026-09-06  logged as idea (founder)
+Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
+  Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
 ### [SMD-038] Radial glass menu on right-click
 Type:    idea
