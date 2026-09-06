@@ -6,13 +6,11 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Phase
 
-**Build** — Phase 3 — Windows, Tray & Shortcuts
+**Build** — Phase 4 — The Hub
 
 ## Current Active Step
 
-Closing Phase 3 — Windows, Tray & Shortcuts. Every item is done; the truth check runs next, then `Current Phase` moves to Phase 4 — The Hub.
-
-Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037) and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
+The hub window: every note listed, opened, focused and deleted from one place. It is the last unbuilt entry in `MASTER.md § In Scope` apart from the theme and motion work, and it gives `list_notes` and `delete_note` their first callers — both written and tested since Phase 2 with nothing calling them (SMD-027).
 
 ---
 
@@ -494,10 +492,19 @@ Notes: `list_notes` and `delete_note` are written, tested where testable, and re
 
 ## Completed Milestones
 
+### Phase 3 — Windows, Tray & Shortcuts — closed 2026-09-06
+Notes became windows. One window per note with its own file identity, tracked by window label; tray residency, so closing the last window puts the application away rather than ending it; a global new-note shortcut registered with the operating system, configurable through `settings.json` and reporting in the tray when it cannot be claimed; session restore of open windows with their geometry; a per-note always-on-top pin; launch at startup, off by default. Items SMD-030, SMD-032, SMD-033, SMD-034, SMD-035, SMD-036, SMD-037, SMD-040, SMD-041, SMD-042, SMD-043.
+
+Truth check run 2026-09-06: retraction grep clean; all six Phase 3 entries of `MASTER.md § In Scope` verified present in code; no supersession pointers to reconcile; 46 items all carrying a state, a date and a history line, every shipped item citing a commit that exists, the one dropped item carrying a reason, and none left `active`; 154 cross-references checked with one genuine error corrected — an unqualified `index.rs`.
+
+Four bugs in this phase were found by the founder looking at the running application rather than by any test, and two of them had causes I had reasoned my way past. That is the phase's real lesson: measure inside the running application.
+
+24 Rust tests pass.
+
 ### Phase 2 — Files & Persistence — closed 2026-09-05
 Notes became files. Rust owns note I/O with typed errors and untrusted-name validation; debounced autosave that flushes on blur and intercepts window close; filenames slugified from the first line with deduplication, renaming, Windows reserved-stem handling and no churn on re-save; the sidecar index with atomic writes, corrupt-file salvage and a mutex against concurrent windows; delete to the operating system's trash. Items SMD-023, SMD-024, SMD-026, SMD-028, SMD-029.
 
-Truth check run 2026-09-05 before the transition: retraction grep clean; all fourteen built entries of `MASTER.md § In Scope` verified present in code; no supersession pointers to reconcile; 29 items all carrying a state, a date and a history line, every shipped item citing a commit that exists, and no item left `active`; 117 cross-references checked with one genuine error corrected — an unqualified `index.rs` in CLAUDE. The remaining link-checker hits are paths inside the user's notes folder rather than repository files.
+Truth check run 2026-09-05 before the transition: retraction grep clean; all fourteen built entries of `MASTER.md § In Scope` verified present in code; no supersession pointers to reconcile; 29 items all carrying a state, a date and a history line, every shipped item citing a commit that exists, and no item left `active`; 117 cross-references checked with one genuine error corrected — an unqualified `src-tauri/src/index.rs` in CLAUDE. The remaining link-checker hits are paths inside the user's notes folder rather than repository files.
 
 21 Rust tests pass. Nothing in the phase is unverified except what SMD-027 names.
 

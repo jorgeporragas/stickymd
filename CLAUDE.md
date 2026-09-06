@@ -2,7 +2,7 @@
 
 > **Authoritative for:** engineering imperatives for this repository — session procedure, project structure, framework usage rules, design enforcement, cross-platform discipline, local setup, and build.
 > **Never contains:** project context, stack rationale, or current state. What sticky.md is and why the stack was chosen live in `MASTER.md`. The visual system lives in `docs/DESIGN.md`. Current phase and active work live in `docs/STATUS.md`.
-> **Last verified:** 2026-09-05
+> **Last verified:** 2026-09-06
 
 This project runs on FLOW. The spec sits in the working tree at `docs/FLOW_SYSTEM_v*.md` and is **deliberately untracked** — it is the founder's portable system, excluded by `.gitignore` per ADR-015. Read it before doing anything else. If it is absent from your working copy, ask the founder for it rather than proceeding without it.
 

@@ -2,7 +2,7 @@
 
 > **Authoritative for:** non-obvious solutions that must never be undone, each naming the area it guards.
 > **Never contains:** anything that is not a fix. Work items live in `docs/STATUS.md`. Rules live in `CLAUDE.md`. Decisions live in `docs/DECISIONS.md`.
-> **Last verified:** 2026-09-05
+> **Last verified:** 2026-09-06
 
 An entry belongs here when a solution was non-obvious, or when it took more than one failed attempt to get right. Each entry names the area it guards so that `CLAUDE.md § Areas that require reading FIXES.md first` stays accurate.
 
