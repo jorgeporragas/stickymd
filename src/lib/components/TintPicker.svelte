@@ -97,7 +97,8 @@
   */
   .swatch,
   .dot {
-    background: var(--gloss-tinted);
+    --lozenge-fill: var(--gloss-tinted);
+    --lozenge-pressed: var(--gloss-tinted-pressed);
   }
 
   /* One diameter for every disc in the window — the founder's call, and the
@@ -227,7 +228,8 @@
   /* Clear is the absence of a tint, so it is drawn as one: a lit rim with
      nothing in it. No slash, no label — an empty lozenge says it. */
   [data-tint-swatch='clear'] {
-    background: transparent;
+    --lozenge-fill: transparent;
+    --lozenge-pressed: transparent;
     border-color: var(--rim-neutral);
   }
 </style>

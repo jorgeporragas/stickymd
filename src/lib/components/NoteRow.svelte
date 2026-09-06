@@ -22,7 +22,7 @@
   </button>
 
   <button
-    class="delete"
+    class="lozenge delete"
     type="button"
     aria-label="Delete {title}"
     onclick={onDelete}
@@ -84,18 +84,25 @@
     color: var(--ink-muted);
   }
 
+  /*
+    A seated control like the ones on a window's chrome, and square rather than
+    round — the round ones are the note's own colour and its window's controls,
+    and this is neither. The disc treatment is `.lozenge`, in src/app.css; only
+    the radius and the size differ here.
+  */
   .delete {
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    width: var(--space-6);
+    width: var(--space-4);
+    height: var(--space-4);
     margin: var(--space-2) var(--space-2) var(--space-2) 0;
-    padding: 0;
-    border: 0;
+    align-self: center;
     border-radius: var(--radius-chip);
-    background: transparent;
+    border-color: var(--rim-neutral);
+    --lozenge-fill: var(--gloss-neutral);
+    --lozenge-pressed: var(--gloss-pressed);
     color: var(--ink-muted);
-    cursor: pointer;
 
     opacity: 0;
     transition:
@@ -119,8 +126,11 @@
   }
 
   .delete svg {
-    width: 12px;
-    height: 12px;
+    /* Above the specular, as on every other seated control. */
+    position: relative;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
     stroke: currentColor;
     stroke-width: 1.2;
     stroke-linecap: round;

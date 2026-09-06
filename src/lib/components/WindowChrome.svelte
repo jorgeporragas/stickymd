@@ -96,7 +96,8 @@
     width: var(--space-4);
     height: var(--space-4);
     border-color: var(--rim-neutral);
-    background: var(--gloss-neutral);
+    --lozenge-fill: var(--gloss-neutral);
+    --lozenge-pressed: var(--gloss-pressed);
     color: var(--ink-secondary);
 
     /* Small control, not a glass surface: fading is cheap and correct.
@@ -139,7 +140,8 @@
   .control.active,
   .control.active:hover {
     color: var(--signal-engaged);
-    background: var(--gloss-tinted);
+    --lozenge-fill: var(--gloss-tinted);
+    --lozenge-pressed: var(--gloss-tinted-pressed);
     border-color: var(--swatch-rim);
   }
 

@@ -218,11 +218,15 @@ Notes: The document holds real markdown and CodeMirror serialises the clipboard 
 
 ### [SMD-019] Note window JavaScript weight
 Type:    idea
-State:   idea
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
 Notes: The note window's main chunk is 555 kB raw, 193 kB gzipped — mostly CodeMirror plus the HTML, CSS and JavaScript grammars that `@codemirror/lang-markdown` pulls in unconditionally (see `docs/FIXES.md`). Loaded from disk, so no network cost, but every open note window parses its own copy.
+  2026-09-06 — measured rather than changed, which is what this item asked for. A production build ships **677 kB of raw JavaScript** across both windows, 14.5 kB of CSS and 176 kB of fonts.
+  Where it sits matters more than the total. The hub's own chain is about 64 kB; effectively all the rest belongs to the note window, and it is CodeMirror plus the language set. That matches this item's own guess, and `docs/FIXES.md` records why the language set cannot simply be lazy-loaded.
+  The number that actually bears on "optimized" is not the total but the multiplier: **each note window is its own WebView2 renderer and parses its own copy.** Ten notes open is ten parses of the same 600-odd kB, which is the shape of this product. That is the argument for trimming the language set, and it is a stronger argument than bundle size on its own would be.
+  Not acted on. Cutting languages is a product decision — it decides which fenced blocks highlight — and it belongs to the founder rather than to a measurement.
   Measured 2026-09-05, one window, development build: the sticky.md process tree is 381.8 MB across 7 processes — 35.9 MB for the application and 345.9 MB across 6 WebView2 processes. Half the WebView2 processes on the machine belonged to other applications and are excluded.
   Still unmeasured, and both matter before drawing any conclusion: a release build, and the cost of the second and subsequent windows. Tauri shares one WebView2 environment across windows, so window two should cost a renderer rather than another tree — that is the number that decides whether the many-window architecture is affordable. `MASTER.md § Stack` claims materially lower memory across many windows; that claim is currently unverified in either direction.
 
@@ -578,13 +582,16 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
 
 ### [SMD-061] Restyle the hub's delete control
 Type:    feature
-State:   idea
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
 Notes: The founder wants it square rather than round, with the grey bezel the window's controls wear, appearing only on hover, and pressing it should read as a click.
   Half of that already holds and should not be claimed as work: it is revealed by `.row:hover` in CSS today. What is missing is the lozenge treatment at a square radius, and a press state — the control has a hover colour but nothing that responds to the press itself.
-  One thing to settle while building it: `.lozenge` is round because every disc so far has been. A square variant means the shared treatment stops being "the disc" and becomes "the seated control", which is the more honest name for it either way.
+  Shipped. Square at `--radius-chip`, `--space-4` like every other seated control, with the neutral gloss and the grey rim. Round is now the default rather than the only option: the round ones are a note's own colour and its window's controls, and this is neither.
+  The press turned into the more useful half of the item. It lives on `.lozenge` rather than on this button, because a control that answers a press is not a property of the hub — so the fill arrives as `--lozenge-fill` and the shared treatment owns the states. Pressed, the fill lights from below and the specular goes out; a highlight on a face no longer turned toward the light is what makes a pressed state look painted on rather than pushed in. Every seated control in the application answers a press now, not only this one.
+  The name `.lozenge` stayed. A lozenge is a small tablet, not specifically a circle, so it survives having a square member; renaming it would have been churn across three files for no gain.
+  Verified in the running dev server behind a probe that seeded two rows, since the hub has no backend in a browser: the control measures 16x16 at a 6px radius with the neutral gloss and rim, the hover-only rule is intact, and both `:active` rules resolve with the pressed fill. The click *feel* is the founder's to judge — the browser pane takes no clicks while it is hidden.
 
 ### [SMD-051] Typographic scrambling
 Type:    idea

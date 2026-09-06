@@ -138,8 +138,19 @@ body {
   padding: 0;
   border-radius: 50%;
   border: 1px solid var(--swatch-rim);
+  background: var(--lozenge-fill);
   box-shadow: var(--gloss-seat);
   cursor: pointer;
+}
+
+/*
+ * The fill arrives as a variable rather than as a background, so that pressing
+ * one belongs here rather than being written out again by every control that
+ * has a fill of its own. A control sets `--lozenge-fill`, and optionally
+ * `--lozenge-pressed`; the states are the shared treatment's business.
+ */
+.lozenge:active {
+  background: var(--lozenge-pressed, var(--lozenge-fill));
 }
 
 /*
@@ -147,6 +158,13 @@ body {
  * proportion at any diameter, and `pointer-events: none` so it never eats the
  * click meant for the disc under it.
  */
+/* The highlight goes out while the control is pressed. A specular on a face
+ * that is no longer turned toward the light is what makes a pressed state look
+ * painted on rather than pushed in. */
+.lozenge:active::after {
+  opacity: 0;
+}
+
 .lozenge::after {
   content: '';
   position: absolute;

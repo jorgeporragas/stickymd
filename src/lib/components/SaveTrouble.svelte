@@ -42,7 +42,8 @@
     width: var(--space-4);
     height: var(--space-4);
     color: var(--signal-danger);
-    background: var(--gloss-tinted);
+    --lozenge-fill: var(--gloss-tinted);
+    --lozenge-pressed: var(--gloss-tinted-pressed);
     border-color: var(--swatch-rim);
   }
 

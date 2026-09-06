@@ -42,6 +42,16 @@
     color-mix(in oklab, currentColor 84%, var(--rim-shade)) 100%
   );
 
+  /* The same fill lit from below instead of above: a control pushed in. The
+     specular goes with it — a highlight on a surface that is no longer facing
+     the light is what makes a "pressed" state look painted on. */
+  --gloss-tinted-pressed: radial-gradient(
+    circle at 50% 88%,
+    color-mix(in oklab, currentColor 62%, var(--rim-light)) 0%,
+    color-mix(in oklab, currentColor 92%, var(--rim-shade)) 60%,
+    color-mix(in oklab, currentColor 74%, var(--rim-shade)) 100%
+  );
+
   /* A swatch's rim is its own hue darkened, never a neutral border — a grey
      ring is what made seven tints read as seven generic dots. */
   /* The glyph on a lit control: its own hue taken most of the way to black,
@@ -241,6 +251,7 @@
   /* Dark on a light note, which is the point: code is read on a dark ground
      by nearly everyone who reads code. */
   --code-surface: #131317;
+  --gloss-pressed: radial-gradient(circle at 50% 88%, #f4f2ec 0%, #d8d5cc 60%, #e2e0d8 100%);
   --selection: var(--ink-wash-strong);
 
   /* Elevation */
@@ -316,6 +327,7 @@
   /* Lighter than the note here, not darker. On a dark surface a darker panel
      reads as a hole rather than as a block set into the page. */
   --code-surface: #1e1e23;
+  --gloss-pressed: radial-gradient(circle at 50% 88%, #3a3936 0%, #1d1c1a 60%, #2a2926 100%);
   --selection: rgba(242, 239, 232, 0.20);
 
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);
