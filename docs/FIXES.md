@@ -227,7 +227,7 @@ Never:    Never animate the geometry of the element that covers a glass window.
 ### Deleting a note races its own window's last write
 Area:     The sidecar index, and note file rename and deduplication logic
 Date:     2026-09-06
-Commit:   pending
+Commit:   a948181
 Problem:  Deleting a note destroys its window first, then trashes the file,
           then forgets its index entry. But destroying a focused window makes
           the system take focus away from it, and a focus loss is one of the
