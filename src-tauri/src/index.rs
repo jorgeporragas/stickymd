@@ -147,6 +147,16 @@ pub fn set_placement(
     size: Option<(u32, u32)>,
     open: bool,
 ) -> Result<(), NoteError> {
+    // A note that is not on disk gets no entry. Destroying a window makes the
+    // system take focus away from it first, and a focus loss is one of the two
+    // moments placement is written — so deleting a note races its own window's
+    // last write, and the loser is whichever runs second. If that write wins,
+    // it puts back the entry the delete just removed, marked open, and the note
+    // returns at the next launch as an empty window with its name on it.
+    if !dir.join(name).exists() {
+        return Ok(());
+    }
+
     let mut index = load(dir);
     let state = index.notes.entry(name.to_string()).or_default();
 
@@ -170,7 +180,13 @@ pub fn restorable(dir: &Path) -> Vec<(String, NoteState)> {
     load(dir)
         .notes
         .into_iter()
-        .filter(|(_, state)| state.open)
+        // Open *and* still there. The index is a record of what the windows
+        // were doing, not of what exists: a note deleted from the folder while
+        // the application was not running leaves its entry behind, and
+        // restoring from that entry alone would open a window onto a file that
+        // is gone. Existence is the folder's answer to give, which is the same
+        // rule the rest of this module follows.
+        .filter(|(name, state)| state.open && dir.join(name).exists())
         .collect()
 }
 
@@ -230,7 +246,10 @@ pub fn set_note_always_on_top(
 mod tests {
     use std::path::PathBuf;
 
-    use super::{forget_entry, load, rename_entry, store, Index, NoteState, INDEX_FILE};
+    use super::{
+        forget_entry, load, rename_entry, restorable, set_placement, store, Index, NoteState,
+        INDEX_FILE,
+    };
 
     fn scratch(label: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!("stickymd-index-{label}-{}", std::process::id()));
@@ -243,6 +262,46 @@ mod tests {
         let mut index = load(dir);
         index.notes.insert(name.to_string(), state);
         store(dir, &index).expect("store");
+    }
+
+    /// A note file, so the folder agrees the note exists.
+    fn with_file(dir: &PathBuf, name: &str) {
+        std::fs::write(dir.join(name), "body").expect("note file");
+    }
+
+    #[test]
+    fn a_deleted_note_is_not_restored_even_if_its_entry_says_open() {
+        let dir = scratch("restore-deleted");
+        with_entry(&dir, "gone.md", NoteState { open: true, ..Default::default() });
+        with_entry(&dir, "here.md", NoteState { open: true, ..Default::default() });
+        with_file(&dir, "here.md");
+
+        let restorable: Vec<String> = restorable(&dir).into_iter().map(|(name, _)| name).collect();
+        assert_eq!(restorable, vec!["here.md".to_string()]);
+    }
+
+    #[test]
+    fn placement_is_not_written_for_a_note_that_is_gone() {
+        let dir = scratch("placement-deleted");
+
+        // The race this guards: destroying a window takes focus from it, and a
+        // focus loss writes placement. Deleting a note removes its entry, and
+        // that write can land afterwards.
+        set_placement(&dir, "gone.md", Some((10, 20)), Some((300, 300)), true).expect("placement");
+
+        assert!(load(&dir).notes.is_empty(), "an entry was recreated for a deleted note");
+    }
+
+    #[test]
+    fn placement_is_written_for_a_note_that_exists() {
+        let dir = scratch("placement-live");
+        with_file(&dir, "live.md");
+
+        set_placement(&dir, "live.md", Some((10, 20)), Some((300, 300)), true).expect("placement");
+
+        let state = load(&dir).notes.get("live.md").cloned().expect("entry");
+        assert_eq!((state.x, state.y), (Some(10), Some(20)));
+        assert!(state.open);
     }
 
     #[test]

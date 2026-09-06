@@ -469,6 +469,18 @@ Dropped because: what changes when the cursor leaves a line is a reflow — the 
 Notes: Syntax currently appears and disappears instantly as the cursor enters and leaves a line. The founder would like that transition softened. Beyond V1 by his own framing, and it belongs with Phase 5 — Theme & Motion.
   Constrained by `docs/DESIGN.md § Never Allowed`: the syntax characters are hidden with replace decorations, so there is no element to fade — a transition means rendering the marks and animating their width or opacity rather than removing them, which changes how the decoration layer works. Not a styling change.
 
+### [SMD-050] A deleted note could come back as an empty window
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  found while checking the notes folder after the founder's hub test
+  2026-09-06  shipped
+Notes: Found by looking rather than by report. The founder's notes folder held an index entry for `testing-hub-responsiveness.md`, a note whose file is not there — so something leaves entries behind.
+  The path that can do it: deleting a note destroys its window before trashing the file, and destroying a focused window makes the system take focus away from it first. A focus loss is one of the two moments placement is written. So the delete and the window's last write run at once on different threads, and if the write lands after `forget_entry` it puts the entry back, marked open. `restorable` filtered on `open` alone, so the next launch would open an empty window carrying the deleted note's name.
+  Fixed with two independent guards, since either alone leaves a hole: `set_placement` writes nothing for a note that is not in the folder, and `restorable` requires the file to exist as well as the entry to say open. The second one also covers the case no in-process ordering can reach — a note deleted from the folder while the application is not running. Three tests, 27 passing.
+  What is *not* claimed: that this is how the founder's orphan got there. Its entry says `open: false`, and the race produces `open: true`. Something else can leave an entry behind and I have not found it. The guards above make an orphan harmless rather than absent, which is the right order to do this in, but the second cause is still open. Not chased further because it is untraceable after the fact — worth watching for a fresh orphan appearing in a folder whose history is known.
+
 ### [SMD-049] The release workflow
 Type:    chore
 State:   shipped

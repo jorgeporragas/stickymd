@@ -223,3 +223,32 @@ Never:    Never animate the geometry of the element that covers a glass window.
           Anything nested *inside* it may scale freely — what is behind a
           palette is the window, not the desktop. That is the line: the surface
           is the window's own paint, everything else sits on it.
+
+### Deleting a note races its own window's last write
+Area:     The sidecar index, and note file rename and deduplication logic
+Date:     2026-09-06
+Commit:   pending
+Problem:  Deleting a note destroys its window first, then trashes the file,
+          then forgets its index entry. But destroying a focused window makes
+          the system take focus away from it, and a focus loss is one of the
+          two moments placement is written — so the delete and the window's
+          last write are running at once, on different threads, and whichever
+          lands second wins. When the write wins it puts back the entry the
+          delete had just removed, marked `open`, and the note comes back at
+          the next launch as an empty window carrying its name. `restorable`
+          filtered on `open` alone and had no reason to doubt the entry.
+Fix:      Two independent guards, because either one alone still leaves a hole.
+          `set_placement` writes nothing for a note that is not in the folder,
+          so the losing write cannot recreate an entry. `restorable` requires
+          the file to exist as well as the entry to say open, so an entry that
+          got in another way — a note deleted from the folder while the
+          application was not running, which no amount of in-process ordering
+          can prevent — still cannot open a window onto a file that is gone.
+          Both are tested.
+Never:    Never treat the index as evidence that a note exists. It records what
+          the windows were doing; the folder is what says what there is. Any
+          read that acts on an entry has to ask the folder too.
+          And do not fix this by reordering the delete. The two writes are on
+          different threads and the ordering is the system's to decide, not
+          ours — an ordering that happens to work is a race that has not fired
+          yet.
