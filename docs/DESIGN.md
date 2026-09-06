@@ -36,7 +36,7 @@ A theme is a complete set of token values and nothing else. Themes never replace
 
 ## Typography
 
-Three families, all SIL Open Font License, all vendored into the repository with their `OFL.txt` alongside. Nothing is fetched at runtime.
+Three families, all SIL Open Font License, all vendored into `src/assets/fonts/` with their licence texts alongside as `OFL-<Family>.txt`. Nothing is fetched at runtime.
 
 | Role | Face | Used for |
 |---|---|---|

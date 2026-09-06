@@ -6,11 +6,13 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Phase
 
-**Build** — Phase 1 — Foundation & Editor Core
+**Build** — Phase 2 — Files & Persistence
 
 ## Current Active Step
 
-Closing Phase 1 — Foundation & Editor Core. Every item in the phase is done; the truth check runs next, then `Current Phase` moves to Phase 2 — Files & Persistence.
+Note file I/O: Rust commands to read and write a note in the notes folder, and the folder's default location. Everything else in the phase — debounced autosave, slugified filenames, the sidecar index, delete-to-trash — depends on it.
+
+This is the first work that touches a user's disk. Nothing in the phase may write a note file on every keystroke (`CLAUDE.md § Backend`), and deletion goes through the `trash` crate rather than any platform call.
 
 ---
 
@@ -93,11 +95,12 @@ Notes: The canonical text from gnu.org, verbatim, as `LICENSE` in the repository
 
 ### [SMD-008] Write the README
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active
+  2026-09-05  shipped — commit 2f56290
 Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it appears rather than burying it. Links to the FLOW files rather than restating them: current state points at STATUS, toolchain requirements at CLAUDE. Opens with a notice that the software is unfinished, placed above the feature list so a visitor cannot read the list as a claim about what runs today. The clone URL is deliberately absent — no remote exists yet, and inventing one would be a false instruction.
 
 ### [SMD-009] Chakra Petch as an alternate built-in theme's display face
@@ -141,7 +144,7 @@ History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active
   2026-09-05  shipped — commit 7417271
-Notes: Eight variable woff2 files in `src/assets/fonts/`, 190 kB total, subset to latin and latin-ext — other scripts deliberately absent. Geist ships roman and italic; the others are roman only. Each family's `OFL.txt` sits beside its files. Verified in a browser: all three families load and render, and the Handjet axes drive real degradation.
+Notes: Eight variable woff2 files in `src/assets/fonts/`, 190 kB total, subset to latin and latin-ext — other scripts deliberately absent. Geist ships roman and italic; the others are roman only. Each family's licence text sits beside its files as `OFL-<Family>.txt`. Verified in a browser: all three families load and render, and the Handjet axes drive real degradation.
 
 ### [SMD-014] App icon and bundle configuration
 Type:    chore
@@ -152,7 +155,7 @@ History:
   2026-09-05  scope corrected — blocks the build, not only releases
   2026-09-05  active
   2026-09-05  shipped — commit e3ac885
-Notes: `tauri-build` requires `icons/icon.ico` to generate the Windows resource file, so `cargo check` fails without it and the application cannot run at all. The earlier note claiming `tauri dev` was unaffected was wrong. Also needs the `bundle` section in `tauri.conf.json` for NSIS and the portable zip. The icon itself is an identity decision for the founder.
+Notes: `tauri-build` requires `src-tauri/icons/icon.ico` to generate the Windows resource file, so `cargo check` fails without it and the application cannot run at all. The earlier note claiming `tauri dev` was unaffected was wrong. Also needs the `bundle` section in `src-tauri/tauri.conf.json` for NSIS and the portable zip. The icon itself is an identity decision for the founder.
 
 ### [SMD-015] Compositor glass and the Glass/Solid mode switch
 Type:    feature
@@ -231,4 +234,9 @@ Notes: The note tints from ADR-018 — Clear, Sun, Spring, Aqua, Sky, Lilac, Blu
 
 ## Completed Milestones
 
-*(A phase collapses into a single changelog line here when it closes.)*
+### Phase 1 — Foundation & Editor Core — closed 2026-09-05
+Tauri v2 + Svelte 5 shell with custom chrome and the design token layer; CodeMirror 6 with the inline-rendering layer, formatting commands, fenced-code highlighting and rendered tables; three vendored OFL typefaces; the application mark; compositor glass with a Solid fallback; the README. Items SMD-006, SMD-007, SMD-008, SMD-012, SMD-013, SMD-014, SMD-015, SMD-016, SMD-017.
+
+Truth check run 2026-09-05 before the transition: retraction grep clean across truth files; all ten built entries of `MASTER.md § In Scope` verified present in code; no supersession pointers to reconcile; 22 items all carrying a state, a date and a history line, with every shipped item citing a commit that exists; 111 cross-references checked and two genuine errors corrected — the font licence filenames and three unqualified paths.
+
+The item entries above are kept rather than folded away. Their commit citations and findings — the Handjet metric measurement, the memory figures, the licence discrepancy — are not reproducible from a changelog line.
