@@ -283,6 +283,7 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as active — Phase 2 — Files & Persistence
   2026-09-05  shipped — commit 6dad028
+  2026-09-06  confirmed on device (founder) — a note deleted from the hub left the folder and appeared in the Recycle Bin
 Notes: `trash` crate 5.2.7, never an unlink — a note deleted by mistake has to be recoverable, which is why the app has no bin of its own. Deleting also forgets the note's index entry, under the lock. A trash failure is its own error variant rather than a generic IO one: some locations have no trash at all, and offering a permanent delete is a different conversation from reporting a broken disk.
   Deliberately not unit-tested. Exercising it would put files in the developer's real Recycle Bin, and what it delegates to is the crate's job. The parts worth covering — name validation and forgetting the entry — are tested through `safe_name` and `forget_entry`.
 
@@ -425,15 +426,18 @@ Notes: A checkable "Launch at startup" item in the tray menu, since there is no 
 
 ### [SMD-047] The hub
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as active — Phase 4 — The Hub
+  2026-09-06  shipped — commit 8c7f373
+  2026-09-06  confirmed on device (founder) — opens, drags, lists, deletes
 Notes: Every note listed newest first, opened by clicking, deleted from the row. Opened by clicking the tray, or from its menu. `list_notes` now returns a title and a modified time rather than a filename: the hub shows what a person calls a note, which is its first line, while every command still refers to notes by filename.
   Deleting asks for no confirmation. The file goes to the operating system's trash, so it is already undoable — a dialog guarding something the OS made recoverable is friction with no benefit.
   A note that cannot be read is listed under its filename rather than hidden. A note the hub silently omits is a note the user cannot recover.
   The list refreshes whenever the hub is focused. Notes change in other windows and in the folder itself, and a list that is only right when it was opened is worse than one that is right when you look at it.
-  Not confirmed: that the hub opens, lists, opens notes, and deletes to the Recycle Bin.
+  Confirmed by the founder on 2026-09-06: the hub opens, the window drags, and deleting a note removes it from the folder and puts it in the Recycle Bin.
+  A first report that the hub could not be dragged and its buttons did nothing turned out to be a stale build: the launch being tested had exited with an error and left an older instance running, from before the hub had a capability entry. Nothing was changed to fix it. The lesson is that "the app is running" is not the same as "the app is running this code" — check that a launch actually succeeded before asking for a test.
 
 ### [SMD-046] A settings surface
 Type:    idea
