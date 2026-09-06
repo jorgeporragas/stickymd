@@ -10,11 +10,11 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Phase 5 is built and awaiting the founder's verification on device. Both halves are in: the theme system with Frost and Dark and the seven per-note tints (SMD-004, SMD-021, ADR-024), and the motion pass (SMD-048).
+Nothing in progress. The autonomous bundle the founder approved is done and awaiting his verification: SMD-022 (the transparency setting followed at runtime), SMD-020 (fenced code blocks — panel, size, colour), SMD-061 (the hub's delete control, and a press state for every seated control), and SMD-019 (the bundle measured rather than changed).
 
-Two calls in it are his to confirm rather than mine. SMD-045 was dropped rather than built — animating the written-to-rendered transition means animating a reflow on every cursor move, which would make it worse, and the fix applied instead is a design one. And `docs/DESIGN.md § Motion` was amended: a note cannot scale into place on a frosted window, so it arrives by the light on it.
+Build phases 1 to 5 are shipped. What remains on the list is all `idea`-state and each piece needs a decision that is the founder's rather than mine — the notes folder being configurable needs migration semantics, the settings surface and the radial menu need design, typographic scrambling lost its mechanism with Handjet, and cutting the language set decides which fenced blocks highlight.
 
-The phase's truth check runs once he has verified, not before — a milestone written against unverified work is exactly what the check exists to catch.
+Two phases in `MASTER.md` are deliberately beyond V1: Phase 6 (macOS and Linux) and Phase 7 (auto-update), the latter by the founder's own call.
 
 ---
 
