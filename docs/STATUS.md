@@ -10,7 +10,7 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Launch at startup (SMD-037), off by default and toggled from the tray menu, since there is no settings surface.
+SMD-037 is written and running, awaiting confirmation that the tray toggle actually registers sticky.md to launch with Windows.
 
 Then, to close Phase 3 — Windows, Tray & Shortcuts: launch at startup (SMD-037) and making the shortcut set remappable, which SMD-033 showed is load-bearing rather than a nicety.
 
@@ -414,11 +414,14 @@ Notes: A note titled "I'm Jorge" produced `i-m-jorge.md`. An apostrophe joins a 
 
 ### [SMD-037] Launch at startup, off by default
 Type:    feature
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 3 — Windows, Tray & Shortcuts
-Notes: `MASTER.md § In Scope` requires it off by default and user-togglable, and MASTER veto 5 forbids enabling it without explicit consent. The tray menu is the natural home for the toggle, since there is no settings surface. Needs `tauri-plugin-autostart`.
+  2026-09-06  active
+Notes: A checkable "Launch at startup" item in the tray menu, since there is no settings surface. `tauri-plugin-autostart` is registered but never enables anything on its own — only the toggle does, which is what MASTER veto 5 requires.
+  The checkbox is read from what the system reports, both when the menu is built and after every toggle, rather than from a remembered value. The user may have removed the entry outside the application, and a menu that claims a change succeeded when it failed is worse than one that shows nothing.
+  Not confirmed: that the toggle survives a restart of the machine, which is the only test that means anything.
 
 ### [SMD-045] Animate the transition between written and rendered markdown
 Type:    idea

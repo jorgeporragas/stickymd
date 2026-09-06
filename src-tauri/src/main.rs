@@ -47,6 +47,14 @@ fn main() {
                 eprintln!("sticky.md: could not restore the last session: {error}");
             }
 
+            // Registered, never enabled: MASTER veto 5 forbids launching at
+            // startup without explicit consent, so only the tray toggle turns
+            // it on.
+            app.handle().plugin(tauri_plugin_autostart::init(
+                tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+                None,
+            ))?;
+
             shortcuts::register(app.handle());
             tray::install(app.handle())?;
 
