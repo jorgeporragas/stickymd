@@ -16,6 +16,8 @@
     "core:window:allow-destroy",
     "core:window:allow-set-focus",
     "core:window:allow-set-always-on-top",
-    "dialog:allow-open"
+    "dialog:allow-open",
+    "updater:default",
+    "process:allow-restart"
   ]
 }

@@ -36,6 +36,15 @@ fn surface_mode(current: tauri::State<'_, surface::Current>) -> SurfaceMode {
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        // The one part of this application that touches the network, and it
+        // carries no note content — ADR-014, and MASTER veto 2 is about
+        // content rather than about sockets. It runs in Rust, so the web
+        // view's Content Security Policy is untouched and stays as strict as
+        // it was.
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        // Restarting into the new version, and nothing else this plugin can do
+        // is reachable — the capability grants `process:allow-restart` alone.
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             // Checked rather than used: the surface is applied to every open
             // window by `surface::refresh` below. This is here so a missing

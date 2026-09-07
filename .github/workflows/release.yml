@@ -68,7 +68,15 @@ jobs:
         working-directory: src-tauri
         run: cargo test
 
+      # The signing key is the updater's whole trust model: the manifest and the
+      # installer are signed here, and the application refuses anything that
+      # does not verify against the public key compiled into it. Absent the
+      # secret, the build still succeeds and simply produces no signatures —
+      # which is the honest behaviour for a fork that has its own key or none.
       - name: Build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: npm run tauri build
 
       # Tauri builds the installer. The portable asset is the same binary with
@@ -88,6 +96,42 @@ jobs:
           Copy-Item README.md $staging
           Compress-Archive -Path $staging -DestinationPath "portable/sticky.md-$version-portable-x64.zip"
 
+      # The updater asks for one file and reads the rest from it. Written here
+      # rather than by a third-party action, for the same reason nothing else
+      # in this workflow is one: it is the file that tells every installed copy
+      # what to download next.
+      #
+      # Skipped when there is no signature, because a manifest the updater
+      # cannot verify is worse than no manifest — it turns every update check
+      # into an error instead of a quiet "you are up to date".
+      - name: Write the update manifest
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}' -replace '^v', ''
+          $installer = Get-ChildItem -Recurse -Include *.exe -Path src-tauri/target/release/bundle/nsis | Select-Object -First 1
+          $signature = "$($installer.FullName).sig"
+
+          if (-not (Test-Path $signature)) {
+            "No signature beside $($installer.Name) — the signing key is not set, so no manifest is written."
+            exit 0
+          }
+
+          $manifest = [ordered]@{
+            version   = $version
+            pub_date  = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+            notes     = "See the release notes for $version."
+            platforms = [ordered]@{
+              'windows-x86_64' = [ordered]@{
+                signature = (Get-Content $signature -Raw).Trim()
+                url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$($installer.Name)"
+              }
+            }
+          }
+
+          New-Item -ItemType Directory -Path manifest -Force | Out-Null
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content manifest/latest.json -Encoding utf8
+          Get-Content manifest/latest.json
+
       # Created as a draft: MASTER.md says every release carries written notes,
       # and notes nobody wrote are not written notes. The assets are attached
       # and the release waits for the founder to describe it and publish.
@@ -99,6 +143,7 @@ jobs:
           $tag = '${{ github.ref_name }}'
           $assets = @(Get-ChildItem -Recurse -Include *.exe -Path src-tauri/target/release/bundle/nsis | ForEach-Object { $_.FullName })
           $assets += (Get-ChildItem portable/*.zip | ForEach-Object { $_.FullName })
+          if (Test-Path manifest/latest.json) { $assets += (Resolve-Path manifest/latest.json).Path }
           $assets
 
           gh release view $tag 2>$null

@@ -140,5 +140,6 @@ Run the app with `npm run tauri dev`. Never start a dev server with a bare `npm 
 - Every release carries both the NSIS installer and the portable zip.
 - Vendor all fonts and assets into the repository with their licence files alongside. Never fetch an asset over the network at runtime or at build time.
 - The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
-- Do not add a dependency that makes a network request at runtime.
+- Do not add a dependency that makes a network request at runtime. **One exception, and it is named rather than general:** the Tauri updater, per ADR-014 and Phase 7. It carries no note content, checks only when a person presses a button, and prompts before replacing anything. Anything else that reaches the network is a bug, and a second exception needs its own decision.
+- The updater runs in Rust and the Content Security Policy is therefore untouched by it. If something ever appears to need `connect-src` widened for an update check, it is being done in the wrong half of the application.
 - The Content Security Policy in `src-tauri/tauri.conf.json` is restrictive by design — it is MASTER veto 2 enforced by the engine rather than by discipline. Never widen it to make something work. If a change appears to require a wider CSP, the change is wrong.

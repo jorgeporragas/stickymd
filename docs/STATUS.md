@@ -73,11 +73,19 @@ Notes: A complete set of token values, not a code change — faint black tint ov
 
 ### [SMD-005] Auto-update via the Tauri updater
 Type:    feature
-State:   accepted
+State:   active
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 7 — Release & Auto-Update, per ADR-014
+  2026-09-07  built as far as it goes without the founder's signing key
 Notes: Must prompt before replacing anything. Requires a minisign keypair generated locally and a version manifest published alongside releases.
+  2026-09-07 — **everything but the key is built.** `tauri-plugin-updater` and `tauri-plugin-process` are registered, the capability grants `updater:default` and `process:allow-restart` and nothing wider, `bundle.createUpdaterArtifacts` is on so the build emits signatures, and the release workflow signs the installer and writes `latest.json` beside the assets.
+  The flow never advances on its own: **checking is a button, installing is a second button after the version is named, and restarting is a third.** ADR-014's condition was that it prompts before replacing anything and never installs silently, and the way this keeps that promise is by having no code that could break it — no check at startup, no timer.
+  Restarting is separate from installing on purpose. The update is on disk either way, and a restart that took away the note someone was mid-sentence in would be its own kind of replacing.
+  Two failures are named rather than passed through as whatever the plugin said, because each has a different answer: a signature that does not verify ("that download could not be verified as genuine") and an unreachable GitHub. Everything else is reported verbatim.
+  The manifest is skipped when there is no signature. A manifest the updater cannot verify is worse than no manifest — it turns every check into an error rather than a quiet "you are up to date".
+  **Left `active`, and it is blocked on one thing only: the keypair.** The public key is compiled into the application and the private key signs releases, so the founder generates it and holds it. Until `plugins.updater.pubkey` is filled and the two secrets are set, the check reports a problem rather than working, and none of this has been exercised end to end — there is also nothing to update *to* until a second release exists.
+  `CLAUDE.md`'s "no dependency that makes a network request at runtime" now carries this as a named exception rather than being quietly contradicted. The updater runs in Rust, so the Content Security Policy is untouched.
 
 ### [SMD-006] Verify Handjet axis behaviour and metrics
 Type:    chore

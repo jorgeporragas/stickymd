@@ -31,6 +31,8 @@ tauri-plugin-dialog = "2"
 # enabling it without explicit consent, so nothing here ever calls enable()
 # except the tray toggle.
 tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2.11.0"
+tauri-plugin-process = "2.3.1"
 
 # Compositor blur. The frosted surface is a window property applied here, not a
 # CSS filter -- a web view cannot see the desktop behind it.

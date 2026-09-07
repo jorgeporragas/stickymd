@@ -3,6 +3,13 @@
   import Field from '../../lib/components/Field.svelte';
   import ChordInput from '../../lib/components/ChordInput.svelte';
   import Toggle from '../../lib/components/Toggle.svelte';
+  import {
+    checkForUpdate,
+    installUpdate,
+    restart,
+    runningVersion,
+    type UpdateState
+  } from '../../lib/state/updates';
   import Scramble from '../../lib/components/Scramble.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
   import {
@@ -28,6 +35,8 @@
   );
 
   onMount(async () => {
+    VERSION = await runningVersion();
+
     const loaded = await readPreferences();
     prefs = loaded;
     shortcutProblem = loaded.shortcutProblem ?? undefined;
@@ -80,6 +89,61 @@
 
     const settled = await setFormattingShortcut(action, chord);
     if (settled) prefs.formatting = settled;
+  }
+
+  /**
+   * The update flow, which never advances on its own.
+   *
+   * Three deliberate stops: checking is a button, installing is a second
+   * button after the version is named, and restarting is a third. ADR-014's
+   * condition is that the updater prompts before replacing anything — and a
+   * restart that took away the note someone was mid-sentence in would be its
+   * own kind of replacing.
+   */
+  let update = $state<UpdateState>({ status: 'idle' });
+
+  /** The running version, read from the binary rather than from a manifest. */
+  let VERSION = $state('');
+
+  /**
+   * What the row says under its label. The version is the useful fact at rest
+   * — "you are on 1.0.0" answers the question the button exists to ask.
+   */
+  const updateNote = $derived.by(() => {
+    switch (update.status) {
+      case 'checking':
+        return 'Asking GitHub…';
+      case 'current':
+        return `You are on ${VERSION}, which is the latest.`;
+      case 'found':
+        return `${update.version} is available. Nothing is replaced until you say so.`;
+      case 'downloading':
+        return update.percent === undefined
+          ? `Downloading ${update.version}…`
+          : `Downloading ${update.version} — ${update.percent}%`;
+      case 'ready':
+        return `${update.version} is installed. It takes effect when sticky.md restarts.`;
+      case 'problem':
+        return `You are on ${VERSION}.`;
+      default:
+        return `You are on ${VERSION}. Nothing is checked until you ask.`;
+    }
+  });
+
+  async function lookForUpdate(): Promise<void> {
+    update = { status: 'checking' };
+    update = await checkForUpdate();
+  }
+
+  async function acceptUpdate(): Promise<void> {
+    if (update.status !== 'found') return;
+
+    const { update: found, version } = update;
+    update = { status: 'downloading', version };
+
+    update = await installUpdate(found, (percent) => {
+      if (update.status === 'downloading') update = { status: 'downloading', version, percent };
+    });
   }
 
   async function pickFolder(): Promise<void> {
@@ -186,6 +250,31 @@
           {/snippet}
         </Field>
       {/each}
+
+      <Field
+        label="Updates"
+        note={updateNote}
+        problem={update.status === 'problem' ? update.reason : undefined}
+      >
+        {#snippet control()}
+          {#if update.status === 'found'}
+            <button class="action primary" type="button" onclick={acceptUpdate}>
+              Install {update.version}
+            </button>
+          {:else if update.status === 'ready'}
+            <button class="action primary" type="button" onclick={restart}>Restart</button>
+          {:else}
+            <button
+              class="action"
+              type="button"
+              disabled={update.status === 'checking' || update.status === 'downloading'}
+              onclick={lookForUpdate}
+            >
+              Check
+            </button>
+          {/if}
+        {/snippet}
+      </Field>
 
       <Field label="Launch at startup" note="Off unless you turn it on.">
         {#snippet control()}
