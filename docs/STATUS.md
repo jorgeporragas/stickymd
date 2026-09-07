@@ -621,6 +621,19 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. **Not yet seen on a real transparent window** — `backdrop-filter` inside WebView2 on a layered window is the one thing the mock cannot stand in for.
 
+### [SMD-079] Windows unfrosts a window that is not the active one
+Type:    bug
+State:   dropped
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder
+  2026-09-06  legacy blur tried and rejected
+  2026-09-06  dropped by the founder
+Dropped because: the founder's own verdict — "it looked better before I told you", and an always-transparent window is a nice-to-have rather than a problem. Recorded so nobody spends the cycles again.
+Notes: On Windows 11 22523 and later, `window_vibrancy::apply_acrylic` resolves to the documented `DWMWA_SYSTEMBACKDROP_TYPE` / `DWMSBT_TRANSIENTWINDOW`. DWM owns that backdrop and drops it to a flat fallback whenever the window is inactive. There is no attribute to decline it: Windows Terminal shipped a dedicated "unfocused acrylic" feature for the same problem, and did it through the WinUI composition controller rather than this attribute — which from Rust means composition interop, out of proportion to this application.
+  **Do not swap `apply_acrylic` for `apply_blur`.** It is the obvious next move and it was measured on the founder's machine. `apply_blur` takes the old `SetWindowCompositionAttribute` path, which has no notion of activation and does keep frosting an inactive window — and it is worse on both counts that matter: murkier at rest, and dragging glitches, the desktop popping through unblurred at intervals. That is the reputation the legacy blur has on Windows 11, confirmed here rather than assumed.
+  Painting an unfocused window opaque was built and reverted at the founder's word. It read as intentional to him as it was.
+
 ### [SMD-076] The radial menu becomes an insert menu
 Type:    feature
 State:   shipped
