@@ -315,7 +315,7 @@ Never:    Never make a command that builds a window synchronous, however
 ### Regenerating the icons does not rebuild the icon into the application
 Area:     Tauri bundler and release workflow configuration
 Date:     2026-09-06
-Commit:   pending
+Commit:   88fd5e0
 Problem:  The mark was regenerated and the application went on showing the old
           one. Nothing was wrong with the icon: `icons/icon.ico` was written at
           18:16:44 and the running binary had been built at 18:12:51. The icon
