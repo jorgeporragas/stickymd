@@ -714,14 +714,20 @@ Notes: My own regression, from ADR-025: a blanket replace of `var(--accent)` wit
 
 ### [SMD-074] A mistyped formatting chord fails silently
 Type:    bug
-State:   idea
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged while building SMD-073
+  2026-09-07  shipped — commit f8f5eaf
 Notes: The settings window takes a chord as free text and hands it to CodeMirror, which ignores anything it cannot parse. A typo therefore produces a binding that never fires and never explains itself.
   The new-note chord does not have this problem: it is registered with the operating system, which refuses a bad one, and `ShortcutStatus` surfaces that.
   Two ways out. Validate the string on the way in — CodeMirror's own key parsing is not exported, so this means a small grammar of `Mod-`, `Shift-`, `Alt-` and a key. Or capture the chord from a keypress instead of typing it, which removes the class of error rather than reporting it, and is what most applications do.
   The second is better and is more work. Not urgent: the defaults are correct and most people will never touch them.
+  2026-09-07 — the founder chose the second, and it is built. `ChordInput` waits for a keypress and writes the chord itself, so there is no longer a way to express one that does not exist. It serves both fields: the formatting chords in CodeMirror's dialect and the new-note chord in the operating system's, which are different strings for the same thing (`Mod-Shift-x` against `CmdOrCtrl+Shift+X`) and are now written from one captured value rather than typed twice.
+  **The refusals turned out to be the valuable half.** A bare letter, which would swallow that letter in the editor; a lone modifier; and **Ctrl+Alt**, which is AltGr on Latin American, Spanish and most European layouts — `docs/FIXES.md` records a chord already lost to it on the founder's own machine. Typing could never have caught that one, because `Mod-Alt-n` is perfectly well-formed and simply never arrives.
+  One subtlety worth keeping: Shift changes what a printable key reports, so Ctrl+Shift+3 arrives as `#` on one layout and something else on another. The physical key survives in `event.code`, and that is what is recorded — Ctrl+Shift+3 is stored as `Mod-Shift-3` wherever it was pressed.
+  **The hand-edited path is closed too.** `settings.json` is editable by hand (ADR-022), so the capture cannot be the only guard: `formattingKeymapFor` now checks each chord and falls back to its default rather than binding one CodeMirror will ignore. Falling back rather than dropping the binding, because the alternative to a working `Mod-b` is not "no bold shortcut" — it is a user who thinks bold is broken.
+  Verified against ten keypresses and nine stored strings, including the four kinds of malformed chord and both dialects' round trips.
 
 ### [SMD-072] Task lists render, and code colour stops leaking into prose
 Type:    bug

@@ -78,8 +78,10 @@ if echo "$staged" | grep -q '^docs/STATUS\.md$'; then
       echo "FLOW: an item moved to shipped with no commit cited."
       echo "  Fix: add a history line to that item —"
       echo "         YYYY-MM-DD  shipped — commit <hash>"
-      echo "       naming the commit that did the work. If that is this commit,"
-      echo "       cite it in a follow-up; the hash does not exist yet."
+      echo "       naming the commit that did the work."
+      echo "  If that commit is this one, its hash does not exist yet: commit"
+      echo "  the work first, then the ship line citing it. Two commits, and"
+      echo "  the second is one line — which is what the log has always done."
       echo
       fail=1
     fi
