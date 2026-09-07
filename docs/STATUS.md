@@ -583,6 +583,20 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-071] The dark tints were murky
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder: the dark theme's default is fine, the coloured tints look dirty
+  2026-09-06  shipped
+Notes: Murky turned out to be a **chroma** problem rather than a darkness one, which is worth writing down because the report said "darker" and the fix was mostly not about lightness.
+  The dark tints were each swatch's hue at whatever chroma survived being darkened — 0.019 to 0.031 in oklab, which at that lightness is grey with a hint. The light swatches are pale by necessity, since a light theme composites them against white; scaling a pale hue down in lightness does not give a dark version of that colour, it gives dirt.
+  Each dark tint is now its swatch's hue at a fixed chroma of **0.085**, set as light as the ink's 4.5:1 allows over a white wallpaper. That budget caps *luminance* and nothing else, which is why chroma was free to spend and lightness was not: the composites sit at the cap either way.
+  Two wrong answers on the way, both discarded by looking at the numbers rather than the code. Maximising chroma against the same budget produced `#c9207a` and `#761dca` — magenta and violet, a highlighter rather than coloured paper. Keeping 72% of the pale swatch's own chroma produced almost no change, for the reason above.
+  The alpha stays at 0.8 rather than the 0.95 the arithmetic would also accept. A higher alpha satisfies the contrast requirement just as well and quietly turns the window opaque; the wallpaper showing through is the point of the surface, not a side effect.
+  Every value re-checked: 4.56:1 to 4.61:1 against `--ink-primary` over the worst-case wallpaper.
+
 ### [SMD-070] Dark takes the bezel back
 Type:    feature
 State:   shipped
