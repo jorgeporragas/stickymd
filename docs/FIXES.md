@@ -311,3 +311,25 @@ Never:    Never make a command that builds a window synchronous, however
           thread, then from the main thread, then the hub's own frontend
           invoking over IPC — and only the last hung. A hypothesis that cannot
           be reproduced on demand is not a diagnosis.
+
+### Regenerating the icons does not rebuild the icon into the application
+Area:     Tauri bundler and release workflow configuration
+Date:     2026-09-06
+Commit:   pending
+Problem:  The mark was regenerated and the application went on showing the old
+          one. Nothing was wrong with the icon: `icons/icon.ico` was written at
+          18:16:44 and the running binary had been built at 18:12:51. The icon
+          is embedded as a Windows *resource* at build time, and `tauri-build`
+          only reruns when something it watches changes — which the icon files
+          are not. No Rust source had changed either, so the dev watcher had
+          nothing to rebuild and the stale resource stayed in the binary.
+Fix:      Touch `src-tauri/tauri.conf.json` after regenerating icons. The build
+          script watches it, so the resource is rebuilt and the new icon is
+          embedded. Confirm by comparing the timestamps: the binary must be
+          newer than `icon.ico`.
+Never:    Never conclude an icon is wrong because the application still shows
+          the old one. Check that the binary postdates the icon file first —
+          this looks exactly like a bad icon, and it is a stale build.
+          Windows also caches icons for the taskbar and Explorer separately
+          from the running process, so a pinned entry can lag behind a window
+          that is already correct.
