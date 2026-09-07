@@ -14,6 +14,13 @@ import { open } from '@tauri-apps/plugin-dialog';
  * text editor and nobody else. See ADR-022.
  */
 
+export interface FormattingChords {
+  bold: string;
+  italic: string;
+  inlineCode: string;
+  strikethrough: string;
+}
+
 export interface Preferences {
   theme: string;
   newNoteShortcut: string;
@@ -21,6 +28,7 @@ export interface Preferences {
   shortcutProblem: string | null;
   notesFolder: string;
   launchAtStartup: boolean;
+  formatting: FormattingChords;
   settingsFile: string;
 }
 
@@ -35,6 +43,12 @@ const unavailable: Preferences = {
   shortcutProblem: null,
   notesFolder: 'unavailable',
   launchAtStartup: false,
+  formatting: {
+    bold: 'Mod-b',
+    italic: 'Mod-i',
+    inlineCode: 'Mod-e',
+    strikethrough: 'Mod-Shift-x'
+  },
   settingsFile: 'unavailable'
 };
 
@@ -72,6 +86,24 @@ export async function setNewNoteShortcut(chord: string): Promise<string | null> 
   } catch (error) {
     console.error('sticky.md: could not change the shortcut', error);
     return 'sticky.md could not change the shortcut.';
+  }
+}
+
+/**
+ * Change one formatting chord.
+ *
+ * Returns the whole set as it now stands, so a caller never has to assume the
+ * write took. Rust tells every open note itself.
+ */
+export async function setFormattingShortcut(
+  action: keyof FormattingChords,
+  chord: string
+): Promise<FormattingChords | undefined> {
+  try {
+    return await invoke<FormattingChords>('set_formatting_shortcut', { action, chord });
+  } catch (error) {
+    console.error('sticky.md: could not change the shortcut', error);
+    return undefined;
   }
 }
 

@@ -10,8 +10,10 @@
     readPreferences,
     setLaunchAtStartup,
     setNewNoteShortcut,
+    setFormattingShortcut,
     setNotesFolder,
     setTheme,
+    type FormattingChords,
     type Preferences
   } from '../../lib/state/preferences';
 
@@ -28,6 +30,7 @@
   onMount(async () => {
     const loaded = await readPreferences();
     prefs = loaded;
+    chordDrafts = { ...loaded.formatting };
     shortcutDraft = loaded.newNoteShortcut;
     shortcutProblem = loaded.shortcutProblem ?? undefined;
   });
@@ -51,6 +54,31 @@
     const problem = await setNewNoteShortcut(shortcutDraft);
     shortcutProblem = problem ?? undefined;
     prefs.newNoteShortcut = shortcutDraft;
+  }
+
+  /**
+   * The four formatting chords, as rows.
+   *
+   * A fixed list rather than something derived: the set is deliberately small
+   * and closed (ADR-037), and a settings file cannot name a command that does
+   * not exist.
+   */
+  const FORMATTING: { action: keyof FormattingChords; label: string }[] = [
+    { action: 'bold', label: 'Bold' },
+    { action: 'italic', label: 'Italic' },
+    { action: 'inlineCode', label: 'Inline code' },
+    { action: 'strikethrough', label: 'Strikethrough' }
+  ];
+
+  let chordDrafts = $state<Record<string, string>>({});
+
+  async function commitFormatting(action: keyof FormattingChords): Promise<void> {
+    if (!prefs) return;
+    const chord = chordDrafts[action];
+    if (!chord || chord === prefs.formatting[action]) return;
+
+    const settled = await setFormattingShortcut(action, chord);
+    if (settled) prefs.formatting = settled;
   }
 
   async function pickFolder(): Promise<void> {
@@ -146,6 +174,21 @@
           />
         {/snippet}
       </Field>
+
+      {#each FORMATTING as row (row.action)}
+        <Field label={row.label} note="Inside a note. `Mod` is Ctrl here and Cmd on a Mac.">
+          {#snippet control()}
+            <input
+              class="chord"
+              type="text"
+              spellcheck="false"
+              aria-label={row.label + ' shortcut'}
+              bind:value={chordDrafts[row.action]}
+              onblur={() => commitFormatting(row.action)}
+            />
+          {/snippet}
+        </Field>
+      {/each}
 
       <Field label="Launch at startup" note="Off unless you turn it on.">
         {#snippet control()}

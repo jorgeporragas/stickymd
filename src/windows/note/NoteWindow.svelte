@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { onMount } from 'svelte';
+  import { DEFAULT_CHORDS, type FormattingChords } from '../../lib/editor/commands';
   import Editor from '../../lib/components/Editor.svelte';
   import RadialMenu, { type RadialAction } from '../../lib/components/RadialMenu.svelte';
   import SaveTrouble from '../../lib/components/SaveTrouble.svelte';
@@ -26,9 +27,16 @@
     initiallyPinned?: boolean;
     /** The note's colour when it was last open. Read once, as above. */
     initialTint?: Tint;
+    /** The formatting chords, as configured. */
+    formatting?: FormattingChords;
   }
 
-  let { initial = '', initiallyPinned = false, initialTint = 'clear' }: Props = $props();
+  let {
+    initial = '',
+    initiallyPinned = false,
+    initialTint = 'clear',
+    formatting = DEFAULT_CHORDS
+  }: Props = $props();
 
   let revealed = $state(false);
 
@@ -160,7 +168,7 @@
       <TintPicker {revealed} {tint} onTint={chooseTint} />
     {/snippet}
   </WindowChrome>
-  <Editor value={initial} onChange={queueSave} />
+  <Editor value={initial} onChange={queueSave} {formatting} />
 
   {#if menuAt}
     <RadialMenu

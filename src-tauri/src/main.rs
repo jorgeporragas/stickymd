@@ -99,6 +99,7 @@ fn main() {
             preferences::set_theme,
             preferences::set_launch_at_startup,
             preferences::set_new_note_shortcut,
+            preferences::set_formatting_shortcut,
             preferences::inspect_notes_folder,
             preferences::set_notes_folder
         ])

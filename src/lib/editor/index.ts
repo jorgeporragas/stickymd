@@ -1,11 +1,11 @@
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { syntaxHighlighting } from '@codemirror/language';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, drawSelection, keymap, placeholder, type KeyBinding } from '@codemirror/view';
 
 import { codeBlockSurface } from './codeBlock';
-import { formattingKeymap } from './commands';
+import { DEFAULT_CHORDS, formattingKeymapFor, type FormattingChords } from './commands';
 import { markdownHighlight } from './highlight';
 import { codeLanguages } from './languages';
 import { livePreview } from './livePreview';
@@ -37,13 +37,30 @@ export interface EditorOptions {
    * forbids hardcoding Ctrl or Cmd.
    */
   extraKeymap?: readonly KeyBinding[];
+  /** The formatting chords. Defaults when the settings are unavailable. */
+  formatting?: FormattingChords;
+}
+
+/**
+ * Holds the formatting bindings so they can be swapped without rebuilding the
+ * editor. A chord that only applied to windows opened afterwards would be a
+ * setting that appears not to work — the same reason the theme is broadcast.
+ */
+const formattingChords = new Compartment();
+
+/** Re-bind an open editor to a new set of chords. */
+export function applyFormattingChords(view: EditorView, chords: FormattingChords): void {
+  view.dispatch({
+    effects: formattingChords.reconfigure(keymap.of([...formattingKeymapFor(chords)]))
+  });
 }
 
 export function createEditor({
   parent,
   doc,
   onDocChange,
-  extraKeymap = []
+  extraKeymap = [],
+  formatting = DEFAULT_CHORDS
 }: EditorOptions): EditorView {
   return new EditorView({
     parent,
@@ -79,8 +96,10 @@ export function createEditor({
         editorTheme,
 
         // Formatting bindings come first so they win over any default sharing
-        // a chord.
-        keymap.of([...extraKeymap, ...formattingKeymap, ...historyKeymap, ...defaultKeymap])
+        // a chord, and sit in their own compartment so a changed chord can be
+        // swapped into an open editor. Everything else is fixed for its life.
+        formattingChords.of(keymap.of([...formattingKeymapFor(formatting)])),
+        keymap.of([...extraKeymap, ...historyKeymap, ...defaultKeymap])
       ]
     })
   });

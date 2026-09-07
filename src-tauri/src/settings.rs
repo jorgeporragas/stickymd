@@ -32,6 +32,12 @@ pub struct Settings {
     /// The application-wide theme. Notes carry a tint of their own; the theme
     /// decides the ink. See ADR-024.
     pub theme: String,
+    /// The formatting chords, inside a note window.
+    ///
+    /// Separate from the new-note shortcut because they are a different kind
+    /// of thing: that one is registered with the operating system and can be
+    /// refused by it, these are the web view's own and always take.
+    pub formatting: Formatting,
     /// Where notes live. Absent means the default, which is worked out from
     /// the user's Documents folder — stored as absent rather than resolved so
     /// that a user who has never chosen one keeps following the default if
@@ -44,7 +50,36 @@ impl Default for Settings {
         Self {
             new_note_shortcut: DEFAULT_NEW_NOTE_SHORTCUT.to_string(),
             theme: "frost".to_string(),
+            formatting: Formatting::default(),
             notes_folder: None,
+        }
+    }
+}
+
+/// The four formatting chords.
+///
+/// Named fields rather than a map: the set is deliberately small and fixed
+/// (`docs/DECISIONS.md` ADR-037), and a map would invite a settings file to
+/// name a command that does not exist.
+///
+/// `CmdOrCtrl` in string form is the platform abstraction — never write Ctrl
+/// or Cmd literally (CLAUDE.md, cross-platform).
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Formatting {
+    pub bold: String,
+    pub italic: String,
+    pub inline_code: String,
+    pub strikethrough: String,
+}
+
+impl Default for Formatting {
+    fn default() -> Self {
+        Self {
+            bold: "Mod-b".to_string(),
+            italic: "Mod-i".to_string(),
+            inline_code: "Mod-e".to_string(),
+            strikethrough: "Mod-Shift-x".to_string(),
         }
     }
 }

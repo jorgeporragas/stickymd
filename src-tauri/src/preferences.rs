@@ -17,7 +17,7 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::notes::{notes_dir, NoteError};
-use crate::settings;
+use crate::settings::{self, Formatting};
 use crate::shortcuts::{self, ShortcutStatus};
 
 /// Everything the settings window shows, resolved.
@@ -31,6 +31,7 @@ pub struct Preferences {
     /// Where notes are, resolved — not the stored value, which may be absent.
     pub notes_folder: String,
     pub launch_at_startup: bool,
+    pub formatting: Formatting,
     /// Where the settings file itself lives, for the user who would rather
     /// edit it by hand. That was the only way to reach these until now.
     pub settings_file: String,
@@ -41,13 +42,14 @@ pub fn read_preferences(app: AppHandle, status: tauri::State<'_, ShortcutStatus>
     let stored = settings::load(&app);
 
     Preferences {
-        theme: stored.theme,
-        new_note_shortcut: stored.new_note_shortcut,
+        theme: stored.theme.clone(),
+        new_note_shortcut: stored.new_note_shortcut.clone(),
         shortcut_problem: status.problem(),
         notes_folder: notes_dir(&app)
             .map(|dir| dir.display().to_string())
             .unwrap_or_else(|_| "unavailable".to_string()),
         launch_at_startup: app.autolaunch().is_enabled().unwrap_or(false),
+        formatting: stored.formatting,
         settings_file: settings::location(&app),
     }
 }
@@ -99,6 +101,33 @@ pub fn set_new_note_shortcut(
 
     shortcuts::reregister(&app, &status);
     status.problem()
+}
+
+/// Change one formatting chord, and tell every open note about it.
+///
+/// The windows are told rather than left to pick it up next time they open:
+/// a shortcut that only applies to windows opened afterwards is a setting that
+/// appears not to work — the same reason the theme is broadcast.
+#[tauri::command]
+pub fn set_formatting_shortcut(app: AppHandle, action: String, chord: String) -> Result<Formatting, NoteError> {
+    let mut stored = settings::load(&app);
+
+    match action.as_str() {
+        "bold" => stored.formatting.bold = chord,
+        "italic" => stored.formatting.italic = chord,
+        "inlineCode" => stored.formatting.inline_code = chord,
+        "strikethrough" => stored.formatting.strikethrough = chord,
+        _ => {
+            return Err(NoteError::Io {
+                message: format!("no formatting command called '{action}'"),
+            })
+        }
+    }
+
+    settings::save(&app, &stored);
+    let _ = app.emit("formatting-changed", stored.formatting.clone());
+
+    Ok(stored.formatting)
 }
 
 /// What a folder change would involve, so the window can ask before doing it.

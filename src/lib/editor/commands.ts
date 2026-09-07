@@ -61,15 +61,42 @@ export const toggleItalic = toggleWrap('*');
 export const toggleInlineCode = toggleWrap('`');
 export const toggleStrikethrough = toggleWrap('~~');
 
+/** The chords, as the settings file holds them. */
+export interface FormattingChords {
+  bold: string;
+  italic: string;
+  inlineCode: string;
+  strikethrough: string;
+}
+
 /**
- * The default formatting bindings.
+ * The defaults.
  *
  * Deliberately small. A scratchpad that claims four common chords is far less
- * likely to collide with the tools a developer already has bound.
+ * likely to collide with the tools a developer already has bound — and the
+ * set stays fixed so that a settings file cannot name a command that does not
+ * exist.
  */
-export const formattingKeymap: readonly KeyBinding[] = [
-  { key: 'Mod-b', run: toggleBold },
-  { key: 'Mod-i', run: toggleItalic },
-  { key: 'Mod-e', run: toggleInlineCode },
-  { key: 'Mod-Shift-x', run: toggleStrikethrough }
-];
+export const DEFAULT_CHORDS: FormattingChords = {
+  bold: 'Mod-b',
+  italic: 'Mod-i',
+  inlineCode: 'Mod-e',
+  strikethrough: 'Mod-Shift-x'
+};
+
+/**
+ * Bindings for a set of chords.
+ *
+ * `Mod-` is the platform abstraction for the modifier key and is what the
+ * stored chords use — never Ctrl or Cmd literally (CLAUDE.md, cross-platform).
+ * A chord CodeMirror cannot parse simply never fires, which is why the
+ * settings window is where one gets typed rather than a text file alone.
+ */
+export function formattingKeymapFor(chords: FormattingChords): readonly KeyBinding[] {
+  return [
+    { key: chords.bold, run: toggleBold },
+    { key: chords.italic, run: toggleItalic },
+    { key: chords.inlineCode, run: toggleInlineCode },
+    { key: chords.strikethrough, run: toggleStrikethrough }
+  ];
+}

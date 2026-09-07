@@ -583,6 +583,29 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-073] The formatting chords become remappable
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  found by auditing the build against `MASTER.md § In Scope`
+  2026-09-06  shipped
+Notes: ADR-037. `MASTER.md § In Scope` promises "a small set of remappable keyboard shortcuts" and only one was: the global new-note chord. Bold, italic, inline code and strikethrough are settable now, from the settings window, and nothing else is.
+  Close and quit are deliberately excluded — a mis-set chord on either is hard to recover from, since the window it would close is the one you would fix it in.
+  The chords sit in a CodeMirror `Compartment`, so a change reaches open editors rather than waiting for the next window.
+  **A gap worth knowing about:** nothing validates the chord string. CodeMirror silently ignores one it cannot parse, so a typo produces a shortcut that does nothing and says nothing. The global new-note chord *does* report its problems, because the operating system refuses a bad registration and there is something to report. Not fixed here; logged as SMD-074.
+
+### [SMD-074] A mistyped formatting chord fails silently
+Type:    bug
+State:   idea
+Created: 2026-09-06
+History:
+  2026-09-06  logged while building SMD-073
+Notes: The settings window takes a chord as free text and hands it to CodeMirror, which ignores anything it cannot parse. A typo therefore produces a binding that never fires and never explains itself.
+  The new-note chord does not have this problem: it is registered with the operating system, which refuses a bad one, and `ShortcutStatus` surfaces that.
+  Two ways out. Validate the string on the way in — CodeMirror's own key parsing is not exported, so this means a small grammar of `Mod-`, `Shift-`, `Alt-` and a key. Or capture the chord from a keypress instead of typing it, which removes the class of error rather than reporting it, and is what most applications do.
+  The second is better and is more work. Not urgent: the defaults are correct and most people will never touch them.
+
 ### [SMD-072] Task lists render, and code colour stops leaking into prose
 Type:    bug
 State:   shipped
