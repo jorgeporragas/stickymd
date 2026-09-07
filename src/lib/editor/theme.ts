@@ -76,6 +76,50 @@ export const editorTheme = EditorView.theme({
     lineHeight: 'var(--line-height-code)'
   },
 
+  // A task list's checkbox. A seated control like the ones on a window's
+  // chrome, at the size of the text it sits in rather than a fixed pixel
+  // value, so it stays proportionate if the note's type ever changes.
+  '.cm-md-task': {
+    display: 'inline-grid',
+    placeItems: 'center',
+    width: '1em',
+    height: '1em',
+    verticalAlign: '-0.15em',
+    marginRight: '0.15em',
+    borderRadius: 'var(--radius-chip)',
+    border: '1px solid var(--rim-control)',
+    background: 'var(--gloss-control)',
+    boxShadow: 'var(--gloss-seat)',
+    cursor: 'pointer'
+  },
+
+  '.cm-md-task[data-checked="true"]': {
+    borderColor: 'var(--swatch-rim)',
+    color: 'var(--signal-engaged)',
+    background: 'var(--gloss-tinted)'
+  },
+
+  '.cm-md-task svg': {
+    width: '0.7em',
+    height: '0.7em',
+    fill: 'none',
+    // The hue taken most of the way to black, as on every other lit control.
+    stroke: 'color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade))',
+    strokeWidth: '2',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round'
+  },
+
+  // The code palette, scoped to the panel. Outside it these classes are still
+  // applied — the tags are global — and deliberately paint nothing, so a task
+  // marker in prose stays ink.
+  '.cm-md-code .tok-keyword': { color: 'var(--code-keyword)' },
+  '.cm-md-code .tok-string': { color: 'var(--code-string)' },
+  '.cm-md-code .tok-number': { color: 'var(--code-number)' },
+  '.cm-md-code .tok-type': { color: 'var(--code-type)' },
+  '.cm-md-code .tok-muted': { color: 'var(--code-muted)' },
+  '.cm-md-code .tok-ink': { color: 'var(--code-ink)' },
+
   '.cm-md-code-open': {
     paddingTop: 'var(--space-3)',
     borderTopLeftRadius: 'var(--radius-control)',

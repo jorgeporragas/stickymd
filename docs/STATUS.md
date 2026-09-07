@@ -583,6 +583,18 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-072] Task lists render, and code colour stops leaking into prose
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  found by auditing the build against `MASTER.md § In Scope`
+  2026-09-06  shipped
+Notes: Two gaps found by checking the build against what MASTER actually promises rather than against memory.
+  **Task lists parsed but never rendered.** `MASTER.md § In Scope` lists them beside tables, and tables got a rendered view while these stayed as literal `- [ ]`. They are checkboxes now, and clicking one edits the two characters in the document: the box is a decoration over real source, never a replacement for it, so copying still yields `- [x] done` and the marker comes back as text when the cursor is on its line. Same rule the rest of the inline rendering follows.
+  **Code colour was leaking into prose.** A task marker is tagged `t.keyword`, and the fenced-code palette from ADR-030 was attached to that tag globally — so `[ ]` in an ordinary sentence arrived wearing `--code-keyword` teal. Mine, from the code-block work, and a contradiction of both ADR-025 and ADR-030.
+  The fix is the interesting half: a highlight tag cannot say "inside a fenced block", so the style now assigns *classes* and `theme.ts` colours them under `.cm-md-code`. Outside the panel the classes are still applied and deliberately paint nothing. That closes the leak for every tag rather than for the one that was noticed.
+
 ### [SMD-071] The dark tints were murky
 Type:    bug
 State:   shipped

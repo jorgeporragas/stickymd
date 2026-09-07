@@ -10,6 +10,7 @@ import { markdownHighlight } from './highlight';
 import { codeLanguages } from './languages';
 import { livePreview } from './livePreview';
 import { tableView } from './tableView';
+import { taskList } from './taskList';
 import { editorTheme } from './theme';
 
 export { toggleBold, toggleInlineCode, toggleItalic, toggleStrikethrough } from './commands';
@@ -71,6 +72,9 @@ export function createEditor({
         // plugin's inline decorations inside the same range.
         tableView,
         codeBlockSurface,
+        // Before livePreview: both replace ranges, and the task marker is
+        // inside what livePreview would otherwise hide as list syntax.
+        taskList,
         livePreview,
         editorTheme,
 

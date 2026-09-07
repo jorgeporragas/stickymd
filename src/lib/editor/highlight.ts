@@ -42,17 +42,23 @@ export const markdownHighlight = HighlightStyle.define([
   //
   // These are the only hues in the application that are not signals, and
   // ADR-030 is why: inside a fenced block, colour is telling token classes
-  // apart, which is work rather than decoration. They come from the same
-  // --tide-* ramp as the rest of the palette.
-  { tag: t.keyword, color: 'var(--code-keyword)' },
-  { tag: [t.string, t.special(t.string)], color: 'var(--code-string)' },
+  // apart, which is work rather than decoration.
+  //
+  // They are *classes*, not colours, and the colours are attached in
+  // `theme.ts` under `.cm-md-code` — because a highlight tag is global and
+  // these tags are not exclusive to fenced code. `t.keyword` also matches a
+  // task-list marker, which was arriving in prose wearing a code colour. A
+  // rule that says "inside a fenced block" has to be written where that can
+  // be said, and a highlight style cannot say it.
+  { tag: t.keyword, class: 'tok-keyword' },
+  { tag: [t.string, t.special(t.string)], class: 'tok-string' },
   // No italic. The code face ships one style, and `font-synthesis: none` means
   // an italic that is not in the file does not appear — asking for one would be
   // a rule that quietly does nothing. Colour carries comments on its own.
-  { tag: [t.comment, t.lineComment, t.blockComment], color: 'var(--code-muted)' },
-  { tag: [t.number, t.bool, t.null], color: 'var(--code-number)' },
-  { tag: [t.function(t.variableName), t.definition(t.variableName)], color: 'var(--code-ink)' },
-  { tag: [t.typeName, t.className], color: 'var(--code-type)' },
-  { tag: t.operator, color: 'var(--code-muted)' },
-  { tag: t.propertyName, color: 'var(--code-ink)' }
+  { tag: [t.comment, t.lineComment, t.blockComment], class: 'tok-muted' },
+  { tag: [t.number, t.bool, t.null], class: 'tok-number' },
+  { tag: [t.function(t.variableName), t.definition(t.variableName)], class: 'tok-ink' },
+  { tag: [t.typeName, t.className], class: 'tok-type' },
+  { tag: t.operator, class: 'tok-muted' },
+  { tag: t.propertyName, class: 'tok-ink' }
 ]);
