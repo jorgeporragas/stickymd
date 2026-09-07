@@ -284,7 +284,7 @@ Never:    Never treat a successful `apply_acrylic` as proof there is blur
 ### A command that builds a window must be `async`, or the application wedges
 Area:     Window lifecycle
 Date:     2026-09-06
-Commit:   pending
+Commit:   8fb5726
 Problem:  Opening a note from the hub froze the whole application. The founder
           reported it as a crash on the open path; it was neither. Probes in the
           running application showed `open` reaching `.build()` and never
