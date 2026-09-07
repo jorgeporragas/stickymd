@@ -120,13 +120,38 @@ export const editorTheme = EditorView.theme({
   '.cm-md-code .tok-muted': { color: 'var(--code-muted)' },
   '.cm-md-code .tok-ink': { color: 'var(--code-ink)' },
 
+  // The fences are separated from the code as well as from the panel's edge.
+  // With padding only against the edge, the gap above the opening fence came
+  // from the panel while the gap below the closing one came from nothing —
+  // symmetric in the stylesheet and lopsided on screen, because the eye
+  // compares the closing fence to the code line above it rather than to the
+  // panel's edge below.
+  /*
+    Every line but the first bleeds half a pixel upward, in the panel's own
+    colour, to meet the line above it.
+
+    The lines abut exactly — the gap between them measures 0 — but their tops
+    land on fractional device pixels, so each boundary is antialiased and the
+    window behind shows through a sliver of it. Same failure as the pale edges
+    in docs/FIXES.md, at a smaller scale: anything the paint does not cover,
+    something else does.
+
+    Upward only, and not on the first line, so nothing bleeds past the panel's
+    rounded corners.
+  */
+  '.cm-md-code:not(.cm-md-code-open)': {
+    boxShadow: '0 -0.5px 0 0 var(--code-surface)'
+  },
+
   '.cm-md-code-open': {
+    paddingBottom: 'var(--space-2)',
     paddingTop: 'var(--space-3)',
     borderTopLeftRadius: 'var(--radius-control)',
     borderTopRightRadius: 'var(--radius-control)'
   },
 
   '.cm-md-code-close': {
+    paddingTop: 'var(--space-2)',
     paddingBottom: 'var(--space-3)',
     borderBottomLeftRadius: 'var(--radius-control)',
     borderBottomRightRadius: 'var(--radius-control)'

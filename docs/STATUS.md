@@ -595,6 +595,18 @@ Notes: ADR-037. `MASTER.md § In Scope` promises "a small set of remappable keyb
   The chords sit in a CodeMirror `Compartment`, so a change reaches open editors rather than waiting for the next window.
   **A gap worth knowing about:** nothing validates the chord string. CodeMirror silently ignores one it cannot parse, so a typo produces a shortcut that does nothing and says nothing. The global new-note chord *does* report its problems, because the operating system refuses a bad registration and there is something to report. Not fixed here; logged as SMD-074.
 
+### [SMD-075] The closing fence sat tight against the code, and the lines seamed
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder, plus one found while measuring it
+  2026-09-06  shipped
+Notes: The founder asked whether it was normal that a block's closing fence sits closer to the text than its opening one. It was not normal, and the padding was not the reason — measured, it was symmetric: 12px above the opening fence and 12px below the closing one.
+  What was missing is a gap between the **code and the fence**, on either side. At the top the eye compares the fence to the panel's generous edge; at the bottom it compares it to the code line directly above, so the closing fence reads as jammed while the opening one does not. Both fences now sit 12px from the panel's edge and 8px from the code.
+  Found while measuring that: faint seams between code lines. The lines abut exactly — the gap measures 0 — but their tops land on fractional device pixels at 2x, so each boundary is antialiased and the window behind shows through a sliver. The same failure as the pale window edges in `docs/FIXES.md`, three orders of magnitude smaller. Every line but the first now bleeds half a pixel upward in the panel's own colour; upward only, and not the first, so nothing escapes the rounded corners.
+  Also answered while there: syntax highlighting is implemented and works, including the lazily-loaded languages — verified with a Python fence, `def` and `return` as keywords, the comment muted, the f-string a string. Six languages are wired: JS/TS/JSX/TSX, HTML, CSS, Python, Rust, JSON. Anything else renders as an unhighlighted code block.
+
 ### [SMD-074] A mistyped formatting chord fails silently
 Type:    bug
 State:   idea
