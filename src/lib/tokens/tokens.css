@@ -318,13 +318,30 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 20px 36px -20px rgba(255, 255, 255, 0.14);
 
-  /* Deeper than on Frost, and a quieter highlight: the discs are the same pale
-     tints either way, but the panel under them is dark, and a specular at
-     Frost's strength reads as a blown-out spot rather than as a curve. */
+  /*
+   * Bezel rather than gloss — the founder's call, and the whole of it is here.
+   *
+   * A glossy disc needs light to be glossy about. On Frost there is plenty; on
+   * a dark window the gradient and the specular have nothing to catch, and
+   * read as plastic stuck to the surface rather than glass set into it. So in
+   * this theme a control is flat, seated by a bright hairline along its top
+   * inside edge and a shade along its bottom — the bezel these controls wore
+   * before ADR-027 gave them the gloss.
+   *
+   * It is only these values. The control, its markup and its states are the
+   * same object in both themes: principle 8 says a theme is a complete set of
+   * token values and nothing else, and this is that claim being cashed rather
+   * than asserted. A second component would have been two things to keep in
+   * step.
+   */
   --gloss-seat:
-    inset 0 -2px 4px -1px rgba(0, 0, 0, 0.4),
-    0 1px 1px rgba(0, 0, 0, 0.3);
-  --gloss-specular: rgba(255, 255, 255, 0.8);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 3px -1px rgba(0, 0, 0, 0.34);
+
+  /* No highlight to place: the bezel's top edge is the highlight. The overlay
+     still paints, and paints nothing, which costs less than a rule removing it
+     and keeps the difference between the themes in one place. */
+  --gloss-specular: transparent;
 
   --edge-on-glass: rgba(255, 255, 255, 0.12);
   --edge-on-solid: rgba(255, 255, 255, 0.10);
@@ -341,22 +358,29 @@
   --signal-danger: var(--red-300);
   --focus-ring: #f2efe8;
 
+  /* Flat here too, for the same reason as the neutral. */
+  --gloss-tinted: currentColor;
+  --gloss-tinted-pressed: color-mix(in oklab, currentColor 84%, var(--rim-shade));
+  --gloss-from-hue: var(--control-hue);
+
   --scrollbar-thumb: rgba(242, 239, 232, 0.22);
   --scrollbar-thumb-hover: rgba(242, 239, 232, 0.38);
   color-scheme: dark;
 
-  /* Built up from `--surface-solid` (#16161a) rather than sitting on its own
-     scale, and every stop lighter than it. A bubble that bottoms out darker
-     than the window reads as a hole punched in it; on Frost the same gloss is
-     lighter than the surface, and this is that behaviour rather than its
-     mirror. Neutral rather than warm, because the dark window is neutral. */
-  --gloss-neutral: radial-gradient(circle at 50% 18%, #57575a 0%, #323236 60%, #222226 100%);
+  /* Flat, and lighter than the window it sits on — a bezelled control is
+     raised by its edges, not by a gradient. */
+  --gloss-neutral: #32323a;
   --rim-neutral: rgba(255, 255, 255, 0.22);
 
   /* Lighter than the note here, not darker. On a dark surface a darker panel
      reads as a hole rather than as a block set into the page. */
   --code-surface: #1e1e23;
-  --gloss-pressed: radial-gradient(circle at 50% 88%, #45454a 0%, #1e1e22 60%, #2a2a2f 100%);
+  /* Pressed sinks: darker than its resting fill, and the seat inverts so the
+     light lands along the bottom edge instead of the top. */
+  --gloss-pressed: #22222a;
+  --gloss-seat-pressed:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 2px 3px -1px rgba(0, 0, 0, 0.4);
   --selection: rgba(242, 239, 232, 0.20);
 
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);

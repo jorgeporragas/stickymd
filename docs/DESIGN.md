@@ -166,6 +166,8 @@ Values: `src/lib/tokens/tokens.css`, under `:root[data-theme='frost']`.
 
 ### Dark
 
+Its controls wear the **bezel** rather than the gloss (ADR-035) — flat, seated by a bright top edge and a shade below. A glossy disc needs light to be glossy about, and a dark window has none to give it. This is a theme changing values only: the controls are the same objects, and none of them knows which theme it is in.
+
 The inverse of Frost: a faint black tint over the same compositor blur, with warm white ink. The roles are identical and only the values differ, which is what ADR-012 meant by a theme being data.
 
 Values: `src/lib/tokens/tokens.css`, under `:root[data-theme='dark']`.

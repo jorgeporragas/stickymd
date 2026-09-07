@@ -583,6 +583,18 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-070] Dark takes the bezel back
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: ADR-035. The founder found the glossy controls wrong on the dark window and asked for the bezel — the treatment ADR-026 chose and ADR-027 replaced — as a dark-theme exception. He is right about why: a glossy disc needs light to be glossy about, and a dark window has none to give it, so the gradient and the specular read as plastic stuck on rather than glass set in.
+  He asked for a bezel *component*. It is not one, and should not be: the difference is entirely token values — the seat becomes a bezel, the specular becomes transparent so the overlay paints nothing, and the fills become flat colours. No component changed and none knows which theme it is in.
+  That is worth stating plainly because it is the first time principle 8 has been cashed rather than asserted: a theme is a complete set of token values and nothing else. A second component would have been two controls to keep in step, and they would have diverged the first time one gained a state the other did not.
+  One thing did need adding: `--gloss-seat-pressed`, because a bezel inverts when pushed and the light moves to its bottom edge. It lives with the shared treatment rather than the theme, since pressing is a state and not a palette.
+  Verified in both themes at four times size: dark renders flat with no background image, Frost keeps its gradient and highlight.
+
 ### [SMD-069] The dark bubble sat below its own window
 Type:    bug
 State:   shipped
