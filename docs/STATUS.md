@@ -628,10 +628,16 @@ Created: 2026-09-07
 History:
   2026-09-07  asked for by the founder
   2026-09-07  shipped
+  2026-09-07  moved beside the swatch, and the current tint taken out of it (founder)
 Notes: The founder asked for the palette to arrive staggered like the insert ring, and for the panel behind it to go so the discs float on the window.
   The panel was opaque on purpose — SMD-054, where painting it with the window's translucent tint let the note's writing read through it. That reason does not survive the panel being removed: what is left is seven opaque discs with the note between them, which is exactly what the ring already does over the same text.
   The arrival went with the panel. It used to open as one object scaling out of the swatch; a container scaling underneath seven discs that each arrive on their own would be a second animation saying the same thing more slowly. It still *leaves* as one object, because seven discs each taking their turn to go is a dismissal you wait through — and that animation's `animationend` is still what unmounts it.
   **The stagger is now shared.** `.bubble-in` moved to `src/app.css` and the ring was pointed at it: second use means extract, and two copies of one arrival is how the same gesture ends up half a frame apart in two places. The ring's bubbles are placed by their centre, so the positioning translate moved to a wrapper — the keyframe animates `transform` and would otherwise overwrite it.
+  **Second pass, same day.** Floating discs under the swatch put them over the note's first paragraph, and translucent discs with the writing inside them are not swatches. They sit beside the swatch now, on its line, running leftwards over the window's drag bar where there is nothing behind them.
+  With that position they read as coming *out of* the swatch, so they behave that way: `flex-direction: row-reverse` makes the first disc in the markup the one nearest the swatch, the arrival staggers outward from it, and the dismissal is the same index counted from the far end — the row retracts into the control it came from instead of vanishing. Each disc also grows from its trailing edge rather than its middle, which is the difference between one thing opening and six things appearing.
+  The current tint is no longer in the row: the swatch is that option, and the founder's point that it cannot be in two places is right. The list is captured when the palette opens rather than derived — choosing a tint changes the tint, and a derived list would drop the chosen disc and add the old one back in the middle of the animation carrying them all home.
+  What unmounts it is now the disc nearest the swatch, which is the last to leave. It has to be a named one rather than whichever animation ends first: they all report, and the first would take the rest down with it.
+
   Two things found while doing it. `animationend` bubbles, so once the discs animated, the first one to finish arriving reported the palette as gone; the handler now checks the event is the container's own. And the global reduced-motion rule collapsed durations but not delays, which on a staggered group leaves the stagger fully intact and the motion gone — the worst of both. It collapses `animation-delay` too now, which also fixes the ring.
 
 ### [SMD-079] Windows unfrosts a window that is not the active one

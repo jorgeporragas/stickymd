@@ -13,6 +13,21 @@
   let open = $state(false);
 
   /**
+   * The tints the palette is showing, captured when it opens.
+   *
+   * The note's own colour is not among them: the swatch *is* that option, and
+   * an option cannot be in two places at once — the founder's point, and it is
+   * also what makes the palette read as the swatch opening rather than as a
+   * list appearing beside it.
+   *
+   * Captured rather than derived because choosing a tint changes the tint, and
+   * a derived list would rearrange itself mid-dismissal: the chosen disc would
+   * vanish and the old one appear, in the middle of the animation carrying them
+   * all back into the swatch.
+   */
+  let shown = $state<Tint[]>([]);
+
+  /**
    * Whether the palette is playing its dismissal.
    *
    * It has to stay mounted while it leaves — removing it on the click is what
@@ -29,6 +44,7 @@
     } else {
       // Clicking again mid-dismissal takes it back rather than queueing a
       // second open behind the one that is leaving.
+      shown = TINTS.filter((option) => option !== tint);
       open = true;
       closing = false;
     }
@@ -39,10 +55,15 @@
     closing = true;
   }
 
-  function settled(event: AnimationEvent): void {
-    // The discs animate too, and `animationend` bubbles: without this, the
-    // first one to finish arriving would report the palette as gone.
-    if (event.target !== event.currentTarget) return;
+  /**
+   * Called by the disc nearest the swatch, which is the last one to leave.
+   *
+   * The palette retracts into the swatch, so the far end goes first and this
+   * one goes last — when it is done, there is nothing left on screen. It has to
+   * be a specific disc rather than whichever animation happens to end: they all
+   * report, and the first to finish would take the rest down with it.
+   */
+  function settled(): void {
     if (!closing) return;
 
     open = false;
@@ -70,17 +91,16 @@
   ></button>
 
   {#if open}
-    <div class="palette" class:closing role="group" aria-label="Note colour" onanimationend={settled}>
-      {#each TINTS as option, index (option)}
+    <div class="palette" class:closing role="group" aria-label="Note colour">
+      {#each shown as option, index (option)}
         <button
           class="lozenge lit dot bubble-in"
-          class:selected={option === tint}
           data-tint-swatch={option}
           type="button"
           aria-label={option}
-          aria-pressed={option === tint}
-          style="animation-delay: {index * 28}ms"
+          style="animation-delay: {(closing ? shown.length - 1 - index : index) * 28}ms"
           onclick={() => choose(option)}
+          onanimationend={index === 0 ? settled : undefined}
         ></button>
       {/each}
     </div>
@@ -123,13 +143,31 @@
 
   .palette {
     position: absolute;
-    top: calc(100% + var(--space-1));
-    /* Anchored to its right edge, not its left. The picker sits near the
-       window's trailing edge and the surface clips what leaves it, so a
-       palette opening rightwards would be cut in half. */
-    right: 0;
+    /*
+      Beside the swatch, on its line, running away to the left.
+
+      It used to drop below, which put seven discs over the note's first
+      paragraph — and now that they are translucent, the writing sat inside
+      them. Here there is nothing behind them but the window's own drag bar.
+
+      Leftwards because the picker sits near the window's trailing edge and the
+      surface clips what leaves it. The same fact as before; a different answer,
+      because the palette is now a row on the chrome rather than a panel under
+      it.
+    */
+    top: 50%;
+    right: calc(100% + var(--space-2));
+    transform: translateY(-50%);
     z-index: 1;
     display: flex;
+    /*
+      Reversed, so the first disc in the markup is the one nearest the swatch.
+
+      That is what makes the order mean something: the discs arrive outward
+      from the swatch and retract back into it, and both are the same index
+      counted in opposite directions.
+    */
+    flex-direction: row-reverse;
     /* Wider than it was, because there is no longer a panel holding the discs
        together — the spacing is what says they are one group. */
     gap: var(--space-2);
@@ -151,36 +189,40 @@
   }
 
   /*
-    Leaves as one, and faster than it arrived. Arriving disc by disc is the
-    palette presenting itself and is worth the time; leaving is getting out of
-    the way, and seven discs each taking their turn to go is a dismissal you
-    wait through. It is also what still says when the palette is gone — this
-    animation's own `animationend` is what unmounts it.
+    Retracting: the same motion run backwards, and the same order counted from
+    the other end — the far disc goes first and the one against the swatch goes
+    last, so the row draws back into the control it came out of. Quicker than
+    the arrival, because leaving is getting out of the way.
+
+    `forwards`, so a disc that has gone stays gone: without it each one would
+    snap back to full size the moment its own animation ended, and the row
+    would reassemble itself while the last disc was still leaving.
   */
-  .palette.closing {
-    transform-origin: top right;
-    animation: palette-close var(--dur-quick) var(--ease-in-out) forwards;
+  .palette.closing .dot {
+    animation: disc-out var(--dur-instant) var(--ease-in-out) forwards;
   }
 
-  @keyframes palette-close {
+  @keyframes disc-out {
     from {
       opacity: 1;
       transform: scale(1);
     }
     to {
       opacity: 0;
-      transform: scale(0.92);
+      transform: scale(0.4);
     }
   }
 
   .dot {
     width: var(--space-4);
     height: var(--space-4);
-  }
-
-  .dot.selected {
-    outline: 1.5px solid var(--ink-primary);
-    outline-offset: 2px;
+    /*
+      Each disc grows out of its own trailing edge — the side facing the swatch
+      — rather than out of its middle. Six discs each swelling in place is six
+      things appearing; six growing towards you from the control you clicked is
+      one thing opening.
+    */
+    transform-origin: right center;
   }
 
   /* The tints themselves. These are the only place a colour is named outside
