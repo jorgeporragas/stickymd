@@ -58,6 +58,10 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* Delay counts as much as duration once anything is staggered: collapsing
+       the animations of seven discs but not the waits between them leaves the
+       stagger fully intact and the motion gone, which is the worst of both. */
+    animation-delay: 0ms !important;
   }
 }
 
@@ -120,6 +124,34 @@ body {
   }
   to {
     opacity: 0;
+  }
+}
+
+/*
+ * A bubble arriving in a group: out of nothing, staggered, one after another.
+ *
+ * Shared because two things do it — the insert ring and the tint palette — and
+ * they have to do it identically. Two hand-written copies of the same arrival
+ * is how the same gesture ends up half a frame apart in two places.
+ *
+ * Scale and opacity only, never blur (docs/DESIGN.md). The stagger itself is
+ * the caller's: an `animation-delay` per item, since only the caller knows the
+ * order. The element wearing this must not need a transform of its own — the
+ * ring positions its bubbles by centre, so it puts that translate on a wrapper
+ * rather than fighting the keyframe for the property.
+ */
+.bubble-in {
+  animation: bubble-in var(--dur-quick) var(--ease-out) backwards;
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

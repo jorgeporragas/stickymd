@@ -39,8 +39,12 @@
     closing = true;
   }
 
-  function settled(): void {
+  function settled(event: AnimationEvent): void {
+    // The discs animate too, and `animationend` bubbles: without this, the
+    // first one to finish arriving would report the palette as gone.
+    if (event.target !== event.currentTarget) return;
     if (!closing) return;
+
     open = false;
     closing = false;
   }
@@ -67,14 +71,15 @@
 
   {#if open}
     <div class="palette" class:closing role="group" aria-label="Note colour" onanimationend={settled}>
-      {#each TINTS as option (option)}
+      {#each TINTS as option, index (option)}
         <button
-          class="lozenge lit dot"
+          class="lozenge lit dot bubble-in"
           class:selected={option === tint}
           data-tint-swatch={option}
           type="button"
           aria-label={option}
           aria-pressed={option === tint}
+          style="animation-delay: {index * 28}ms"
           onclick={() => choose(option)}
         ></button>
       {/each}
@@ -125,42 +130,36 @@
     right: 0;
     z-index: 1;
     display: flex;
-    gap: var(--space-1);
-    padding: var(--space-2);
-    border-radius: var(--radius-control);
-    border: 1px solid var(--rule);
-    box-shadow: var(--shadow-lifted);
+    /* Wider than it was, because there is no longer a panel holding the discs
+       together — the spacing is what says they are one group. */
+    gap: var(--space-2);
 
-    /* Opaque, not the window's own paint. --surface-paint is translucent in
-       Glass mode, and what is behind this popover is the note's text, so the
-       writing showed through the swatches. --surface-solid is the same colour
-       the note would be painted if it were opaque — so the palette reads as
-       part of this note rather than as a panel from somewhere else. */
-    background: var(--surface-solid);
+    /*
+      No panel: the discs float on the note.
 
-    /* Opens out of the swatch rather than appearing over it. A control this
-       small sits inside the window's own surface, so it may scale: there is no
-       backdrop behind it to show through. */
-    transform-origin: top right;
-    animation: palette-open var(--dur-settle) var(--ease-out);
+      It had one, and the panel was opaque for a good reason — painted with the
+      window's own translucent tint, the note's writing read through it. But
+      that reason was about a *panel*, and there is none now. What is left is
+      seven opaque discs with the note between them, which is what the insert
+      ring already does over the same text.
+
+      Its arrival went with it. The palette used to open as one object, scaling
+      out of the swatch; now each disc arrives on its own, staggered, and a
+      container scaling underneath that would be a second animation saying the
+      same thing more slowly.
+    */
   }
 
-  /* Leaves faster than it arrives. Arriving is the palette presenting itself
-     and is worth the time; leaving is getting out of the way, and a dismissal
-     that takes as long as the arrival reads as lag. */
+  /*
+    Leaves as one, and faster than it arrived. Arriving disc by disc is the
+    palette presenting itself and is worth the time; leaving is getting out of
+    the way, and seven discs each taking their turn to go is a dismissal you
+    wait through. It is also what still says when the palette is gone — this
+    animation's own `animationend` is what unmounts it.
+  */
   .palette.closing {
+    transform-origin: top right;
     animation: palette-close var(--dur-quick) var(--ease-in-out) forwards;
-  }
-
-  @keyframes palette-open {
-    from {
-      opacity: 0;
-      transform: scale(0.88);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
   }
 
   @keyframes palette-close {

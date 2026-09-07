@@ -621,6 +621,19 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. **Not yet seen on a real transparent window** — `backdrop-filter` inside WebView2 on a layered window is the one thing the mock cannot stand in for.
 
+### [SMD-080] The tint palette loses its panel and arrives staggered
+Type:    feature
+State:   shipped
+Created: 2026-09-07
+History:
+  2026-09-07  asked for by the founder
+  2026-09-07  shipped
+Notes: The founder asked for the palette to arrive staggered like the insert ring, and for the panel behind it to go so the discs float on the window.
+  The panel was opaque on purpose — SMD-054, where painting it with the window's translucent tint let the note's writing read through it. That reason does not survive the panel being removed: what is left is seven opaque discs with the note between them, which is exactly what the ring already does over the same text.
+  The arrival went with the panel. It used to open as one object scaling out of the swatch; a container scaling underneath seven discs that each arrive on their own would be a second animation saying the same thing more slowly. It still *leaves* as one object, because seven discs each taking their turn to go is a dismissal you wait through — and that animation's `animationend` is still what unmounts it.
+  **The stagger is now shared.** `.bubble-in` moved to `src/app.css` and the ring was pointed at it: second use means extract, and two copies of one arrival is how the same gesture ends up half a frame apart in two places. The ring's bubbles are placed by their centre, so the positioning translate moved to a wrapper — the keyframe animates `transform` and would otherwise overwrite it.
+  Two things found while doing it. `animationend` bubbles, so once the discs animated, the first one to finish arriving reported the palette as gone; the handler now checks the event is the container's own. And the global reduced-motion rule collapsed durations but not delays, which on a staggered group leaves the stagger fully intact and the motion gone — the worst of both. It collapses `animation-delay` too now, which also fixes the ring.
+
 ### [SMD-079] Windows unfrosts a window that is not the active one
 Type:    bug
 State:   dropped

@@ -91,20 +91,25 @@
 
 <div class="ring" role="menu" aria-label="Insert">
   {#each placed as { action, x, y }, index (action.id)}
-    <button
-      class="lozenge bubble"
-      role="menuitem"
-      type="button"
-      aria-label={action.label}
-      style="left: {x}px; top: {y}px; animation-delay: {index * 28}ms"
-      onpointerenter={() => (hovered = action.id)}
-      onpointerleave={() => (hovered = undefined)}
-      onclick={() => onChoose(action.id)}
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d={PIXEL_ICONS[action.icon]} />
-      </svg>
-    </button>
+    <!-- The seat carries the position, the bubble carries the arrival. Kept
+         apart because `.bubble-in` animates `transform`, and a bubble placed by
+         its centre needs a translate that the keyframe would overwrite. -->
+    <span class="seat" style="left: {x}px; top: {y}px">
+      <button
+        class="lozenge bubble bubble-in"
+        role="menuitem"
+        type="button"
+        aria-label={action.label}
+        style="animation-delay: {index * 28}ms"
+        onpointerenter={() => (hovered = action.id)}
+        onpointerleave={() => (hovered = undefined)}
+        onclick={() => onChoose(action.id)}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d={PIXEL_ICONS[action.icon]} />
+        </svg>
+      </button>
+    </span>
   {/each}
 
   {#if hovered}
@@ -128,11 +133,14 @@
     pointer-events: none;
   }
 
-  .bubble {
+  .seat {
     position: absolute;
     /* Placed by its centre rather than its corner: the ring is described in
        centres, and translating here keeps the arithmetic above honest. */
     transform: translate(-50%, -50%);
+  }
+
+  .bubble {
     pointer-events: auto;
 
     display: grid;
@@ -143,25 +151,10 @@
     width: 40px;
     height: 40px;
     color: var(--control-glyph);
-
-    animation: bubble-in var(--dur-quick) var(--ease-out) backwards;
   }
 
   .bubble:hover {
     color: var(--ink-primary);
-  }
-
-  /* Arrives from the centre, staggered, one after another — the founder's own
-     description of this menu. Transform and opacity only; never blur. */
-  @keyframes bubble-in {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.4);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
   }
 
   /*
