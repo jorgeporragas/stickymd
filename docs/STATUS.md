@@ -583,6 +583,19 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-069] The dark bubble sat below its own window
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder, and two more found by enlarging it
+  2026-09-06  shipped
+Notes: The founder reported two things about the dark theme and both were real, and looking at the control enlarged found a third that was worse than either.
+  **The bubbles were darker than the window.** `--gloss-neutral` sat on its own dark scale and bottomed out at `#232220`, below the window's own `#16161a` once glass let a wallpaper through — so a control read as a hole punched in the window rather than an object resting on it. It is built up from `--surface-solid` now, every stop lighter than it, which is what the Frost gloss already did relative to its own surface.
+  **A lit control kept a pale rim.** Exactly the specificity trap that had made a lit control come out grey an hour earlier, on the other property: components declared `border-color: var(--rim-control)`, which beat `.lozenge.lit` — same specificity, injected later. The rim is a default on `.lozenge` now, like the fill. The lesson did not generalise the first time because it was fixed as one property rather than as a rule.
+  **The specular was a sticker.** A flat white ellipse across 56% of the bubble, hard-edged, painted over the glyph rather than on the glass. Obvious at four times size and quietly wrong at one. It is a radial gradient now, smaller, and it falls off.
+  The glyphs also went to Aqua's weight — the founder's pick of the three icon options. At 58% of a 16px disc a 1.2px stroke is a glyph you infer rather than see.
+
 ### [SMD-068] One selected colour, and the lit lozenge extracted
 Type:    feature
 State:   shipped

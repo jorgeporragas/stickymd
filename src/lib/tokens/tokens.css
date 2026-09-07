@@ -345,13 +345,18 @@
   --scrollbar-thumb-hover: rgba(242, 239, 232, 0.38);
   color-scheme: dark;
 
-  --gloss-neutral: radial-gradient(circle at 50% 18%, #4a4945 0%, #33322f 60%, #232220 100%);
+  /* Built up from `--surface-solid` (#16161a) rather than sitting on its own
+     scale, and every stop lighter than it. A bubble that bottoms out darker
+     than the window reads as a hole punched in it; on Frost the same gloss is
+     lighter than the surface, and this is that behaviour rather than its
+     mirror. Neutral rather than warm, because the dark window is neutral. */
+  --gloss-neutral: radial-gradient(circle at 50% 18%, #57575a 0%, #323236 60%, #222226 100%);
   --rim-neutral: rgba(255, 255, 255, 0.22);
 
   /* Lighter than the note here, not darker. On a dark surface a darker panel
      reads as a hole rather than as a block set into the page. */
   --code-surface: #1e1e23;
-  --gloss-pressed: radial-gradient(circle at 50% 88%, #3a3936 0%, #1d1c1a 60%, #2a2926 100%);
+  --gloss-pressed: radial-gradient(circle at 50% 88%, #45454a 0%, #1e1e22 60%, #2a2a2f 100%);
   --selection: rgba(242, 239, 232, 0.20);
 
   --shadow-lifted: 0 8px 28px rgba(0, 0, 0, 0.55);

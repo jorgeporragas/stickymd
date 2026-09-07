@@ -46,7 +46,7 @@
 
   /* Size, stacking and colour come from `.lozenge.lit`. */
   .trouble svg {
-    stroke-width: 1.8;
+    stroke-width: 2.2;
     stroke-linecap: round;
   }
 </style>

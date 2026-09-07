@@ -28,7 +28,7 @@
     onclick={onDelete}
   >
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-      <path d="M2.6 3.6h6.8M4.9 3.6V2.5h2.2v1.1M3.6 3.6l.4 5.6h4l.4-5.6" />
+      <path d="M2.4 3.5h7.2M4.8 3.5V2.2h2.4v1.3M3.5 3.5l.5 5.8h4l.5-5.8" />
     </svg>
   </button>
 </div>
@@ -141,7 +141,7 @@
     width: 12px;
     height: 12px;
     stroke: currentColor;
-    stroke-width: 1.2;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;

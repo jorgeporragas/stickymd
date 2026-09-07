@@ -137,12 +137,12 @@ body {
   position: relative;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid var(--swatch-rim);
-
-  /* The neutral fill is the default here rather than something each control
-     re-declares. A control that set it itself would win over `.lit` below —
-     same specificity, and component styles are injected after this file — so a
-     lit control came out grey. Set the exception, not the rule. */
+  /* The neutral rim and fill are the defaults here rather than something each
+     control re-declares. A control that set either itself would win over
+     `.lit` below — same specificity, and component styles are injected after
+     this file — so a lit control came out grey, and later kept a pale rim that
+     belonged to the unlit state. Set the exception, not the rule. */
+  border: 1px solid var(--rim-control);
   --lozenge-fill: var(--gloss-control);
   --lozenge-pressed: var(--gloss-pressed);
   background: var(--lozenge-fill);
@@ -216,12 +216,16 @@ body {
 .lozenge::after {
   content: '';
   position: absolute;
-  top: 12%;
-  left: 22%;
-  width: 56%;
-  height: 28%;
+  top: 10%;
+  left: 26%;
+  width: 48%;
+  height: 22%;
   border-radius: 50%;
-  background: var(--gloss-specular);
+
+  /* A gradient, not a flat ellipse. Solid, it was a white sticker across the
+     top half of every bubble — obvious at 16px and unmissable enlarged, and it
+     sat over the glyph rather than on the glass. Light falls off. */
+  background: radial-gradient(ellipse at center, var(--gloss-specular) 0%, transparent 72%);
   pointer-events: none;
 }
 

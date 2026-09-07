@@ -97,16 +97,17 @@
     >
       <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
         {#if action.icon === 'note'}
-          <path d="M4 2.5h8v11H4z" />
-          <path d="M6 5.5h4M6 8h4M6 10.5h2.5" />
+          <path d="M3.5 2.5h9v11h-9z" />
+          <path d="M6 5.8h4M6 8h4M6 10.2h2.5" />
         {:else if action.icon === 'hub'}
-          <path d="M2.5 3.5h11M2.5 8h11M2.5 12.5h11" />
+          <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
         {:else if action.icon === 'settings'}
-          <path d="M2.5 5h11M2.5 11h11" />
-          <path d="M6 5v0.01M10.5 11v0.01" />
+          <path d="M2.5 5.5h11M2.5 10.5h11" />
+          <circle cx="6" cy="5.5" r="1.4" />
+          <circle cx="10.5" cy="10.5" r="1.4" />
         {:else}
-          <path d="M6.2 2h3.6l-.5 3.6 2.2 2.2v1.2H4.5V7.8l2.2-2.2z" />
-          <path d="M8 9v5" />
+          <path d="M5.8 2.5h4.4v3.5l2.1 2.2v0.8H3.7v-0.8l2.1-2.2z" />
+          <path d="M8 9.5v4" />
         {/if}
       </svg>
     </button>
@@ -144,7 +145,6 @@
     place-items: center;
     width: var(--space-8);
     height: var(--space-8);
-    border-color: var(--rim-control);
     color: var(--control-glyph);
 
     animation: bubble-in var(--dur-quick) var(--ease-out) backwards;
@@ -178,7 +178,7 @@
   /* Size and stacking come from `.lozenge`. */
   .bubble svg {
     stroke: currentColor;
-    stroke-width: 1.2;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;

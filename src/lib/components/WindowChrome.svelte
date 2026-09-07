@@ -57,15 +57,15 @@
       onclick={() => onAlwaysOnTop(!alwaysOnTop)}
     >
       <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-        <path d="M4.6 1.5h2.8l-.4 2.7 1.7 1.7v.9H3.3v-.9l1.7-1.7z" />
-        <path d="M6 6.8V10.5" />
+        <path d="M4.4 2h3.2v2.6l1.6 1.7v.6H2.8v-.6l1.6-1.7z" />
+        <path d="M6 7v3.2" />
       </svg>
     </button>
   {/if}
 
   <button class="lozenge control" class:revealed type="button" aria-label={closeLabel} onclick={close}>
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-      <path d="M3.5 3.5 L8.5 8.5 M8.5 3.5 L3.5 8.5" />
+      <path d="M3.8 3.8 8.2 8.2M8.2 3.8 3.8 8.2" />
     </svg>
   </button>
 </div>
@@ -96,7 +96,6 @@
     place-items: center;
     width: var(--space-4);
     height: var(--space-4);
-    border-color: var(--rim-control);
     color: var(--control-glyph);
 
     /* Small control, not a glass surface: fading is cheap and correct.
@@ -155,7 +154,9 @@
      src/app.css. */
   .control svg {
     stroke: currentColor;
-    stroke-width: 1.5;
+    /* Aqua's weight, not a modern hairline: at 58% of a 16px disc a thin
+       stroke is a glyph you infer rather than see. */
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;

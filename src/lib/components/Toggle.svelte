@@ -50,7 +50,6 @@
     /* The diameter every other bubble in the application uses. */
     width: var(--space-4);
     height: var(--space-4);
-    border-color: var(--rim-control);
     color: var(--control-glyph);
   }
 
