@@ -670,13 +670,14 @@ Notes: The founder reported it as "crashes when opening a note from the hub". It
 
 ### [SMD-052] Line boil animation
 Type:    idea
-State:   blocked
+State:   idea
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
 Notes: The other named effect: edges that wobble between a few frames, the way hand-drawn animation does. It is what would make the app look drafted rather than rendered.
   The constraint to check first is cost, since low resource use is one of the founder's two stated priorities. A boil is per-frame, and doing it to a *window edge* is the expensive case — that edge is the compositor's, and the surface cannot move (`docs/FIXES.md`). Doing it to an SVG stroke inside a window, cycling two or three prepared paths at a low frame rate, is cheap. The cheap version is almost certainly the right one, and it points at the mark and at icons rather than at the window.
-  Blocked, not skipped, and on something concrete: the subject this item points at is the application mark, and the founder is redrawing it. The mark in `assets/icon/` is also still the old one — it carries the aqua gradient ADR-025 removed and is titled "StickyMD" rather than "sticky.md" (ADR-019).
+  2026-09-06 — parked by the founder: "a cool concept but I don't really know how I would fit it. Maybe later." Not dropped, because he may come back to it; not blocked either, since the blocker below is no longer what is stopping it. What stops it is that nothing in the application has asked for it yet.
+  The original blocker, still true: the subject this item points at is the application mark, and the founder is redrawing it. The mark in `assets/icon/` is also still the old one — it carries the aqua gradient ADR-025 removed and is titled "StickyMD" rather than "sticky.md" (ADR-019).
   Boiling a mark that is about to be replaced is work thrown away, and every other candidate is worse: the window's glyphs are controls a user looks at constantly, and the titles are text, which is scrambling's job rather than a boil's. This wants the new mark first.
 
 ### [SMD-050] A deleted note could come back as an empty window
