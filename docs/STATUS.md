@@ -10,14 +10,15 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Awaiting the founder's verification of the second autonomous bundle. Shipped in it: the code face swapped to JetBrains Mono (SMD-063), the settings window with a configurable notes folder (SMD-064, closing SMD-046 and SMD-003), typographic scrambling on the window titles (SMD-051), and the radial menu (SMD-038).
+Releasing v1.0.0. The manifests are bumped and the tag is the last thing the release workflow has never had.
 
-Two of the six did not finish, and neither was skipped quietly:
+Three statements that stood here were true when written and are not now, corrected 2026-09-07 rather than left to rot:
 
-- **SMD-052, the line boil, is blocked.** Its subject is the application mark and the founder is redrawing it. The mark on disk is also still the old one — it carries the aqua gradient ADR-025 removed and is titled "StickyMD" rather than "sticky.md".
-- **SMD-065, release readiness, is active.** Everything testable without a remote was tested by hand and both artefacts build. The workflow's own first run is the only part that has never executed, and it needs a tag pushed to a remote that does not exist yet.
+- **The remote exists.** `git@github.com:jorgeporragas/stickymd.git`, since 2026-09-06. It was named as SMD-065's blocker.
+- **The mark has been redrawn.** `assets/icon/stickymd.svg` is the seated lozenge carrying Departure Mono's S, in `--tide-400`, titled "sticky.md". The old aqua-gradient "StickyMD" file is gone, and with it SMD-052's stated blocker — that item is parked by the founder's choice now, not blocked.
+- **The second autonomous bundle was verified.** SMD-063, SMD-064, SMD-051 and SMD-038 all stand, and SMD-038 has since become the insert menu (SMD-076).
 
-Build phases 1 to 5 are shipped. The log now holds nothing that is both unblocked and undecided.
+Build phases 1 to 5 are shipped. Nothing in the log is both unblocked and undecided except SMD-074, which the founder has seen and left.
 
 ---
 
@@ -112,10 +113,12 @@ Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it ap
 
 ### [SMD-009] Chakra Petch as an alternate built-in theme's display face
 Type:    idea
-State:   idea
+State:   dropped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea during Planning
+  2026-09-07  dropped by the founder
+Dropped because: it existed as a fallback for a question that has been answered. Chakra Petch was the founder's second choice while Redaction's licensing was in doubt (ADR-011); Departure Mono settled the display face (ADR-029, SMD-059) and settled it on a different axis — a pixel face, not a technical sans. An alternate theme built on it would be exercising the theme system with a face nobody chose.
 Notes: The founder's fallback display face when Redaction's licensing was in question — see ADR-011. A sharper, more technical skin. Exercises the theme system as more than a colour picker.
 
 ### [SMD-010] Code signing certificate
@@ -861,8 +864,8 @@ History:
 Notes: The other named effect: edges that wobble between a few frames, the way hand-drawn animation does. It is what would make the app look drafted rather than rendered.
   The constraint to check first is cost, since low resource use is one of the founder's two stated priorities. A boil is per-frame, and doing it to a *window edge* is the expensive case — that edge is the compositor's, and the surface cannot move (`docs/FIXES.md`). Doing it to an SVG stroke inside a window, cycling two or three prepared paths at a low frame rate, is cheap. The cheap version is almost certainly the right one, and it points at the mark and at icons rather than at the window.
   2026-09-06 — parked by the founder: "a cool concept but I don't really know how I would fit it. Maybe later." Not dropped, because he may come back to it; not blocked either, since the blocker below is no longer what is stopping it. What stops it is that nothing in the application has asked for it yet.
-  The original blocker, still true: the subject this item points at is the application mark, and the founder is redrawing it. The mark in `assets/icon/` is also still the old one — it carries the aqua gradient ADR-025 removed and is titled "StickyMD" rather than "sticky.md" (ADR-019).
-  Boiling a mark that is about to be replaced is work thrown away, and every other candidate is worse: the window's glyphs are controls a user looks at constantly, and the titles are text, which is scrambling's job rather than a boil's. This wants the new mark first.
+  The original blocker was that the subject this item points at — the application mark — was about to be redrawn, and boiling a mark that is about to be replaced is work thrown away. **That blocker is gone as of 2026-09-06:** `assets/icon/stickymd.svg` is the new mark, the seated lozenge carrying Departure Mono's S.
+  So nothing stops this but the founder's own answer, which is that he does not yet know where it would fit. Every other candidate is still worse: the window's glyphs are controls a user looks at constantly, and the titles are text, which is scrambling's job rather than a boil's.
 
 ### [SMD-050] A deleted note could come back as an empty window
 Type:    bug
@@ -883,9 +886,10 @@ Created: 2026-09-06
 History:
   2026-09-06  accepted into the second autonomous bundle by the founder
   2026-09-06  everything testable without a remote, tested
+  2026-09-07  manifests bumped to 1.0.0 by the founder's word, unblocking the tag
 Notes: The release workflow could not be run — that needs a remote and a tag, and neither exists yet — so what it does was run by hand instead, which catches everything except the Actions runner itself.
   `npm run tauri build` completes: release profile in 2m45s, NSIS fetched and verified, installer produced at **1.6 MB**. The portable zip was assembled with the workflow's own PowerShell and comes to **1.84 MB**, holding `stickymd.exe` (3.79 MB uncompressed), `LICENSE` and `README.md` in a versioned folder. Both artefacts are what `MASTER.md § Deployment` promises.
-  **One thing will stop the first tag, by design.** Both manifests say `0.1.0`, and the workflow refuses a tag that disagrees with them. Tagging `v1.0.0` fails until `package.json` and `src-tauri/tauri.conf.json` are bumped. That is the check working — an installer named after the wrong version is only ever noticed after someone downloads it — but it is worth knowing before the tag rather than after.
+  **One thing stopped the first tag, by design.** Both manifests said `0.1.0`, and the workflow refuses a tag that disagrees with them — an installer named after the wrong version is only ever noticed after someone has downloaded it. Bumped to `1.0.0` on 2026-09-07: `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` alongside them. The workflow checks the first two; the third is the crate's own version and a manifest disagreeing with its own crate is a trap waiting for whoever reads it next.
   Left `active`: the workflow's first real run is still unobserved, and it is the only part of this that has never executed.
 
 ### [SMD-049] The release workflow
