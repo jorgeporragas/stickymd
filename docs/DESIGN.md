@@ -2,7 +2,7 @@
 
 > **Authoritative for:** the visual system — design principles, the token contract, typography, themes, motion, and the component inventory.
 > **Never contains:** work state, or token values. Components and themes that do not exist, and anything carrying a completion mark, live in `docs/STATUS.md`. Every token's value lives in `src/lib/tokens/tokens.css`. Product truth lives in `MASTER.md`. Engineering imperatives live in `CLAUDE.md`.
-> **Last verified:** 2026-09-06
+> **Last verified:** 2026-09-07
 
 ---
 

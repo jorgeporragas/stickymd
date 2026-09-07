@@ -59,4 +59,31 @@ if [ -n "$hits" ]; then
   fail=1
 fi
 
+# --- 3. An item moved to `shipped` with no commit cited -----------------------
+#
+# FLOW names this check and it was never written, which is how 38 shipped items
+# reached the log with nothing to verify them against — found by the truth check
+# at the V1 transition and backfilled from git history.
+#
+# The hash cannot be this commit's: it does not exist yet. The convention is the
+# one the log already uses — cite the commit that did the work, which is either
+# an earlier one or, when code and item ship together, a follow-up. Either way
+# the citation is a hash, and its absence is what this catches.
+
+if echo "$staged" | grep -q '^docs/STATUS\.md$'; then
+  added=$(git diff --cached -U0 -- docs/STATUS.md | grep -E '^\+')
+
+  if echo "$added" | grep -Eq '^\+State:[[:space:]]+shipped'; then
+    if ! echo "$added" | grep -Eq 'commit [0-9a-f]{7,40}'; then
+      echo "FLOW: an item moved to shipped with no commit cited."
+      echo "  Fix: add a history line to that item —"
+      echo "         YYYY-MM-DD  shipped — commit <hash>"
+      echo "       naming the commit that did the work. If that is this commit,"
+      echo "       cite it in a follow-up; the hash does not exist yet."
+      echo
+      fail=1
+    fi
+  fi
+fi
+
 exit $fail

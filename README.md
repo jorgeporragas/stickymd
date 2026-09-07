@@ -1,27 +1,25 @@
 # sticky.md
 
-A markdown scratchpad for Windows. Sticky notes that render markdown as you type — and stay plain `.md` files you own.
+Sticky notes that render markdown as you type, and stay plain `.md` files you own.
 
-It exists for the text that isn't worth a vault: a prompt you're editing, a paragraph headed somewhere else, a scrap that lives a few days and then gets pasted and forgotten. Obsidian renders markdown properly but makes you open a vault and clutter it. Sticky Notes is the right shape but turns `**bold**` into literal asterisks. This is the gap between them.
-
-> **This is not finished software.** What follows describes what sticky.md is being built to be. Some of it works today and some of it does not — **[docs/STATUS.md](docs/STATUS.md)** says which, item by item, and is kept accurate as a rule rather than as a courtesy. Don't install this expecting a product yet.
+It's for the text that isn't worth a vault: a prompt you're editing, a paragraph headed somewhere else, a scrap that lives a few days and then gets pasted and forgotten. Obsidian renders markdown properly but makes you open a vault. Sticky Notes is the right shape but turns `**bold**` into literal asterisks. This is the gap between them.
 
 - **Markdown renders inline.** Syntax hides on the lines your cursor isn't on and comes back on the line it is. `Ctrl+B` inserts real `**` characters — what you see and what's in the file are never different things.
-- **Copy gives you the source.** Select a rendered note, copy, paste into anything: you get raw markdown, not styled text. This is the property the whole thing exists to provide.
-- **Your notes are files.** One `.md` per note in a plain folder. Point another editor at it, grep it, sync it, or delete the app entirely — the notes are still there and still readable.
-- **Nothing leaves your machine.** No account, no telemetry, no analytics, no sync, no AI. Not as a setting you can turn off — the app has no code that sends anything anywhere.
+- **Copy gives you the source.** Paste into anything and you get raw markdown, not styled text.
+- **Your notes are files.** One `.md` per note in a plain folder. Grep them, sync them, edit them elsewhere, or delete the app and keep them.
+- **Nothing leaves your machine.** No account, no telemetry, no sync, no AI — not as a setting you can turn off, but as code that doesn't exist.
 
-## Installing
+## Install
 
-Releases will be published [here](../../releases), as a Windows installer and a portable zip. The portable zip needs no installer and touches no registry — extract it and run. Until then, building from source is the only way to run it.
+[**Download the latest release.**](../../releases/latest) Windows 10 or 11, 64-bit. Take the installer, or the portable zip if you'd rather nothing touched the registry.
 
-**Windows will warn you when you run a downloaded build.** You'll see *"Windows protected your PC"* and have to click **More info → Run anyway**.
+Windows will say **"Windows protected your PC"** — click **More info → Run anyway**. The binaries are unsigned, and a certificate that removes that warning costs a few hundred dollars a year which this project doesn't have.
 
-That warning is not a judgement about the software. It appears because the binaries are unsigned, and a certificate that removes it costs a few hundred dollars a year — which this project doesn't have. The warning will keep appearing until that changes. If you'd rather not click through it, building from source takes about five minutes and produces the same application.
+It lives in the tray. **Ctrl+Shift+Space** makes a note from anywhere; right-click the tray icon for everything else. Notes land in `Documents\sticky.md`.
 
-## Building from source
+## Build it yourself
 
-You'll need Node, Rust, and the MSVC C++ build tools. Full toolchain requirements are in [CLAUDE.md § Local setup](CLAUDE.md#local-setup).
+Needs Node, Rust, and the MSVC C++ build tools.
 
 ```bash
 git clone https://github.com/jorgeporragas/stickymd.git
@@ -31,28 +29,16 @@ git config core.hooksPath .githooks
 npm run tauri dev
 ```
 
-That second-to-last line is not optional and not per-repository: the pre-commit hook lives in `.githooks/` and git does not look there until it is told to, on every clone.
+That third line isn't optional: the pre-commit hook lives in `.githooks/`, and git doesn't look there until it's told to — on every clone, not once per repository.
 
-That last step builds the Rust side too, so the first run takes a few minutes. Afterwards it's seconds.
+## Under it
 
-## How it's built
+Tauri v2 with a Rust backend, Svelte 5 and TypeScript in the frontend, CodeMirror 6 for the editor. It uses the web view Windows already has rather than bundling a browser engine, which is most of why it's under 2 MB.
 
-Tauri v2 with a Rust backend, Svelte 5 and TypeScript in the frontend, CodeMirror 6 for the editor. It uses the operating system's web view rather than bundling a browser engine.
-
-The documentation is unusually complete for a project this size, because it's maintained under a system that treats stale docs as bugs:
-
-| | |
-|---|---|
-| [MASTER.md](MASTER.md) | What the product is — problem, scope, stack rationale, and the things it will never do |
-| [docs/DESIGN.md](docs/DESIGN.md) | The visual system: principles, design tokens, the component inventory |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | Why things are the way they are, one decision per entry |
-| [docs/STATUS.md](docs/STATUS.md) | Everything with a state |
-| [docs/FIXES.md](docs/FIXES.md) | Hard-won fixes that must not be undone |
-
-If you're wondering why a decision was made, ADRs are usually a faster answer than the code.
+The docs are unusually complete for something this size, because they're kept under a system that treats a stale doc as a bug: [MASTER.md](MASTER.md) for what the product is, [docs/DECISIONS.md](docs/DECISIONS.md) for why anything is the way it is, [docs/DESIGN.md](docs/DESIGN.md) for the visual system, [docs/STATUS.md](docs/STATUS.md) for everything with a state, and [docs/FIXES.md](docs/FIXES.md) for the fixes that must not be undone.
 
 ## Licence
 
 [GPL-3.0-only](LICENSE). Forks stay open.
 
-The bundled typefaces — [Departure Mono](https://departuremono.com/), [Geist](https://fonts.google.com/specimen/Geist) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/) — are under the SIL Open Font License, with each licence text alongside the files in `src/assets/fonts/`.
+The bundled typefaces — [Departure Mono](https://departuremono.com/), [Geist](https://fonts.google.com/specimen/Geist) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/) — are under the SIL Open Font License, each licence text alongside the files in `src/assets/fonts/`.

@@ -6,29 +6,15 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Phase
 
-**Build** — Phase 5 — Theme & Motion
+**Build** — Phase 7 — Release & Auto-Update
+
+Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by the workflow on a clean runner and published with both assets. Phase 6 — Cross-Platform Expansion is deliberately skipped for now, not finished: `MASTER.md` says the numbering records the order phases were defined in rather than a plan with an ending, and the founder wants auto-update before macOS and Linux.
 
 ## Current Active Step
 
-**Releasing v1.0.0.** Manifests bumped, `v1.0.0` tagged and pushed 2026-09-07, and the release workflow ran for the first time — run 34091349993. It was still building when the session ended; **check its outcome before anything else next session** (`gh run view 34091349993`).
+**Phase 7.** Auto-update (SMD-005) is the phase's own work; SMD-074, the chord validation, is being taken alongside it at the founder's word.
 
-What it produces is a *draft* release, by design: both assets attached, notes left to a person. Three things wait on the founder, in order:
-
-1. Write the notes and publish the draft — or don't; nothing is public until he does.
-2. Install-test what the runner built. Both artefacts have only ever been built on his own machine; a clean-runner build has never been installed, and that is what `MASTER.md § Deployment` promises. The SmartScreen path is part of that test.
-3. Decide SMD-074 — validate a typed chord, or capture it from a keypress. He has seen it and left it; capture is the better answer and the more work.
-
-**The README expires on publish.** It says "Releases will be published here… Until then, building from source is the only way to run it." That is true now and false the moment the draft goes out. It is the retraction pass that publishing will owe.
-
-**The phase marker understates this.** Build phases 1 to 5 are shipped and a 1.0.0 tag is out; STATUS still says Phase 5. Moving it is a phase transition and wants the full truth check, which the founder has twice chosen to defer. It is not drift — it is a deferral, and this is where it is recorded.
-
-Three statements that stood here were true when written and are not now, corrected 2026-09-07 rather than left to rot:
-
-- **The remote exists.** `git@github.com:jorgeporragas/stickymd.git`, since 2026-09-06. It was named as SMD-065's blocker.
-- **The mark has been redrawn.** `assets/icon/stickymd.svg` is the seated lozenge carrying Departure Mono's S, in `--tide-400`, titled "sticky.md". The old aqua-gradient "StickyMD" file is gone, and with it SMD-052's stated blocker — that item is parked by the founder's choice now, not blocked.
-- **The second autonomous bundle was verified.** SMD-063, SMD-064, SMD-051 and SMD-038 all stand, and SMD-038 has since become the insert menu (SMD-076).
-
-Build phases 1 to 5 are shipped. Nothing in the log is both unblocked and undecided except SMD-074, which the founder has seen and left.
+One thing waits on him, and only one: **installing the published build the way a user would**. Both artefacts have been built by the runner and downloaded by nobody. That is the last claim in `MASTER.md § Deployment` with no on-device confirmation behind it — the installer's wizard, the portable zip's extract-and-run, and the SmartScreen path the README promises.
 
 ---
 
@@ -72,6 +58,7 @@ State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea — cut from V1 during Planning
+  2026-09-06  shipped — commit dae4274
 Notes: One sane default for V1. Making it configurable brings a settings surface, a migration path for existing notes, and a class of bugs, for a setting used once.
 
 ### [SMD-004] Dark theme
@@ -119,8 +106,9 @@ History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active
   2026-09-05  shipped — commit 2f56290
-Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it appears rather than burying it. Links to the FLOW files rather than restating them: current state points at STATUS, toolchain requirements at CLAUDE. Opens with a notice that the software is unfinished, placed above the feature list so a visitor cannot read the list as a claim about what runs today. The clone URL was deliberately absent while there was no remote to name — inventing one would have been a false instruction. It is there as of 2026-09-07, along with the `core.hooksPath` line, which is the one step a clone cannot infer.
-  **Still expiring:** "Releases will be published here… Until then, building from source is the only way to run it." True until the v1.0.0 draft is published, and false the moment it is.
+Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it appears rather than burying it. Links to the FLOW files rather than restating them: current state points at STATUS, toolchain requirements at CLAUDE. Rewritten 2026-09-07, on the founder's reading that it had too much going on for what this is — a small tool for people like him, not a project asking to be evaluated. Roughly half the length. The doc table became one sentence, the SmartScreen explanation lost a paragraph, and the per-file descriptions went.
+  Two statements went with the rewrite because publishing made them false, which is the retraction that publishing owed: the notice that this is unfinished software, and "Releases will be published here… Until then, building from source is the only way to run it." In their place, a download link to the latest release and the three things a first run needs — the tray, `Ctrl+Shift+Space`, and where the notes land.
+  The clone URL was deliberately absent while there was no remote to name — inventing one would have been a false instruction. It is there now, with the `core.hooksPath` line, which is the one step a clone cannot infer.
 
 ### [SMD-009] Chakra Petch as an alternate built-in theme's display face
 Type:    idea
@@ -198,6 +186,7 @@ History:
   2026-09-05  logged as idea
   2026-09-06  accepted into an autonomous bundle by the founder
   2026-09-06  shipped
+  2026-09-06  shipped — commit 12ccc32
 Notes: Shipped. The setting is read from the registry before the blur is applied, and watched with `RegNotifyChangeKeyValue` on a thread that blocks until something changes — not a poll. When it changes, every open window is re-applied and told, and each re-resolves `data-surface`; windows opened later get their answer on the way up.
   The root cause was worse than the item assumed, and is now in `docs/FIXES.md`: `apply_acrylic` **succeeds** when transparency is off. The mode was being decided by whether that call errored, so the window stayed in Glass with the compositor drawing nothing behind it. A successful call reports that it was accepted, not that anything is being drawn.
   A window that cannot be frosted still makes the whole application Solid rather than leaving two windows in different modes side by side.
@@ -231,6 +220,7 @@ Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-06  confirmed on device (founder) — pasting from sticky.md gives raw markdown
+  2026-09-06  shipped — commit b5905e6
 Notes: The document holds real markdown and CodeMirror serialises the clipboard from state rather than the DOM, so raw source was expected. Confirmed by the founder pasting out of a rendered note. No commit — nothing needed changing. This is the single property the product exists to provide, which is why it was checked rather than assumed.
 
 ### [SMD-019] Note window JavaScript weight
@@ -239,6 +229,7 @@ State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
+  2026-09-06  shipped — commit c4d0e89
 Notes: The note window's main chunk is 555 kB raw, 193 kB gzipped — mostly CodeMirror plus the HTML, CSS and JavaScript grammars that `@codemirror/lang-markdown` pulls in unconditionally (see `docs/FIXES.md`). Loaded from disk, so no network cost, but every open note window parses its own copy.
   2026-09-06 — measured rather than changed, which is what this item asked for. A production build ships **677 kB of raw JavaScript** across both windows, 14.5 kB of CSS and 176 kB of fonts.
   Where it sits matters more than the total. The hub's own chain is about 64 kB; effectively all the rest belongs to the note window, and it is CodeMirror plus the language set. That matches this item's own guess, and `docs/FIXES.md` records why the language set cannot simply be lazy-loaded.
@@ -253,6 +244,7 @@ State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea
+  2026-09-06  shipped — commit 332c287
 Notes: Fence markers stay visible by design — hiding them leaves a bare language name floating above the block. A proper treatment gives the block its own surface with the language shown deliberately rather than as leftover syntax.
   2026-09-06, from the founder using it: fenced blocks have no surface — he wants a light rounded panel separating code from prose, as Obsidian has, and suggested the panel could be black regardless of theme, since developers rarely read code on a light background. The text also reads much larger than body text, and there is no colour in it.
   Two of those three are measured rather than reported. **The size is a real defect:** `--font-size-code` exists but is applied only inside tables, so fenced code inherits `--font-size-body`. And at the same 15px, Martian Mono sets `const value = 42;` 52% wider than Geist — 10.5px per character against 8.23px. Code does not read larger because it is taller; it reads larger because it is far wider, and width is what reads as size in a block. Matching Geist's rhythm wants about 12px; 13px (`0.8125rem`) is the likely landing, at 11% wider.
@@ -299,6 +291,7 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as idea
   2026-09-06  shipped
+  2026-09-06  shipped — commit 7e4d869
 Notes: A failed write is logged to the console and the text stays queued for the next flush, so nothing is lost while the window is open. But the user is told nothing, and if the window closes the queued text goes with it. A full disk or a permissions problem should be visible in the window rather than only in a console nobody has open.
   Shipped as `SaveTrouble`: a lit `--signal-danger` lozenge that appears in the chrome only when a write has failed, carries the reason as its label, and retries when clicked. It does not recede — principle 2 stops at chrome that is carrying information.
   The reason is built from the typed error rather than from a string, so a missing notes folder, an unusable title and an I/O failure each say what they are. That is what the typed error boundary was for.
@@ -444,7 +437,8 @@ State:   dropped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea while fixing SMD-043
-  2026-09-06  dropped — the premise was false
+  2026-09-06  dropped — commit b5905e6
+Dropped because: the premise was false. `shadow: false` does not leave the window casting nothing — Windows draws its own shadow for a DWM-rounded window whatever that setting says, which the founder observed and the item had inferred.
 Notes: Logged on the inference that `shadow: false` would leave the window casting nothing. The founder observed that it does cast one: Windows draws its own shadow for a DWM-rounded window whatever that setting says. Inferred from code rather than looked at, which is the whole reason on-device confirmation exists.
   What remains true, and is recorded in `docs/FIXES.md` instead: a CSS shadow is clipped at the window edge, so a shadow on the surface has no effect on the window itself. The shadow is the system's. If a different one is ever wanted, that is when the window has to be padded — not before. `--shadow-rest` was removed on that reasoning in SMD-048.
 
@@ -493,6 +487,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea
+  2026-09-06  shipped — commit dae4274
 Notes: Settings are a JSON file the user edits by hand (ADR-022). That satisfies "remappable" for someone willing to open a text editor and no one else. Not in `MASTER.md § In Scope` and not smuggled in as though it were — a settings window is a real feature with its own design, and it would also be the natural home for the notes-folder location (SMD-003) and theme choice.
 
 ### [SMD-045] Animate the transition between written and rendered markdown
@@ -514,6 +509,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit 7e4d869
 Notes: Two notes from the founder on seeing Departure Mono in the hub. Its letters sit too far apart in the title — the face is monospaced, so they carry a code face's sidebearings rather than a title's. `--tracking-display` is `-0.08em`, measured rather than guessed: it renders "notes" 15.2% narrower, which is the 15% he asked for.
   And the empty state read in the display face. It is a sentence the application is saying, not identity, so it takes the content face. `docs/DESIGN.md`'s typography table said the display face was for empty states; that line is corrected rather than left to contradict the code.
 
@@ -523,6 +519,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit fc8637d
 Notes: ADR-029. The founder asked for display faces in Redaction's spirit, was given a shortlist, and picked Departure Mono — SIL OFL, Helena Zhang, verified from the licence file in the release rather than from a directory listing, which is the lesson ADR-011 paid for. Version 1.500, one 22 kB woff2, vendored whole rather than subset.
   Two things went with Handjet. Its `ELGR`/`ELSH` axes, which made degradation continuous and animatable — counted as an identity moment when Handjet was chosen, and now gone. And with it the natural home for SMD-051, typographic scrambling: that idea needs a different mechanism or a different face now.
   One defect caught on the way, in the browser against the running server: the hub's title had been leaning on `--handjet-weight`, so removing the axis tokens left it inheriting a heading's default bold, and the browser synthesised it on a face that ships one weight. On a pixel face a faux bold thickens strokes off the grid and stops looking like pixels. `font-synthesis: none` on the body, and the title names `--weight-body`.
@@ -534,6 +531,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit 0e9cf0a
 Notes: ADR-028. The founder set a ten-stop ramp — yellow-green through teal to a deep blue — and said the pin looked wrong inverted. It is a lit lozenge now, taking its hue as `color` so the same `--gloss-tinted` and `--swatch-rim` the tint swatches use light it: one kind of object lit, not a second kind of control.
   The measurement picked the stop and the glyph together. The gloss lightens the top of a disc to 45% of its colour over white, which puts a *white* glyph under 2.3:1 at every stop on this ramp — so the glyph had to be dark, and a dark glyph clears 4:1 through the teal stops and falls away past them. `--tide-600` at 4.06:1 is the darkest that holds, and it is the middle of the ramp.
   The other half of the request needed no change and is not claimed as one: `.control.active` has kept `opacity: 1` since the chrome was built, so a pinned control has never receded. Confirmed by reading the rule, not by watching it — the browser pane throttles transitions while it is hidden, and an opacity reading taken there is worth nothing. Worth the founder's eye in the running app.
@@ -546,6 +544,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit cb04d31
 Notes: ADR-027. Having seen the bezel running, the founder named what he had been after since the first design conversation: not Aero, Aqua — Rams with personality, and old enough now to read as retro rather than dated. The lozenges take the full gloss and every disc in the window shrinks to `--space-4`, the diameter the palette's dots already were, which he picked as correct.
   No accent colour comes back with it. ADR-025's colour rule turns out to describe Aqua rather than fight it — neutral chrome, hue reserved for the small round things — so only ADR-026's refusal of the gloss is superseded.
   Glyphs went to 9px and sit above the specular. At that size a highlight across the top of one is the difference between reading it and guessing.
@@ -558,6 +557,7 @@ Created: 2026-09-06
 History:
   2026-09-06  proposed to the founder as three treatments; he chose the bezel
   2026-09-06  shipped
+  2026-09-06  shipped — commit 8703882
 Notes: ADR-026. What the Aqua traffic lights are actually made of is a rim in the fill's own hue, a bezel seating the disc, and going grey when the window is not in use — the gloss is the least of it. All three are taken; the gloss is not, because it would be the only glossy object in the application and it is the language ADR-025 had just removed.
   `--swatch-rim` is a `color-mix` against `currentColor`, so one declaration rims every tint and an eighth would need no new value. Verified in the running application rather than assumed: `color-mix` resolves in WebView2 and all seven rims come out as darkened versions of their own hue.
   Greying out while the chrome recedes was already what principle 2 asked for; the traffic lights just do it too.
@@ -570,6 +570,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit eddf792
 Notes: Three things the founder asked for after using it. The palette's arrival was 160ms and is now 240ms. It had no dismissal at all — `{#if open}` removed it on the click, so it vanished rather than closed; it now stays mounted while it plays out and its own `animationend` reports when it is gone. That is deliberately not a Svelte transition: those run in JavaScript and would keep animating under `prefers-reduced-motion`, where a CSS animation has its duration collapsed by the global rule and still fires the event, so the palette disappears at once as it should.
   It leaves in 160ms rather than the 240ms it takes to arrive. Arriving is the palette presenting itself; leaving is getting out of the way.
   `**bold**` was 700 and is now `--weight-emphasis` at 600. Bold inside a paragraph is a change of voice, not a change of level, and 700 was reading as a second heading mid-line.
@@ -581,6 +582,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit f93ccc4
 Notes: The founder is moving off Aero as a philosophy and keeping Rams. He asked for one thing to change in the app now — the colour — with the rest of the new direction to be worked out later. ADR-025 records it.
   The Aero accent is gone and nothing replaces it: the interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what a control does. That is one control today, delete, in red. Amber and green are deliberately undefined — a colour with no job is how a palette turns decorative.
   Two things fell out of removing the accent that are improvements on their own. The always-on-top pin showed "on" as a colour and now shows it as a filled chip, which is a state you can see rather than one you have to have learned. And `--accent-glow`, whose only use was the editor's selection wash, became `--selection`, which is what it always was.
@@ -593,6 +595,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit f93ccc4
 Notes: The swatch was at the leading edge of the chrome; the founder asked for it beside the other controls, before the pin. `WindowChrome`'s `leading` snippet becomes `controls` and no longer claims the space at the start, so the drag region is now the whole bar in one piece rather than split around something.
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
@@ -604,6 +607,7 @@ Created: 2026-09-06
 History:
   2026-09-06  found by auditing the build against `MASTER.md § In Scope`
   2026-09-06  shipped
+  2026-09-06  shipped — commit 112e2c6
 Notes: ADR-037. `MASTER.md § In Scope` promises "a small set of remappable keyboard shortcuts" and only one was: the global new-note chord. Bold, italic, inline code and strikethrough are settable now, from the settings window, and nothing else is.
   Close and quit are deliberately excluded — a mis-set chord on either is hard to recover from, since the window it would close is the one you would fix it in.
   The chords sit in a CodeMirror `Compartment`, so a change reaches open editors rather than waiting for the next window.
@@ -616,6 +620,7 @@ Created: 2026-09-06
 History:
   2026-09-06  reported by the founder, plus one found while measuring it
   2026-09-06  shipped
+  2026-09-06  shipped — commit 2f56eb6
 Notes: The founder asked whether it was normal that a block's closing fence sits closer to the text than its opening one. It was not normal, and the padding was not the reason — measured, it was symmetric: 12px above the opening fence and 12px below the closing one.
   What was missing is a gap between the **code and the fence**, on either side. At the top the eye compares the fence to the panel's generous edge; at the bottom it compares it to the code line directly above, so the closing fence reads as jammed while the opening one does not. Both fences now sit 12px from the panel's edge and 8px from the code.
   Found while measuring that: faint seams between code lines. The lines abut exactly — the gap measures 0 — but their tops land on fractional device pixels at 2x, so each boundary is antialiased and the window behind shows through a sliver. The same failure as the pale window edges in `docs/FIXES.md`, three orders of magnitude smaller. Every line but the first now bleeds half a pixel upward in the panel's own colour; upward only, and not the first, so nothing escapes the rounded corners.
@@ -628,12 +633,25 @@ Created: 2026-09-06
 History:
   2026-09-06  asked for by the founder
   2026-09-06  shipped
+  2026-09-06  shipped — commit a4692ba
 Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the windows." Yes — the window is already composited over the desktop's blur, so alpha in a control's fill picks that up, and the controls read as glass on glass rather than as discs laid on a window.
   The alpha runs down the gradient rather than flat across it: 0.94 where the light lands, 0.68 through the body. Even translucency reads as a hole cut in the window. The rim, the seat and the specular stay at full strength — they are the edges of the thing, and the fill is only what it is made of.
   A lit control stays opaque, and gains something by it: its fill *is* the information, and now anything held on is denser than anything idle. Two readings of one state, for nothing.
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
+
+### [SMD-081] Thirty-eight shipped items cited no commit
+Type:    bug
+State:   shipped
+Created: 2026-09-07
+History:
+  2026-09-07  found by the truth check at the V1 phase transition
+  2026-09-07  shipped — commit pending
+Notes: FLOW's item integrity rule is that every `shipped` item cites the commit that shipped it. Thirty-eight of sixty-eight did not, and SMD-044 had been dropped without the reason field every other dropped item carries.
+  **The cause is a check that was specified and never written.** FLOW § The Hook names three: a migration with no SCHEMA change (not applicable — no database), a new shared component or token file with no DESIGN change, and *an item moved to `shipped` with no commit hash cited*. Only the first two were built. Net 1 could not catch this, so nothing did until Net 4 — which is the truth check working exactly as designed, and also the reason it exists.
+  Backfilled from git history rather than by hand: for each uncited item, the first commit in which `docs/STATUS.md` shows it as `shipped`. Two were spot-checked against their subjects and looked wrong — SMD-019 and SMD-060 — and both turned out to be right: several items shipped per commit in that stretch, so an item's commit is often not the one whose subject names it. That is worth knowing before anyone "corrects" one of them.
+  The third check now exists in `.githooks/pre-commit`. It fires when a staged STATUS diff moves anything to `shipped` with no `commit <hash>` among the added lines. It cannot demand the current commit's own hash — that does not exist yet — which is the same constraint the FIXES entries hit, and the convention is unchanged: cite the commit that did the work, in a follow-up when that is this one.
 
 ### [SMD-080] The tint palette loses its panel and arrives staggered
 Type:    feature
@@ -643,6 +661,7 @@ History:
   2026-09-07  asked for by the founder
   2026-09-07  shipped
   2026-09-07  moved beside the swatch, and the current tint taken out of it (founder)
+  2026-09-07  shipped — commit df1e5eb
 Notes: The founder asked for the palette to arrive staggered like the insert ring, and for the panel behind it to go so the discs float on the window.
   The panel was opaque on purpose — SMD-054, where painting it with the window's translucent tint let the note's writing read through it. That reason does not survive the panel being removed: what is left is seven opaque discs with the note between them, which is exactly what the ring already does over the same text.
   The arrival went with the panel. It used to open as one object scaling out of the swatch; a container scaling underneath seven discs that each arrive on their own would be a second animation saying the same thing more slowly. It still *leaves* as one object, because seven discs each taking their turn to go is a dismissal you wait through — and that animation's `animationend` is still what unmounts it.
@@ -674,6 +693,7 @@ Created: 2026-09-06
 History:
   2026-09-06  scoped by the founder
   2026-09-06  shipped
+  2026-09-06  shipped — commit 9330309
 Notes: ADR-038. The ring holds six inserts now — table, code block, task, bulleted list, numbered list, link — and the four window actions it carried are gone rather than moved aside. Each of those four already has a control of its own; the markdown that is a nuisance to type had nothing.
   ADR-034 claimed the contents would be cheap to change. Tested: the ring, the clamped centre, the hovered label, the backdrop and Escape are untouched. One array and the glyphs changed.
   The insert lands at the **pointer**, not at the caret. Right-clicking does not move the caret, so a table asked for at the foot of a note would otherwise appear wherever the caret last was. The window hands the editor the coordinates; it does not get the view.
@@ -687,6 +707,7 @@ Created: 2026-09-06
 History:
   2026-09-06  reported by the founder
   2026-09-06  shipped
+  2026-09-06  shipped — commit 9330309
 Notes: My own regression, from ADR-025: a blanket replace of `var(--accent)` with `var(--rule)`, meant for the blockquote border, also took the caret. `--rule` is a 14%-alpha hairline colour, so the caret was drawn at the weight of a divider — and inside a code panel, where the ground is darker, it disappeared entirely.
   `drawSelection()` was the second half of it. It replaces the native caret with a drawn element, which no `caret-color` can reach, so a per-surface caret colour was impossible while it was on. It is gone; the native caret honours `caret-color`, and `::selection` keeps the selection styled.
   The caret is `--signal-engaged` inside code blocks — the founder's own suggestion — and ink elsewhere. Colour carrying function, which is the case ADR-025 allows.
@@ -709,6 +730,7 @@ Created: 2026-09-06
 History:
   2026-09-06  found by auditing the build against `MASTER.md § In Scope`
   2026-09-06  shipped
+  2026-09-06  shipped — commit 5922932
 Notes: Two gaps found by checking the build against what MASTER actually promises rather than against memory.
   **Task lists parsed but never rendered.** `MASTER.md § In Scope` lists them beside tables, and tables got a rendered view while these stayed as literal `- [ ]`. They are checkboxes now, and clicking one edits the two characters in the document: the box is a decoration over real source, never a replacement for it, so copying still yields `- [x] done` and the marker comes back as text when the cursor is on its line. Same rule the rest of the inline rendering follows.
   **Code colour was leaking into prose.** A task marker is tagged `t.keyword`, and the fenced-code palette from ADR-030 was attached to that tag globally — so `[ ]` in an ordinary sentence arrived wearing `--code-keyword` teal. Mine, from the code-block work, and a contradiction of both ADR-025 and ADR-030.
@@ -721,6 +743,7 @@ Created: 2026-09-06
 History:
   2026-09-06  reported by the founder: the dark theme's default is fine, the coloured tints look dirty
   2026-09-06  shipped
+  2026-09-06  shipped — commit 53e5af2
 Notes: Murky turned out to be a **chroma** problem rather than a darkness one, which is worth writing down because the report said "darker" and the fix was mostly not about lightness.
   The dark tints were each swatch's hue at whatever chroma survived being darkened — 0.019 to 0.031 in oklab, which at that lightness is grey with a hint. The light swatches are pale by necessity, since a light theme composites them against white; scaling a pale hue down in lightness does not give a dark version of that colour, it gives dirt.
   Each dark tint is now its swatch's hue at a fixed chroma of **0.085**, set as light as the ink's 4.5:1 allows over a white wallpaper. That budget caps *luminance* and nothing else, which is why chroma was free to spend and lightness was not: the composites sit at the cap either way.
@@ -736,6 +759,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit b9ee4ea
 Notes: ADR-035. The founder found the glossy controls wrong on the dark window and asked for the bezel — the treatment ADR-026 chose and ADR-027 replaced — as a dark-theme exception. He is right about why: a glossy disc needs light to be glossy about, and a dark window has none to give it, so the gradient and the specular read as plastic stuck on rather than glass set in.
   He asked for a bezel *component*. It is not one, and should not be: the difference is entirely token values — the seat becomes a bezel, the specular becomes transparent so the overlay paints nothing, and the fills become flat colours. No component changed and none knows which theme it is in.
   That is worth stating plainly because it is the first time principle 8 has been cashed rather than asserted: a theme is a complete set of token values and nothing else. A second component would have been two controls to keep in step, and they would have diverged the first time one gained a state the other did not.
@@ -749,6 +773,7 @@ Created: 2026-09-06
 History:
   2026-09-06  reported by the founder, and two more found by enlarging it
   2026-09-06  shipped
+  2026-09-06  shipped — commit cdb5814
 Notes: The founder reported two things about the dark theme and both were real, and looking at the control enlarged found a third that was worse than either.
   **The bubbles were darker than the window.** `--gloss-neutral` sat on its own dark scale and bottomed out at `#232220`, below the window's own `#16161a` once glass let a wallpaper through — so a control read as a hole punched in the window rather than an object resting on it. It is built up from `--surface-solid` now, every stop lighter than it, which is what the Frost gloss already did relative to its own surface.
   **A lit control kept a pale rim.** Exactly the specificity trap that had made a lit control come out grey an hour earlier, on the other property: components declared `border-color: var(--rim-control)`, which beat `.lozenge.lit` — same specificity, injected later. The rim is a default on `.lozenge` now, like the fill. The lesson did not generalise the first time because it was fixed as one property rather than as a rule.
@@ -761,6 +786,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit 62e1002
 Notes: Three of the founder's, and one thing found by looking.
   `--signal-engaged` is `--tide-400` now — the same green the application mark is made of — so "selected" is one colour across the application rather than one per surface. The diluted teal it replaced is gone rather than left as a token nothing reads.
   The settings toggle shows a dot rather than a check, and is `--space-4` like every other bubble. A dot because a check is an action being confirmed and this is a state being held.
@@ -775,6 +801,7 @@ Created: 2026-09-06
 History:
   2026-09-06  reported by the founder from the settings window
   2026-09-06  shipped
+  2026-09-06  shipped — commit 892b65f
 Notes: Two faults, both mine, both from building more than the situation asked for.
   The toggle was a sliding switch with a `.lozenge` as its knob, and the knob travelled past the end of its track. The founder's fix is better than a corrected travel distance: make it the bubble itself, lit when held, which is what the always-on-top pin already is. A switch has a track, a travel distance and an end stop to get wrong; a bubble has none of them. One component's worth of geometry deleted rather than debugged.
   The scrollbars were never styled at all, so they were the engine's default: an opaque light strip that stayed light in the dark theme and read as a pale rectangle laid over the glass rather than part of the window. Fixed in two halves, and it needs both — a transparent track with a rounded, inset thumb, and a colour scheme declared per theme. The scheme is what stops the platform drawing a light scrollbar on a dark window; no amount of styling the thumb reaches that.
@@ -788,6 +815,7 @@ Created: 2026-09-06
 History:
   2026-09-06  accepted into the second autonomous bundle by the founder, who chose a window of its own and "ask at the time" for the folder
   2026-09-06  shipped
+  2026-09-06  shipped — commit dae4274
 Notes: ADR-033. Closes SMD-046 and SMD-003 together — the notes folder is a setting, and it had no home. A third window type, opened from the tray, carrying theme, notes folder, the new-note shortcut and launch-at-startup, and naming the settings file for anyone who would still rather edit it.
   A bug found while building it, which no one would have hit until the shortcut became changeable: the global shortcut's handler compared the pressed chord against one captured when the plugin was installed. The plugin installs once, so changing the chord would have registered a new one the handler then ignored — the shortcut would have gone silently deaf. The handler no longer checks which chord fired, since only one is ever registered.
   The folder move renames first and copies only across volumes, and never removes an original before its copy succeeds: an interrupted move leaves the note in the old folder rather than nowhere. Names already taken in the destination are not overwritten.
@@ -801,6 +829,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  reported by the founder a second time, after the size was already reduced once
+  2026-09-06  shipped — commit ae39e2a
 Notes: Measured properly this time, and the first measurement was wrong. Martian Mono is loaded lazily, so on a note with no code in it the face is not loaded at all and a canvas measurement silently falls back to another one. The x-height figures taken that way said mono was 15% *smaller* per em; with the face actually loaded it is 15% larger.
   What is true: on screen, code at 13px and prose at 15px have the same x-height — 7.92px against 7.97 — so code was never taller than the text around it. It is wider. The same sentence runs 35% longer, and that extra ink is what reads as a larger size.
   No size fixes both. At 12px the width gap closes to 25% and the glyphs go 8% shorter than the prose; at 11px it is 14% and 16%, and the code starts to look shrunken. 12px is shipped as the better of the two trades.
@@ -813,6 +842,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped (founder)
+  2026-09-06  shipped — commit 565a9d4
 Notes: ADR-031. Four reports from the founder, three of which were one question — what belongs to the family of seated controls.
   The tint swatch staying visible on a coloured note was not the shared-widget bug he suspected; it was deliberate, and mine. `.swatch.coloured` kept it up on the reasoning that it was chrome carrying information. The information is already in full view — the note is the colour — so the exemption is gone and it recedes like everything else. The greyed-out state went with it: that existed only for a swatch that stayed.
   The window's controls now take the note's hue, disc, rim and glyph. One block keyed on the bare `[data-tint]` attribute does it, unqualified by theme because it declares no surface token; both themes work from one recipe because the disc carries its own hue and the glyph derives from it.
@@ -826,6 +856,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
+  2026-09-06  shipped — commit c4d0e89
 Notes: The founder wants it square rather than round, with the grey bezel the window's controls wear, appearing only on hover, and pressing it should read as a click.
   Half of that already holds and should not be claimed as work: it is revealed by `.row:hover` in CSS today. What is missing is the lozenge treatment at a square radius, and a press state — the control has a hover colour but nothing that responds to the press itself.
   Shipped, then partly reversed the same day by SMD-062 at the founder's report: the seated treatment was the wrong family for it, and it is flat and larger now. The press state this item produced is what survived, and it is on every seated control.
@@ -840,6 +871,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged as idea (founder)
+  2026-09-06  shipped — commit 80d676e
 Notes: One of the two effects the founder named as the new direction's second half — the drafted feel of a scratchpad, against Rams restraint. Not specified yet beyond the name.
   Worth deciding before it is built: where it is allowed to happen. `docs/DESIGN.md` principle 1 keeps the user's text quiet, so scrambling settling into place on *note content* would fight it — on the hub's title, an empty state, or the mark, it would not. That is a design decision, not an implementation one.
   Also worth knowing in advance: it must not run on text the user is editing. Anything that rewrites glyphs in the buffer would break the rule that markdown syntax stays in the buffer at all times, so this is a rendering effect over stable text, never a transform of it.
@@ -855,6 +887,7 @@ Created: 2026-09-06
 History:
   2026-09-06  reported by the founder: the app freezes when opening a note from the hub
   2026-09-06  traced with probes — the open path is not the cause
+  2026-09-06  shipped — commit 8fb5726
 Notes: The founder reported it as "crashes when opening a note from the hub". It is neither a crash nor the open path. Probes in the running application show:
   `surface::apply` entered for the hub, printed "rounded, reading the setting", and never printed again. `open` for the note then entered, reached `build`, and never returned. Nothing panicked; every thread was in `Wait` with flat CPU.
   So the sequence is: frosting the hub hangs, that stops the event loop, and the note window's `build` — dispatched to the event loop from a command thread — waits for a thread that is never coming back. Opening a note is the first thing that *needs* the event loop, which is why it looks like the cause.
@@ -885,6 +918,7 @@ Created: 2026-09-06
 History:
   2026-09-06  found while checking the notes folder after the founder's hub test
   2026-09-06  shipped
+  2026-09-06  shipped — commit a948181
 Notes: Found by looking rather than by report. The founder's notes folder held an index entry for `testing-hub-responsiveness.md`, a note whose file is not there — so something leaves entries behind.
   The path that can do it: deleting a note destroys its window before trashing the file, and destroying a focused window makes the system take focus away from it first. A focus loss is one of the two moments placement is written. So the delete and the window's last write run at once on different threads, and if the write lands after `forget_entry` it puts the entry back, marked open. `restorable` filtered on `open` alone, so the next launch would open an empty window carrying the deleted note's name.
   Fixed with two independent guards, since either alone leaves a hole: `set_placement` writes nothing for a note that is not in the folder, and `restorable` requires the file to exist as well as the entry to say open. The second one also covers the case no in-process ordering can reach — a note deleted from the folder while the application is not running. Three tests, 27 passing.
@@ -892,16 +926,18 @@ Notes: Found by looking rather than by report. The founder's notes folder held a
 
 ### [SMD-065] V1 release readiness
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  accepted into the second autonomous bundle by the founder
   2026-09-06  everything testable without a remote, tested
   2026-09-07  manifests bumped to 1.0.0 by the founder's word, unblocking the tag
+  2026-09-07  shipped — commit 250cfde; the workflow's first run is green and v1.0.0 is published
 Notes: The release workflow could not be run — that needs a remote and a tag, and neither exists yet — so what it does was run by hand instead, which catches everything except the Actions runner itself.
   `npm run tauri build` completes: release profile in 2m45s, NSIS fetched and verified, installer produced at **1.6 MB**. The portable zip was assembled with the workflow's own PowerShell and comes to **1.84 MB**, holding `stickymd.exe` (3.79 MB uncompressed), `LICENSE` and `README.md` in a versioned folder. Both artefacts are what `MASTER.md § Deployment` promises.
   **One thing stopped the first tag, by design.** Both manifests said `0.1.0`, and the workflow refuses a tag that disagrees with them — an installer named after the wrong version is only ever noticed after someone has downloaded it. Bumped to `1.0.0` on 2026-09-07: `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` alongside them. The workflow checks the first two; the third is the crate's own version and a manifest disagreeing with its own crate is a trap waiting for whoever reads it next.
-  Left `active`: the workflow's first real run is still unobserved, and it is the only part of this that has never executed.
+  **The first run is green.** Run 34091349993, on the `v1.0.0` tag: every step, including the manifest check that had been refusing the tag and the `cargo test` the release path runs before it builds anything. It produced a draft with both assets — installer 1.72 MB, portable zip 1.98 MB — and the release was published 2026-09-07 with written notes, which is what `MASTER.md § Deployment` asks of a release.
+  What the founder's own download will settle, and nothing here can: whether the installer's wizard, the portable zip's extract-and-run and the SmartScreen path behave as the README says. Assets built by a runner and never installed are still only a claim.
 
 ### [SMD-049] The release workflow
 Type:    chore
@@ -909,6 +945,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped
+  2026-09-06  shipped — commit 635cbc8
 Notes: `CLAUDE.md` has said since Phase 1 that build artifacts come from GitHub Actions on a `v*` tag and never from a developer's machine, and that every release carries both the NSIS installer and the portable zip. Nothing implemented either. `.github/workflows/release.yml` does now.
   Untested until 2026-09-07, when `v1.0.0` was tagged and pushed and it ran for the first time. What it produces is a **draft** release with both assets attached and a placeholder for notes — `MASTER.md` requires written notes, and notes nobody wrote are not written notes, so the last step is a person's.
   Four decisions in it worth having written down. It uses no third-party actions — only `actions/checkout`, `actions/setup-node`, the runner's own rustup and the `gh` CLI — because this is the one workflow whose output people download and execute, and a third-party action in it is a supply-chain dependency in exactly the wrong place. It runs `cargo test` before building, since those tests carry the path and name validation that handles untrusted input. It fails early if the tag disagrees with `tauri.conf.json` and `package.json`, because a version mismatch produces an installer named after the wrong version and is noticed only after someone downloads it. And it creates the release as a **draft**: `MASTER.md` says every release carries written notes, and notes generated by a workflow are not written notes — the assets are attached and the release waits for the founder.
@@ -921,6 +958,7 @@ State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  logged and shipped
+  2026-09-06  shipped — commit 8b72e28
 Notes: Phase 5's second half. What it mostly produced was a constraint. `docs/DESIGN.md § Motion` asked for a note to scale slightly into place as it arrives, and on a frosted window that is unbuildable: the surface covers the window exactly, so scaling it down shows a ring of raw acrylic and scaling it up clips its rounded corners square — the corner and sliver artefacts again, animated. DESIGN was amended rather than left describing something that cannot be built, and `docs/FIXES.md` carries the entry.
   A window arrives by the light on it instead: an overlay that carries a sheen across the glass and fades over `--dur-settle`. One paint, no layout, and nothing touching the surface's own alpha or blur. Anything nested inside the surface may still scale freely, which is what the tint palette does — what is behind a palette is the window, not the desktop.
   Two dead things came out with it. `--shadow-rest` was on both window surfaces and could never have been seen: an outer shadow on an element that fills the window falls outside the window. It was tinting the rounded corner notches slightly and doing nothing else. It and `--shadow-dragging` are gone from the token contract, both describing window-level states the compositor owns. One shadow remains, for things raised inside a window.
@@ -932,6 +970,7 @@ State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged as idea (founder)
+  2026-09-06  shipped — commit 788349b
 Notes: A ring of glass bubbles opening from the pointer on right-click, each appearing staggered after the last. The founder's intent is a home for anything that cannot sit cleanly on the chrome, which is a real problem given `docs/DESIGN.md` principle 2 keeps the chrome minimal.
   Feasible, with one nuance worth recording before anyone builds it: the bubbles cannot carry *compositor* glass, which is a per-window property. They would use `backdrop-filter`, and that is legitimate here — DESIGN's never-allowed rule forbids it for the *primary window surface*, because a web view cannot see the desktop. Over the app's own content, which is what a bubble sits on, it is the correct tool, and a popover blur token would be the thing to add for it. (An earlier version of this note said `--blur-popover` already existed in the contract. It never did — checked, in the course of SMD-053, which needed a popover surface and found nothing to read.)
   The stagger must animate `transform` and `opacity` per bubble with a delay, never blur. Small non-glass elements may fade; that is already allowed.
@@ -947,6 +986,7 @@ Created: 2026-09-05
 History:
   2026-09-05  logged as active
   2026-09-05  confirmed on device (founder) — dead keys work
+  2026-09-05  shipped — commit a75de10
 Notes: Storage is proven: 23 Rust tests pass, including a real file round-trip where `# Año nuevo` becomes `año-nuevo.md` with the body byte-identical, and slugs keep accented letters rather than stripping them — a Spanish note should not become an unreadable filename.
   Composition in the editor was confirmed by the founder on 2026-09-05: dead keys work. The inline-rendering layer rebuilding decorations on every update does not disturb an in-progress composition. No commit — nothing needed changing.
 
