@@ -607,6 +607,20 @@ Notes: The founder asked whether it was normal that a block's closing fence sits
   Found while measuring that: faint seams between code lines. The lines abut exactly — the gap measures 0 — but their tops land on fractional device pixels at 2x, so each boundary is antialiased and the window behind shows through a sliver. The same failure as the pale window edges in `docs/FIXES.md`, three orders of magnitude smaller. Every line but the first now bleeds half a pixel upward in the panel's own colour; upward only, and not the first, so nothing escapes the rounded corners.
   Also answered while there: syntax highlighting is implemented and works, including the lazily-loaded languages — verified with a Python fence, `def` and `return` as keywords, the comment muted, the f-string a string. Six languages are wired: JS/TS/JSX/TSX, HTML, CSS, Python, Rust, JSON. Anything else renders as an unhighlighted code block.
 
+### [SMD-078] The controls become glass
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  asked for by the founder
+  2026-09-06  shipped
+Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the windows." Yes — the window is already composited over the desktop's blur, so alpha in a control's fill picks that up, and the controls read as glass on glass rather than as discs laid on a window.
+  The alpha runs down the gradient rather than flat across it: 0.94 where the light lands, 0.68 through the body. Even translucency reads as a hole cut in the window. The rim, the seat and the specular stay at full strength — they are the edges of the thing, and the fill is only what it is made of.
+  A lit control stays opaque, and gains something by it: its fill *is* the information, and now anything held on is denser than anything idle. Two readings of one state, for nothing.
+  This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
+  Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
+  Verified in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. **Not yet seen on a real transparent window** — `backdrop-filter` inside WebView2 on a layered window is the one thing the mock cannot stand in for.
+
 ### [SMD-076] The radial menu becomes an insert menu
 Type:    feature
 State:   shipped

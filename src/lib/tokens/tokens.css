@@ -50,11 +50,35 @@
   --rim-control: var(--rim-neutral);
   --control-glyph: var(--ink-secondary);
 
+  /* How hard a translucent control frosts what is behind it.
+   *
+   * This is `backdrop-filter`, and it is the one place in the application it is
+   * correct: it can only reach the application's own content, which is exactly
+   * what is behind a control — the note's text, under a bubble in the ring. The
+   * desktop is frosted by the compositor, from Rust, and no CSS can touch it.
+   * Both are in play at once on a glass window, which is why the controls now
+   * read as glass on glass rather than as discs on a window. */
+  --gloss-blur: 8px;
+
+  /* Translucent to the same degree as the neutral, and by the same shape: the
+     lit top holds, the body thins. Mixed with `transparent` rather than
+     restated as rgba, because the hue arrives as a variable and there is no
+     rgba to write. */
   --gloss-from-hue: radial-gradient(
     circle at 50% 18%,
-    color-mix(in oklab, var(--control-hue) 45%, var(--rim-light)) 0%,
-    var(--control-hue) 52%,
-    color-mix(in oklab, var(--control-hue) 84%, var(--rim-shade)) 100%
+    color-mix(
+        in oklab,
+        color-mix(in oklab, var(--control-hue) 45%, var(--rim-light)) 94%,
+        transparent
+      )
+      0%,
+    color-mix(in oklab, var(--control-hue) 72%, transparent) 55%,
+    color-mix(
+        in oklab,
+        color-mix(in oklab, var(--control-hue) 84%, var(--rim-shade)) 66%,
+        transparent
+      )
+      100%
   );
 
   /* The same fill lit from below instead of above: a control pushed in. The
@@ -264,14 +288,31 @@
 
   /* A control carries no tint, so its gloss is named rather than mixed, and
      its rim is neutral — a rim mixed from the glyph's own ink would draw a
-     hard ring around a control whose job is to stay quiet. */
-  --gloss-neutral: radial-gradient(circle at 50% 18%, #ffffff 0%, #f1efe9 60%, #dedbd2 100%);
+     hard ring around a control whose job is to stay quiet.
+   *
+   * The alpha runs down the gradient rather than sitting flat across it: dense
+   * where the light lands, thin through the body. A disc of even translucency
+   * reads as a hole cut in the window; this one reads as glass, which is the
+   * whole point of the exercise. */
+  --gloss-neutral: radial-gradient(
+    circle at 50% 18%,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(241, 239, 233, 0.68) 55%,
+    rgba(222, 219, 210, 0.6) 100%
+  );
   --rim-neutral: rgba(26, 26, 23, 0.3);
 
   /* Dark on a light note, which is the point: code is read on a dark ground
      by nearly everyone who reads code. */
   --code-surface: #131317;
-  --gloss-pressed: radial-gradient(circle at 50% 88%, #f4f2ec 0%, #d8d5cc 60%, #e2e0d8 100%);
+  /* Pressed is denser than idle by a little. A control being pushed is a
+     control being addressed, and glass held against something reads solider. */
+  --gloss-pressed: radial-gradient(
+    circle at 50% 88%,
+    rgba(244, 242, 236, 0.82) 0%,
+    rgba(216, 213, 204, 0.76) 60%,
+    rgba(226, 224, 216, 0.76) 100%
+  );
   --selection: var(--ink-wash-strong);
 
   /* Elevation */
@@ -368,16 +409,19 @@
   color-scheme: dark;
 
   /* Flat, and lighter than the window it sits on — a bezelled control is
-     raised by its edges, not by a gradient. */
-  --gloss-neutral: #32323a;
+     raised by its edges, not by a gradient. Translucent like Frost's, and flat
+     in its alpha as well as its colour: there is no gradient here to run the
+     alpha down, and the bezel is what makes this one an object. */
+  --gloss-neutral: rgba(56, 56, 65, 0.66);
   --rim-neutral: rgba(255, 255, 255, 0.22);
 
   /* Lighter than the note here, not darker. On a dark surface a darker panel
      reads as a hole rather than as a block set into the page. */
   --code-surface: #1e1e23;
   /* Pressed sinks: darker than its resting fill, and the seat inverts so the
-     light lands along the bottom edge instead of the top. */
-  --gloss-pressed: #22222a;
+     light lands along the bottom edge instead of the top. Denser too, for the
+     reason Frost's is. */
+  --gloss-pressed: rgba(34, 34, 42, 0.8);
   --gloss-seat-pressed:
     inset 0 -1px 0 rgba(255, 255, 255, 0.22),
     inset 0 2px 3px -1px rgba(0, 0, 0, 0.4);

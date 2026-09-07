@@ -147,6 +147,13 @@ body {
   --lozenge-pressed: var(--gloss-pressed);
   background: var(--lozenge-fill);
   box-shadow: var(--gloss-seat);
+  /* The fill is translucent, so whatever the control is over comes through it:
+     the window's own glass where it sits on the chrome, and the note's text
+     where the ring opens over writing. The second of those needs frosting or
+     the words read straight through the glyph — and that is the one thing
+     `backdrop-filter` is for here, since the app's own content is all it can
+     reach. Harmless on a lit control, whose fill is opaque. */
+  backdrop-filter: blur(var(--gloss-blur));
   cursor: pointer;
 }
 

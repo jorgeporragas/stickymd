@@ -114,6 +114,7 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | `--gloss-neutral` | The fill of a disc that carries none: the window's own controls |
 | `--gloss-seat` | The shade inside a disc's lower edge, and the contact shadow under it |
 | `--gloss-specular` | The highlight across its top |
+| `--gloss-blur` | How hard a control frosts what is behind it. Controls are translucent (ADR-039), so a bubble in the ring has the note's own text under it — this is the one `backdrop-filter` in the application, and it is correct because the app's own content is all that filter can ever see |
 | `--swatch-rim` | A swatch's edge — its own hue darkened, via `currentColor`, never a neutral border. A control carrying no tint overrides it with `--rule`. |
 | `--focus-ring` | The focus indicator |
 | `--selection` | The wash behind selected text |
@@ -248,7 +249,7 @@ So a window arrives by the light on it rather than by moving: a sheen across the
 | Animate blur radius | Switch between discrete blur states |
 | Animate a window's opacity | Animate `transform` and `box-shadow` |
 | Animate the alpha of a large glass surface | Animate the tint layer above it — a paint, not a re-blur |
-| `backdrop-filter` for the primary window surface | OS compositor blur, applied from Rust |
+| `backdrop-filter` for the primary window surface | OS compositor blur, applied from Rust. A **control** is the exception, and the only one: it sits over the app's own content, which is all that filter can see — `--gloss-blur`, ADR-039 |
 | A static colour value in a component | A semantic token |
 | Spacing or radius outside the scale | A scale token |
 | The display face inside note content | Geist |
@@ -274,6 +275,8 @@ Every entry lands in the same commit as the component it describes.
 The neutral is the default and `.lit` the exception, which is not arbitrary: a component that declared the neutral itself would win over `.lit` — same specificity, and component styles are injected after `app.css`. That produced two faults in turn, a lit control coming out grey and then a lit control keeping the pale rim of the unlit state.
 
 The specular is a gradient rather than a flat ellipse. Solid, it was a white sticker across the top half of every bubble, and it sat over the glyph instead of on the glass. Light falls off.
+
+Translucent, and the alpha runs down the gradient rather than sitting flat across it — dense where the light lands, thin through the body (ADR-039). A disc of even translucency reads as a hole cut in the window. The rim, the seat and the specular stay at full strength: those are what keep it an object. A **lit** lozenge stays opaque, because its fill is the information.
 
 Round, and worn only by a note window's own chrome — the controls, the tint swatches, the save indicator. Nothing outside that window joins it: the hub's delete control is flat and secondary (ADR-031). Pressed, the fill lights from below and the specular goes out: a highlight on a face no longer turned toward the light is what makes a pressed state look painted on rather than pushed in. Worn by the window's controls and by every tint swatch. Not a component — a shared treatment, in `app.css` for the same reason `.surface` is: two components wanted it. |
 | `SaveTrouble` | Shown only when a write has failed: a lit `--signal-danger` lozenge carrying the reason as its label, which retries the write when clicked. Takes `reason`, `onRetry`. | Does not recede. Principle 2 stops at chrome carrying information, and "what is on screen is not what is on disk" is the most important thing a note window can say. Colour is doing the work rather than decorating, which is the case ADR-025 allows. |

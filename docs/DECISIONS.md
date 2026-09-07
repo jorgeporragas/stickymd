@@ -297,7 +297,7 @@ Consequences: The hub stays about notes. That was the argument for a separate wi
             `tauri-plugin-dialog` is a new dependency, for the folder picker. A notes folder typed by hand is a notes folder that can be wrong.
 
 ## ADR-034 — The radial menu holds actions that already exist
-Status:     Accepted; its contents are superseded by ADR-038. The mechanism — the ring, the clamped centre, the centre label, the dismissal — stands unchanged, which is what it was built to be.
+Status:     Accepted; its contents are superseded by ADR-038 and its refusal of `backdrop-filter` by ADR-039. The mechanism — the ring, the clamped centre, the centre label, the dismissal — stands unchanged, which is what it was built to be.
 Date:       2026-09-06
 Context:    The founder asked for a ring of glass bubbles on right-click, as a home for anything that cannot sit cleanly on the chrome. Building it without direction on its contents risked a large rework, so it was built as a mechanism first.
 Decision:   Right-click on a note window opens a ring of seated bubbles at the pointer: New note, All notes, Settings, and the always-on-top pin. Every one of them is an action reachable elsewhere already — the ring is a faster way to them, not a second set of capabilities.
@@ -354,3 +354,16 @@ Consequences: That ADR-034 cost nothing to change is the claim it made, now test
             They fill rather than stroke, so a stroke rule applied to them draws nothing. `.lozenge`'s 58% glyph sizing is overridden here for the same reason.
             Six is what the ring holds before the bubbles crowd. Headings and blockquotes were the next candidates and are not in it; the set is closed at six until something is taken out.
             Pixelarticons is MIT, vendored as six path strings with its licence beside them, like the typefaces. Nothing is fetched at runtime. The numbered list borrows `list-box`, the nearest the set has — the hovered label says which it is, which is a thing a ring can do that a wordless toolbar cannot.
+
+## ADR-039 — The controls are glass on glass
+Status:     Accepted
+Date:       2026-09-06
+Context:    The founder asked whether the bubbles could be transparent like the windows. They could: the window is already composited over the desktop's blur, so a control with alpha in its fill picks that up and reads as glass resting on glass rather than as a disc laid on a window — which is what Aqua's own controls did.
+Decision:   A control's fill is translucent in both themes. The rim, the seat and the specular stay at full strength, and a **lit** control stays opaque. Controls carry `backdrop-filter: blur(var(--gloss-blur))`.
+Consequences: The alpha runs down the gradient rather than sitting flat across it — 0.94 at the lit top, 0.68 through the body, 0.60 at the edge on Frost. Even translucency reads as a hole cut in the window; graded translucency reads as glass. Dark's is flat at 0.66 because there is no gradient there to grade, and its bezel is what makes it an object.
+            The rim, the seat and the specular are what survive the fill going thin. Those are the edges of the thing; the fill is only what it is made of.
+            **A lit control stays opaque, and gains meaning from it.** Its fill is the information — an engaged pin, a tint swatch, a failed save — and diluting it would dilute what it says. The side effect is worth naming: something held on is now denser than something idle, which is a second reading of the same state and cost nothing.
+            **This is the application's one `backdrop-filter`, and it does not contradict the rule against it.** That rule is about the primary window surface, where the filter cannot see the desktop and so cannot do the job — the compositor does that, from Rust. Here the thing behind the control *is* the app's own content: the note's text, under a bubble in the ring. Without the blur the words read straight through the glyph.
+            ADR-034 said these bubbles would not need it, on the reasoning that an opaque gloss has nothing to see through. That reasoning was sound and its premise is now gone. SMD-038's original note — that a bubble sits over the app's own content, where the filter is legitimate — turns out to have been right about the principle before there was a reason to use it.
+            Contrast was checked before the look was: over white, mid and black desktops, in both themes, for the neutral control and all six tinted ones. The worst case is 4.01:1 and most are above 8:1, against a 3:1 floor for a graphical object. Legibility was never the binding constraint here — appearance was — but that is worth knowing rather than assuming.
+            Solid mode needs no branch. There the window is opaque, so a translucent control simply picks up the surface beneath it and reads a shade lighter. One recipe, two modes, which is what `--surface-paint` is for.
