@@ -401,15 +401,27 @@
  * wallpaper. A coloured tint is darker than white, so in the light theme it
  * needs *more* alpha than Clear, not less.
  *
- * The dark tints are computed a second way, and the reason is worth keeping.
- * They were murky, and murky turned out to be a chroma problem rather than a
- * darkness one: the light swatches are pale by necessity, and a pale hue at low
- * lightness reads as grey rather than as a colour. Each dark tint is now its
- * swatch's hue at a fixed chroma of 0.085, set as light as the ink's 4.5:1
- * allows over a white wallpaper — which is the real cap, since that budget
- * limits luminance and nothing else.
- * Maximising chroma instead was tried and produced magenta and violet. A note
- * tint is coloured paper, not a highlighter.
+ * The dark tints are computed a second way, and on a different backdrop
+ * assumption, which is the part to read before changing them.
+ *
+ * They were murky first, and murky is a chroma problem rather than a darkness
+ * one: the light swatches are pale by necessity, and a pale hue at low
+ * lightness reads as grey rather than as a colour. Then, computed against a
+ * *white* wallpaper, they came out strong and nearly opaque — the worst case
+ * is what forces both.
+ *
+ * So the dark tints hold 4.5:1 against a **mid** backdrop rather than a white
+ * one, and never fall below 3:1 even against white. That is a deliberate
+ * relaxation, and its price is stated rather than hidden: a dark-theme note
+ * over a bright wallpaper is legible but under AA. It buys a window you can
+ * see through, which is the point of the surface.
+ *
+ * Alpha 0.77 is not a taste: it is the most transparent these can be with that
+ * 3:1 floor intact. At 0.62 the ink falls to 2.36:1 over white, which is not
+ * legible, and no chroma choice rescues it. Chroma is 0.06 — enough to read as
+ * a colour, where 0.085 read as strong. Maximising chroma was tried earlier
+ * and produced magenta and violet: a note tint is coloured paper, not a
+ * highlighter.
  *
  * Clear is the default and comes from the theme itself.
  */
@@ -461,8 +473,8 @@
 }
 
 :root[data-theme='dark'][data-tint='sun'] {
-  --surface-tint: rgba(93, 69, 0, 0.8);
-  --surface-solid: #4f3c05;
+  --surface-tint: rgba(115, 103, 62, 0.77);
+  --surface-solid: #5e5436;
 }
 :root[data-theme='frost'][data-tint='spring'] {
   --surface-tint: rgba(199, 240, 216, 0.59);
@@ -470,8 +482,8 @@
 }
 
 :root[data-theme='dark'][data-tint='spring'] {
-  --surface-tint: rgba(6, 86, 46, 0.8);
-  --surface-solid: #09492a;
+  --surface-tint: rgba(70, 112, 89, 0.77);
+  --surface-solid: #3b5b4b;
 }
 :root[data-theme='frost'][data-tint='aqua'] {
   --surface-tint: rgba(184, 236, 247, 0.6);
@@ -479,8 +491,8 @@
 }
 
 :root[data-theme='dark'][data-tint='aqua'] {
-  --surface-tint: rgba(0, 84, 104, 0.8);
-  --surface-solid: #044858;
+  --surface-tint: rgba(57, 112, 123, 0.77);
+  --surface-solid: #315b65;
 }
 :root[data-theme='frost'][data-tint='sky'] {
   --surface-tint: rgba(207, 228, 253, 0.6);
@@ -488,8 +500,8 @@
 }
 
 :root[data-theme='dark'][data-tint='sky'] {
-  --surface-tint: rgba(25, 74, 131, 0.8);
-  --surface-solid: #18406e;
+  --surface-tint: rgba(78, 105, 137, 0.77);
+  --surface-solid: #41566f;
 }
 :root[data-theme='frost'][data-tint='lilac'] {
   --surface-tint: rgba(220, 212, 247, 0.63);
@@ -497,8 +509,8 @@
 }
 
 :root[data-theme='dark'][data-tint='lilac'] {
-  --surface-tint: rgba(79, 61, 129, 0.8);
-  --surface-solid: #44356c;
+  --surface-tint: rgba(108, 98, 136, 0.77);
+  --surface-solid: #58516f;
 }
 :root[data-theme='frost'][data-tint='blush'] {
   --surface-tint: rgba(251, 213, 224, 0.61);
@@ -506,6 +518,6 @@
 }
 
 :root[data-theme='dark'][data-tint='blush'] {
-  --surface-tint: rgba(125, 49, 74, 0.8);
-  --surface-solid: #682c40;
+  --surface-tint: rgba(135, 92, 105, 0.77);
+  --surface-solid: #6d4c57;
 }

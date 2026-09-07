@@ -596,6 +596,8 @@ Notes: Murky turned out to be a **chroma** problem rather than a darkness one, w
   Two wrong answers on the way, both discarded by looking at the numbers rather than the code. Maximising chroma against the same budget produced `#c9207a` and `#761dca` — magenta and violet, a highlighter rather than coloured paper. Keeping 72% of the pale swatch's own chroma produced almost no change, for the reason above.
   The alpha stays at 0.8 rather than the 0.95 the arithmetic would also accept. A higher alpha satisfies the contrast requirement just as well and quietly turns the window opaque; the wallpaper showing through is the point of the surface, not a side effect.
   Every value re-checked: 4.56:1 to 4.61:1 against `--ink-primary` over the worst-case wallpaper.
+  **Then the founder said they read too strong and no longer looked like a window, and he was right about the cause:** sizing for a white wallpaper is what forces both the saturation and the opacity. ADR-036 relaxes it — dark tints hold 4.5:1 over a *mid* backdrop and never fall below 3:1 over white, at alpha 0.77 and chroma 0.06.
+  His hypothesis was that a dark desktop has dark things behind it, so the white case barely happens. Half right, and the other half is why the floor stayed: at alpha 0.62 the ink falls to 2.36:1 over white, and the compositor blurs the desktop, so a bright wallpaper behind a dark note is ordinary rather than pathological. 0.77 is where the 3:1 floor lands and no chroma choice rescues a lower one.
 
 ### [SMD-070] Dark takes the bezel back
 Type:    feature

@@ -156,6 +156,8 @@ A **theme** is application-wide. It decides ink, accent, edges and shadows, and 
 
 Tint selectors are qualified by theme — `[data-theme='dark'][data-tint='sun']`. A tint block and a theme block carry equal specificity, so an unqualified tint would override the theme's surface entirely and a dark note would come back white.
 
+**The dark tints are sized against a mid backdrop, the light ones against white** (ADR-036). A light theme composites against white anyway, so its worst case *is* its ordinary case. A dark theme's is not: sizing for a white wallpaper produced tints so opaque they stopped reading as a window. Dark tints hold 4.5:1 over a mid backdrop and never drop below 3:1 over white — a stated relaxation, whose price is that a dark note over a bright wallpaper is legible but under AA.
+
 **Every tint alpha is computed, never chosen.** The tint sits over the compositor's blur, so the ink has to hold 4.5:1 against it over a worst-case wallpaper. In the light theme a coloured tint needs *more* alpha than Clear, because it is darker than white. In the dark theme the worst case inverts to a white wallpaper. A tint whose alpha has not been checked is not a tint yet.
 
 ### Frost — the default
