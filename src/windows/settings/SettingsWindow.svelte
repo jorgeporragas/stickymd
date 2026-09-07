@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Field from '../../lib/components/Field.svelte';
+  import ChordInput from '../../lib/components/ChordInput.svelte';
   import Toggle from '../../lib/components/Toggle.svelte';
   import Scramble from '../../lib/components/Scramble.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
@@ -19,7 +20,6 @@
 
   let prefs = $state<Preferences | undefined>(undefined);
   let revealed = $state(false);
-  let shortcutDraft = $state('');
   let shortcutProblem = $state<string | undefined>(undefined);
 
   /** A folder the user has picked but not yet decided what to do about. */
@@ -30,8 +30,6 @@
   onMount(async () => {
     const loaded = await readPreferences();
     prefs = loaded;
-    chordDrafts = { ...loaded.formatting };
-    shortcutDraft = loaded.newNoteShortcut;
     shortcutProblem = loaded.shortcutProblem ?? undefined;
   });
 
@@ -49,11 +47,18 @@
     if (prefs) prefs.launchAtStartup = took;
   }
 
-  async function commitShortcut(): Promise<void> {
-    if (!prefs || shortcutDraft === prefs.newNoteShortcut) return;
-    const problem = await setNewNoteShortcut(shortcutDraft);
+  /**
+   * The chord arrives already valid — `ChordInput` cannot produce one that is
+   * not — so what comes back here is the operating system's answer, which is a
+   * different question: the chord is well-formed and another application may
+   * still hold it.
+   */
+  async function commitShortcut(chord: string): Promise<void> {
+    if (!prefs || chord === prefs.newNoteShortcut) return;
+
+    const problem = await setNewNoteShortcut(chord);
     shortcutProblem = problem ?? undefined;
-    prefs.newNoteShortcut = shortcutDraft;
+    prefs.newNoteShortcut = chord;
   }
 
   /**
@@ -70,12 +75,8 @@
     { action: 'strikethrough', label: 'Strikethrough' }
   ];
 
-  let chordDrafts = $state<Record<string, string>>({});
-
-  async function commitFormatting(action: keyof FormattingChords): Promise<void> {
-    if (!prefs) return;
-    const chord = chordDrafts[action];
-    if (!chord || chord === prefs.formatting[action]) return;
+  async function commitFormatting(action: keyof FormattingChords, chord: string): Promise<void> {
+    if (!prefs || chord === prefs.formatting[action]) return;
 
     const settled = await setFormattingShortcut(action, chord);
     if (settled) prefs.formatting = settled;
@@ -164,27 +165,23 @@
         problem={shortcutProblem}
       >
         {#snippet control()}
-          <input
-            class="chord"
-            type="text"
-            spellcheck="false"
-            aria-label="New note shortcut"
-            bind:value={shortcutDraft}
-            onblur={commitShortcut}
+          <ChordInput
+            value={prefs?.newNoteShortcut ?? ''}
+            format="global"
+            label="New note shortcut"
+            onChange={commitShortcut}
           />
         {/snippet}
       </Field>
 
       {#each FORMATTING as row (row.action)}
-        <Field label={row.label} note="Inside a note. `Mod` is Ctrl here and Cmd on a Mac.">
+        <Field label={row.label} note="Inside a note.">
           {#snippet control()}
-            <input
-              class="chord"
-              type="text"
-              spellcheck="false"
-              aria-label={row.label + ' shortcut'}
-              bind:value={chordDrafts[row.action]}
-              onblur={() => commitFormatting(row.action)}
+            <ChordInput
+              value={prefs?.formatting[row.action] ?? ''}
+              format="editor"
+              label={row.label}
+              onChange={(chord) => commitFormatting(row.action, chord)}
             />
           {/snippet}
         </Field>
@@ -257,20 +254,6 @@
     color: var(--ink-muted);
   }
 
-  .chord {
-    flex: 0 0 auto;
-    /* Wide enough for the default chord. "CmdOrCtrl+Shift+Space" is 21
-       characters, and at 13px the code face sets that in about 10.3rem before
-       padding — 11rem clipped the last letter. */
-    width: 13rem;
-    padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-chip);
-    background: var(--control-hover);
-    color: var(--ink-primary);
-    font-family: var(--font-mono);
-    font-size: var(--font-size-code);
-  }
 
   .asking {
     display: flex;

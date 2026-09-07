@@ -1,6 +1,8 @@
 import { EditorSelection, type ChangeSpec, type StateCommand } from '@codemirror/state';
 import type { KeyBinding } from '@codemirror/view';
 
+import { isBindable } from '../keys';
+
 /**
  * Formatting commands.
  *
@@ -89,14 +91,28 @@ export const DEFAULT_CHORDS: FormattingChords = {
  *
  * `Mod-` is the platform abstraction for the modifier key and is what the
  * stored chords use — never Ctrl or Cmd literally (CLAUDE.md, cross-platform).
- * A chord CodeMirror cannot parse simply never fires, which is why the
- * settings window is where one gets typed rather than a text file alone.
+ *
+ * Every chord is checked before it is bound, and an unbindable one falls back
+ * to its default rather than being handed over. CodeMirror ignores what it
+ * cannot parse, so binding a bad chord produces a shortcut that never fires and
+ * never explains itself — and `settings.json` is editable by hand (ADR-022),
+ * so the settings window's keypress capture cannot be the only guard.
+ *
+ * Falling back rather than dropping the binding: the alternative to a working
+ * `Mod-b` is not "no bold shortcut", it is a user who thinks bold is broken.
  */
 export function formattingKeymapFor(chords: FormattingChords): readonly KeyBinding[] {
+  const bind = (chord: string, fallback: string): string => {
+    if (isBindable(chord, 'editor')) return chord;
+
+    console.warn(`sticky.md: "${chord}" is not a shortcut this editor can bind. Using ${fallback}.`);
+    return fallback;
+  };
+
   return [
-    { key: chords.bold, run: toggleBold },
-    { key: chords.italic, run: toggleItalic },
-    { key: chords.inlineCode, run: toggleInlineCode },
-    { key: chords.strikethrough, run: toggleStrikethrough }
+    { key: bind(chords.bold, DEFAULT_CHORDS.bold), run: toggleBold },
+    { key: bind(chords.italic, DEFAULT_CHORDS.italic), run: toggleItalic },
+    { key: bind(chords.inlineCode, DEFAULT_CHORDS.inlineCode), run: toggleInlineCode },
+    { key: bind(chords.strikethrough, DEFAULT_CHORDS.strikethrough), run: toggleStrikethrough }
   ];
 }
