@@ -196,10 +196,8 @@ pub fn note_state(
     lock: State<'_, IndexLock>,
     name: String,
 ) -> Result<NoteState, NoteError> {
-    eprintln!("PROBE note_state: entered for {name}");
     let dir = notes_dir(&app)?;
     let _guard = guard(&lock)?;
-    eprintln!("PROBE note_state: holding the index lock");
 
     Ok(load(&dir).notes.get(&name).cloned().unwrap_or_default())
 }

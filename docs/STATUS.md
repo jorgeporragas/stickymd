@@ -650,9 +650,9 @@ Notes: One of the two effects the founder named as the new direction's second ha
   `prefers-reduced-motion` is honoured in JavaScript rather than CSS: the global rule collapses transition and animation durations, and cannot reach a `requestAnimationFrame` loop.
   **Not observed running.** The browser pane runs zero animation frames while it is hidden — measured, 0 in 500ms with the page reporting itself visible and reduced motion off — so nothing rAF-driven can be seen there. That is the same root cause as the stuck opacity transitions and the unobservable press state earlier in the session, and it is worth remembering before chasing another one: **if an effect depends on rAF or on a transition, the pane cannot show it, and a reading taken there means nothing.**
 
-### [SMD-066] The app freezes when a window is frosted after startup
+### [SMD-066] Opening a note from the hub wedges the event loop
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-06
 History:
   2026-09-06  reported by the founder: the app freezes when opening a note from the hub
@@ -662,7 +662,11 @@ Notes: The founder reported it as "crashes when opening a note from the hub". It
   So the sequence is: frosting the hub hangs, that stops the event loop, and the note window's `build` — dispatched to the event loop from a command thread — waits for a thread that is never coming back. Opening a note is the first thing that *needs* the event loop, which is why it looks like the cause.
   `surface::refresh` never appeared in the trace, so the transparency watcher is not firing and is not involved. Two `refresh` lines later in the log are app restarts caused by icon files landing in `src-tauri/`, which the dev watcher rebuilds on.
   **One hypothesis raised and disproved.** It looked like the registry read might block while the watcher's synchronous `RegNotifyChangeKeyValue` was pending on the same key — it fit the evidence exactly, including working at startup, because `watch` starts after the first `refresh`. A test that reproduces that shape says otherwise: the read returns in well under a second with a notification pending. The test is kept, in `surface.rs`, because it documents a real hazard that was worth ruling out and would otherwise be re-guessed.
-  That leaves `window_vibrancy::apply_acrylic`. A probe now sits on its far side, so the next occurrence says whether it returns. Not yet confirmed, and not to be treated as confirmed until the trace shows it.
+  **Found, and it was none of the things it looked like.** A probe on the far side of `apply_acrylic` showed it returning `Glass` — the frost is fine. The hang is `.build()`, on **ThreadId(1)**, the main thread.
+  A synchronous Tauri command invoked over IPC runs on the main thread from inside the web view's message callback. Creating a web view there cannot finish: creation needs the message loop to pump and the loop is inside the callback. The native window appears empty — which is the blank window the founder saw — the loop wedges, and the global shortcut and window dragging go with it. Typing in an open note kept working because that is the web view's own process.
+  Fixed by making the four window-building commands `async`, so Tauri runs them on the async runtime. `docs/FIXES.md` carries the rule.
+  Four attempts, three wrong, and the method is the point. Guessing produced: the transparency watcher (disproved — `refresh` never appears in the trace), the registry read blocking under a pending notification (disproved by a test, which is kept), and `apply_acrylic` (disproved by a probe on its far side). What worked was making the application reproduce the failure by itself — opening a window from a spawned thread, then from the main thread, then letting the hub's own frontend invoke over IPC. Only the last hung, and it hung every time.
+  The earlier exit with code `0xcfffffff` is a separate thing and stays attributed to a release build run against the same target directory as the live dev instance.
 
 ### [SMD-052] Line boil animation
 Type:    idea

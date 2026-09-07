@@ -280,3 +280,34 @@ Never:    Never treat a successful `apply_acrylic` as proof there is blur
           The API cannot watch a single value, only a key, so other settings
           under `Personalize` wake it too — the handler re-reads and may
           conclude nothing changed, which is why it must be cheap.
+
+### A command that builds a window must be `async`, or the application wedges
+Area:     Window lifecycle
+Date:     2026-09-06
+Commit:   pending
+Problem:  Opening a note from the hub froze the whole application. The founder
+          reported it as a crash on the open path; it was neither. Probes in the
+          running application showed `open` reaching `.build()` and never
+          returning, on **ThreadId(1)** — the main thread.
+          A synchronous Tauri command invoked over IPC runs on the main thread,
+          from inside the web view's own message callback. Creating a web view
+          from there cannot complete: the creation needs the message loop to
+          pump, and the loop is busy dispatching the callback we are standing
+          in. The native window appears and stays empty, the event loop is
+          wedged, and everything that needs it goes with it — the global
+          shortcut, window dragging, and every window built afterwards. Typing
+          in an already-open note still worked, because that is the web view's
+          own process and needs nothing from the loop.
+Fix:      `new_note_window`, `open_note_window`, `show_hub` and `show_settings`
+          are `async`. Tauri runs an async command on the async runtime rather
+          than the main thread, so the loop stays free to service the creation.
+Never:    Never make a command that builds a window synchronous, however
+          trivial it looks. The symptom does not point at the cause: the freeze
+          surfaces at whatever *next* needs the event loop, which is usually
+          opening something, so it reads as a bug in the open path.
+          Three wrong answers were reached before the right one, each of which
+          fitted the evidence at the time. What settled it was reproducing the
+          failure automatically — the Rust side opening a window from a spawned
+          thread, then from the main thread, then the hub's own frontend
+          invoking over IPC — and only the last hung. A hypothesis that cannot
+          be reproduced on demand is not a diagnosis.

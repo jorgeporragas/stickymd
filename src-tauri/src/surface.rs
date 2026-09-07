@@ -64,7 +64,6 @@ pub fn transparency_enabled() -> bool {
     use windows::Win32::Foundation::ERROR_SUCCESS;
     use windows::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
 
-    eprintln!("PROBE transparency_enabled: calling RegGetValueW");
     let mut value: u32 = 1;
     let mut size = std::mem::size_of::<u32>() as u32;
 
@@ -82,7 +81,6 @@ pub fn transparency_enabled() -> bool {
         )
     };
 
-    eprintln!("PROBE transparency_enabled: RegGetValueW returned");
 
     if status != ERROR_SUCCESS {
         return true;
@@ -142,7 +140,6 @@ fn round_corners(window: &WebviewWindow) {
 /// Never returns an error: a window that cannot be frosted is a Solid window,
 /// which is a supported way to run rather than something to recover from.
 pub fn apply(window: &WebviewWindow) -> SurfaceMode {
-    eprintln!("PROBE surface::apply: entered for {}", window.label());
     #[cfg(target_os = "windows")]
     {
         round_corners(window);
@@ -152,23 +149,17 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
         // compositor then draws nothing behind the window — which is the whole
         // bug: a tint over nothing is a washed-out window rather than a Solid
         // one. See docs/FIXES.md.
-        eprintln!("PROBE surface::apply: rounded, reading the setting");
         if !transparency_enabled() {
-            eprintln!("PROBE surface::apply: transparency off, clearing acrylic");
             let _ = window_vibrancy::clear_acrylic(window);
-            eprintln!("PROBE surface::apply: cleared");
             return SurfaceMode::Solid;
         }
 
         // A fully transparent tint: the CSS layer above supplies the colour, so
         // the compositor contributes blur only. See src/lib/tokens/tokens.css.
-        eprintln!("PROBE surface::apply: setting read, applying acrylic");
-        let outcome = match window_vibrancy::apply_acrylic(window, Some((0, 0, 0, 0))) {
+        match window_vibrancy::apply_acrylic(window, Some((0, 0, 0, 0))) {
             Ok(()) => SurfaceMode::Glass,
             Err(_) => SurfaceMode::Solid,
-        };
-        eprintln!("PROBE surface::apply: acrylic returned {outcome:?}");
-        outcome
+        }
     }
 
     #[cfg(not(target_os = "windows"))]
@@ -184,7 +175,6 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
 /// later get theirs from `apply` on the way up, so this only has to catch the
 /// ones already on screen.
 pub fn refresh(app: &AppHandle) -> SurfaceMode {
-    eprintln!("PROBE surface::refresh: entered");
     let mut mode = if transparency_enabled() {
         SurfaceMode::Glass
     } else {
