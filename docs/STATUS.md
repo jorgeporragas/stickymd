@@ -10,7 +10,17 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Active Step
 
-Releasing v1.0.0. The manifests are bumped and the tag is the last thing the release workflow has never had.
+**Releasing v1.0.0.** Manifests bumped, `v1.0.0` tagged and pushed 2026-09-07, and the release workflow ran for the first time — run 34091349993. It was still building when the session ended; **check its outcome before anything else next session** (`gh run view 34091349993`).
+
+What it produces is a *draft* release, by design: both assets attached, notes left to a person. Three things wait on the founder, in order:
+
+1. Write the notes and publish the draft — or don't; nothing is public until he does.
+2. Install-test what the runner built. Both artefacts have only ever been built on his own machine; a clean-runner build has never been installed, and that is what `MASTER.md § Deployment` promises. The SmartScreen path is part of that test.
+3. Decide SMD-074 — validate a typed chord, or capture it from a keypress. He has seen it and left it; capture is the better answer and the more work.
+
+**The README expires on publish.** It says "Releases will be published here… Until then, building from source is the only way to run it." That is true now and false the moment the draft goes out. It is the retraction pass that publishing will owe.
+
+**The phase marker understates this.** Build phases 1 to 5 are shipped and a 1.0.0 tag is out; STATUS still says Phase 5. Moving it is a phase transition and wants the full truth check, which the founder has twice chosen to defer. It is not drift — it is a deferral, and this is where it is recorded.
 
 Three statements that stood here were true when written and are not now, corrected 2026-09-07 rather than left to rot:
 
@@ -109,7 +119,8 @@ History:
   2026-09-05  logged and accepted into Phase 1 — Foundation & Editor Core
   2026-09-05  active
   2026-09-05  shipped — commit 2f56290
-Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it appears rather than burying it. Links to the FLOW files rather than restating them: current state points at STATUS, toolchain requirements at CLAUDE. Opens with a notice that the software is unfinished, placed above the feature list so a visitor cannot read the list as a claim about what runs today. The clone URL is deliberately absent — no remote exists yet, and inventing one would be a false instruction.
+Notes: Documents the SmartScreen warning per ADR-010, and says plainly why it appears rather than burying it. Links to the FLOW files rather than restating them: current state points at STATUS, toolchain requirements at CLAUDE. Opens with a notice that the software is unfinished, placed above the feature list so a visitor cannot read the list as a claim about what runs today. The clone URL was deliberately absent while there was no remote to name — inventing one would have been a false instruction. It is there as of 2026-09-07, along with the `core.hooksPath` line, which is the one step a clone cannot infer.
+  **Still expiring:** "Releases will be published here… Until then, building from source is the only way to run it." True until the v1.0.0 draft is published, and false the moment it is.
 
 ### [SMD-009] Chakra Petch as an alternate built-in theme's display face
 Type:    idea
@@ -622,7 +633,7 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   A lit control stays opaque, and gains something by it: its fill *is* the information, and now anything held on is denser than anything idle. Two readings of one state, for nothing.
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
-  Verified in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. **Not yet seen on a real transparent window** — `backdrop-filter` inside WebView2 on a layered window is the one thing the mock cannot stand in for.
+  Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
 ### [SMD-080] The tint palette loses its panel and arrives staggered
 Type:    feature
@@ -899,7 +910,7 @@ Created: 2026-09-06
 History:
   2026-09-06  logged and shipped
 Notes: `CLAUDE.md` has said since Phase 1 that build artifacts come from GitHub Actions on a `v*` tag and never from a developer's machine, and that every release carries both the NSIS installer and the portable zip. Nothing implemented either. `.github/workflows/release.yml` does now.
-  Untested, and it cannot be tested yet: there is no remote. It will run for the first time on the first tag pushed to one, and the first run is the one to watch.
+  Untested until 2026-09-07, when `v1.0.0` was tagged and pushed and it ran for the first time. What it produces is a **draft** release with both assets attached and a placeholder for notes — `MASTER.md` requires written notes, and notes nobody wrote are not written notes, so the last step is a person's.
   Four decisions in it worth having written down. It uses no third-party actions — only `actions/checkout`, `actions/setup-node`, the runner's own rustup and the `gh` CLI — because this is the one workflow whose output people download and execute, and a third-party action in it is a supply-chain dependency in exactly the wrong place. It runs `cargo test` before building, since those tests carry the path and name validation that handles untrusted input. It fails early if the tag disagrees with `tauri.conf.json` and `package.json`, because a version mismatch produces an installer named after the wrong version and is noticed only after someone downloads it. And it creates the release as a **draft**: `MASTER.md` says every release carries written notes, and notes generated by a workflow are not written notes — the assets are attached and the release waits for the founder.
   The portable zip carries `LICENSE` and `README.md` alongside the binary. GPL-3.0 requires the terms to be conveyed with the binary, and a zip someone extracts on its own is the case that would otherwise arrive without them.
   Not cached. A cold Rust build on a runner is several minutes, and releases are rare; the cache actions available are third-party, which is the thing this workflow is avoiding. Revisit only if release builds become frequent enough to be annoying.

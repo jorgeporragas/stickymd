@@ -23,13 +23,15 @@ That warning is not a judgement about the software. It appears because the binar
 
 You'll need Node, Rust, and the MSVC C++ build tools. Full toolchain requirements are in [CLAUDE.md § Local setup](CLAUDE.md#local-setup).
 
-Clone the repository, then:
-
 ```bash
+git clone https://github.com/jorgeporragas/stickymd.git
+cd stickymd
 npm install
 git config core.hooksPath .githooks
 npm run tauri dev
 ```
+
+That second-to-last line is not optional and not per-repository: the pre-commit hook lives in `.githooks/` and git does not look there until it is told to, on every clone.
 
 That last step builds the Rust side too, so the first run takes a few minutes. Afterwards it's seconds.
 
