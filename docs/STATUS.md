@@ -647,7 +647,7 @@ State:   shipped
 Created: 2026-09-07
 History:
   2026-09-07  found by the truth check at the V1 phase transition
-  2026-09-07  shipped — commit pending
+  2026-09-07  shipped — commit 22dedfe
 Notes: FLOW's item integrity rule is that every `shipped` item cites the commit that shipped it. Thirty-eight of sixty-eight did not, and SMD-044 had been dropped without the reason field every other dropped item carries.
   **The cause is a check that was specified and never written.** FLOW § The Hook names three: a migration with no SCHEMA change (not applicable — no database), a new shared component or token file with no DESIGN change, and *an item moved to `shipped` with no commit hash cited*. Only the first two were built. Net 1 could not catch this, so nothing did until Net 4 — which is the truth check working exactly as designed, and also the reason it exists.
   Backfilled from git history rather than by hand: for each uncited item, the first commit in which `docs/STATUS.md` shows it as `shipped`. Two were spot-checked against their subjects and looked wrong — SMD-019 and SMD-060 — and both turned out to be right: several items shipped per commit in that stretch, so an item's commit is often not the one whose subject names it. That is worth knowing before anyone "corrects" one of them.
