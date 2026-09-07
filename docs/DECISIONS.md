@@ -297,7 +297,7 @@ Consequences: The hub stays about notes. That was the argument for a separate wi
             `tauri-plugin-dialog` is a new dependency, for the folder picker. A notes folder typed by hand is a notes folder that can be wrong.
 
 ## ADR-034 — The radial menu holds actions that already exist
-Status:     Accepted
+Status:     Accepted; its contents are superseded by ADR-038. The mechanism — the ring, the clamped centre, the centre label, the dismissal — stands unchanged, which is what it was built to be.
 Date:       2026-09-06
 Context:    The founder asked for a ring of glass bubbles on right-click, as a home for anything that cannot sit cleanly on the chrome. Building it without direction on its contents risked a large rework, so it was built as a mechanism first.
 Decision:   Right-click on a note window opens a ring of seated bubbles at the pointer: New note, All notes, Settings, and the always-on-top pin. Every one of them is an action reachable elsewhere already — the ring is a faster way to them, not a second set of capabilities.
@@ -339,3 +339,18 @@ Consequences: Close and quit are deliberately not exposed. A mis-set chord on ei
             The chords live in a CodeMirror `Compartment`, so a change is swapped into open editors rather than waiting for the next window. A shortcut that only applied to windows opened afterwards is a setting that appears not to work, which is the same reason the theme is broadcast.
             Remapping earns its keep less for the founder than for the audience: `Mod-` is the platform abstraction, and `docs/FIXES.md` already records a chord lost to AltGr on his own layout. Someone whose layout collides now has somewhere to go.
             A chord CodeMirror cannot parse simply never fires. That is why the settings window exists as the place to type one, and it is also a gap: nothing validates the string yet. Worth knowing before someone types nonsense into it.
+
+## ADR-038 — The ring inserts markdown, and wears a pixel icon set
+Status:     Accepted
+Date:       2026-09-06
+Context:    ADR-034 built the ring as a mechanism and left its contents open, on the reasoning that the contents are a preference the founder can change without touching any of it. He has: the ring becomes an insert menu for tables, code blocks and lists — the markdown that is a nuisance to type by hand — and the four window actions it held move out entirely rather than sharing it. His argument is that those four were the weaker set, since each already has a control of its own.
+Decision:   Right-click on a note opens six inserts: table, code block, task, bulleted list, numbered list, link. Every one writes real markdown at the pointer. The glyphs are Pixelarticons, vendored, drawn at 24px in a 40px bubble.
+Consequences: That ADR-034 cost nothing to change is the claim it made, now tested: the ring, the clamped centre, the hovered label, the backdrop and Escape are all untouched. What changed is one array and the glyphs it names.
+            Nothing is lost by the four leaving. New note has the tray and a global chord, the hub has the tray, settings has the tray, and the pin is on the chrome of every note.
+            The insert lands at the **pointer**, not at the caret. Right-clicking does not move the caret, so without that a table asked for at the foot of a note would appear wherever the caret happened to be — the kind of thing noticed only after it has moved your text. The window hands the editor the coordinates and the editor resolves them; a window that could reach into CodeMirror to do it itself would be a window that can do anything.
+            The commands write syntax, exactly as the formatting commands do. Nothing renders a table without a table being in the text, and copy still yields source.
+            Each lands the caret where a person would start typing — the first header cell, a fence's language, the text half of a link — and a table's first heading arrives selected, to be typed over. A command that inserts a skeleton and leaves the caret at the end has done half the job.
+            The glyphs are **pixel art on a 24-unit grid** and are only sharp at 24px or a multiple of it, which is why the ring's bubbles are 40px rather than the scale's 32: the bubble is sized to the glyph. That is a deliberate exception to the spacing scale and the only one in the inventory. The window's own 9px controls keep their hand-drawn strokes, where a design pixel would be under half a screen pixel.
+            They fill rather than stroke, so a stroke rule applied to them draws nothing. `.lozenge`'s 58% glyph sizing is overridden here for the same reason.
+            Six is what the ring holds before the bubbles crowd. Headings and blockquotes were the next candidates and are not in it; the set is closed at six until something is taken out.
+            Pixelarticons is MIT, vendored as six path strings with its licence beside them, like the typefaces. Nothing is fetched at runtime. The numbered list borrows `list-box`, the nearest the set has — the hovered label says which it is, which is a thing a ring can do that a wordless toolbar cannot.

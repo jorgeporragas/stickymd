@@ -2,7 +2,7 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { syntaxHighlighting } from '@codemirror/language';
 import { Compartment, EditorState } from '@codemirror/state';
-import { EditorView, drawSelection, keymap, placeholder, type KeyBinding } from '@codemirror/view';
+import { EditorView, keymap, placeholder, type KeyBinding } from '@codemirror/view';
 
 import { codeBlockSurface } from './codeBlock';
 import { DEFAULT_CHORDS, formattingKeymapFor, type FormattingChords } from './commands';
@@ -74,7 +74,12 @@ export function createEditor({
         }),
 
         history(),
-        drawSelection(),
+        // No `drawSelection`. It replaces the caret with an element of its own
+        // and blanks the native one, and an element outside the line cannot be
+        // coloured per surface — the cursor has to be visible on a dark code
+        // panel as well as on paper. The native caret takes `caret-color`,
+        // which is a property of the line it sits in. Selection is styled
+        // through `::selection` either way.
         EditorView.lineWrapping,
         placeholder('Write something.'),
 

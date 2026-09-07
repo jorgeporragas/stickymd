@@ -1,7 +1,16 @@
 <script lang="ts">
+  import type { StateCommand } from '@codemirror/state';
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { onMount } from 'svelte';
   import { DEFAULT_CHORDS, type FormattingChords } from '../../lib/editor/commands';
+  import {
+    insertBulletList,
+    insertCodeBlock,
+    insertLink,
+    insertNumberedList,
+    insertTable,
+    insertTaskList
+  } from '../../lib/editor/insert';
   import Editor from '../../lib/components/Editor.svelte';
   import RadialMenu, { type RadialAction } from '../../lib/components/RadialMenu.svelte';
   import SaveTrouble from '../../lib/components/SaveTrouble.svelte';
@@ -15,7 +24,6 @@
     setTint,
     type Tint
   } from '../../lib/state/note';
-  import { openNewNoteWindow, showHub, showSettings } from '../../lib/state/windows';
 
   interface Props {
     /** The note's source. A new window starts empty. */
@@ -62,12 +70,24 @@
   /** Where the radial menu is open, if it is. */
   let menuAt = $state<{ x: number; y: number } | undefined>(undefined);
 
-  const menuActions = $derived<RadialAction[]>([
-    { id: 'new', label: 'New note', icon: 'note' },
-    { id: 'hub', label: 'All notes', icon: 'hub' },
-    { id: 'settings', label: 'Settings', icon: 'settings' },
-    { id: 'pin', label: alwaysOnTop ? 'Unpin' : 'Keep on top', icon: 'pin', engaged: alwaysOnTop }
-  ]);
+  /** Set once the editor exists. Until then there is nothing to insert into. */
+  let runCommand: ((command: StateCommand, at?: { x: number; y: number }) => void) | undefined;
+
+  /**
+   * What the ring inserts.
+   *
+   * Six: enough to cover the markdown that is a nuisance to type and few
+   * enough that the ring stays a shape rather than a list. Everything here
+   * writes real syntax into the document — see `lib/editor/insert.ts`.
+   */
+  const menuActions: (RadialAction & { command: StateCommand })[] = [
+    { id: 'table', label: 'Table', icon: 'table', command: insertTable },
+    { id: 'code', label: 'Code block', icon: 'code', command: insertCodeBlock },
+    { id: 'task', label: 'Task', icon: 'task', command: insertTaskList },
+    { id: 'list', label: 'Bulleted list', icon: 'list', command: insertBulletList },
+    { id: 'numbered', label: 'Numbered list', icon: 'numbered', command: insertNumberedList },
+    { id: 'link', label: 'Link', icon: 'link', command: insertLink }
+  ];
 
   function openMenu(event: MouseEvent): void {
     // The web view draws its own context menu otherwise, beside this one.
@@ -76,22 +96,11 @@
   }
 
   function chooseFromMenu(id: string): void {
+    const at = menuAt;
     menuAt = undefined;
 
-    switch (id) {
-      case 'new':
-        void openNewNoteWindow();
-        break;
-      case 'hub':
-        void showHub();
-        break;
-      case 'settings':
-        void showSettings();
-        break;
-      case 'pin':
-        togglePin(!alwaysOnTop);
-        break;
-    }
+    const chosen = menuActions.find((action) => action.id === id);
+    if (chosen) runCommand?.(chosen.command, at);
   }
 
   function retrySave(): void {
@@ -168,7 +177,12 @@
       <TintPicker {revealed} {tint} onTint={chooseTint} />
     {/snippet}
   </WindowChrome>
-  <Editor value={initial} onChange={queueSave} {formatting} />
+  <Editor
+    value={initial}
+    onChange={queueSave}
+    {formatting}
+    onReady={(run) => (runCommand = run)}
+  />
 
   {#if menuAt}
     <RadialMenu

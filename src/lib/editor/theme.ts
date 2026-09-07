@@ -41,15 +41,7 @@ export const editorTheme = EditorView.theme({
     padding: '0'
   },
 
-  '&.cm-focused .cm-cursor': {
-    borderLeftColor: 'var(--rule)'
-  },
-
-  '&.cm-focused .cm-selectionBackground, ::selection': {
-    backgroundColor: 'var(--selection)'
-  },
-
-  '.cm-selectionBackground': {
+  '::selection': {
     backgroundColor: 'var(--selection)'
   },
 
@@ -60,6 +52,11 @@ export const editorTheme = EditorView.theme({
   '.cm-md-code': {
     backgroundColor: 'var(--code-surface)',
     color: 'var(--code-ink)',
+
+    // Ink on paper is invisible on this panel, so the caret takes the colour
+    // the application already uses to say "this one". Green on
+    // `--code-surface` is 7:1, where ink is nothing at all.
+    caretColor: 'var(--signal-engaged)',
     paddingLeft: 'var(--space-4)',
     paddingRight: 'var(--space-4)',
 

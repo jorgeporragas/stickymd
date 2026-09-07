@@ -1,14 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { PIXEL_ICONS, type PixelIcon } from '../icons/pixel';
 
   export interface RadialAction {
     id: string;
     /** What it does, for screen readers and the hovered label. */
     label: string;
-    /** Which glyph to draw. Kept to a named set so the paths live here. */
-    icon: 'note' | 'hub' | 'settings' | 'pin';
-    /** Whether the action is currently engaged — the pin, when pinned. */
-    engaged?: boolean;
+    icon: PixelIcon;
   }
 
   interface Props {
@@ -21,10 +19,16 @@
 
   let { actions, at, onChoose, onDismiss }: Props = $props();
 
-  /** Distance from the centre to each bubble. */
-  const RADIUS = 52;
+  /**
+   * Distance from the centre to each bubble.
+   *
+   * Sixty rather than the fifty-two it was: six bubbles of forty need about
+   * twenty between them or the ring reads as one lumpy shape instead of six
+   * things you can aim at.
+   */
+  const RADIUS = 60;
   /** Half a bubble plus a little, so none of the ring meets the window edge. */
-  const MARGIN = 26;
+  const MARGIN = 30;
 
   let hovered = $state<string | undefined>(undefined);
 
@@ -63,9 +67,13 @@
 <!--
   A ring of seated bubbles, opened at the pointer.
 
-  Everything in it is an action that already exists elsewhere — this is a
-  faster way to reach them, not a second set of capabilities. That is what
-  keeps it cheap to change: which actions are in the ring is one array.
+  It held window actions first — new note, the hub, settings, the pin — and
+  they moved out: those all had a control of their own already, where the
+  markdown that is awkward to type by hand had nothing. A ring that both
+  inserted a table and opened settings would have to be read every time. One
+  that only inserts is a gesture you learn once.
+
+  What is in the ring is still one array, held by the window.
 
   The backdrop catches the click that dismisses it. It is transparent rather
   than absent, because a menu you can dismiss only by choosing something is a
@@ -81,12 +89,10 @@
   }}
 ></div>
 
-<div class="ring" role="menu" aria-label="Note actions">
+<div class="ring" role="menu" aria-label="Insert">
   {#each placed as { action, x, y }, index (action.id)}
     <button
       class="lozenge bubble"
-      class:engaged={action.engaged}
-      class:lit={action.engaged}
       role="menuitem"
       type="button"
       aria-label={action.label}
@@ -95,20 +101,8 @@
       onpointerleave={() => (hovered = undefined)}
       onclick={() => onChoose(action.id)}
     >
-      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        {#if action.icon === 'note'}
-          <path d="M3.5 2.5h9v11h-9z" />
-          <path d="M6 5.8h4M6 8h4M6 10.2h2.5" />
-        {:else if action.icon === 'hub'}
-          <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
-        {:else if action.icon === 'settings'}
-          <path d="M2.5 5.5h11M2.5 10.5h11" />
-          <circle cx="6" cy="5.5" r="1.4" />
-          <circle cx="10.5" cy="10.5" r="1.4" />
-        {:else}
-          <path d="M5.8 2.5h4.4v3.5l2.1 2.2v0.8H3.7v-0.8l2.1-2.2z" />
-          <path d="M8 9.5v4" />
-        {/if}
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d={PIXEL_ICONS[action.icon]} />
       </svg>
     </button>
   {/each}
@@ -143,23 +137,18 @@
 
     display: grid;
     place-items: center;
-    width: var(--space-8);
-    height: var(--space-8);
+    /* 40px rather than the scale's 32: the glyphs are pixel art on a 24-unit
+       grid and are only sharp at 24px, so the bubble has to be large enough to
+       carry one at its own size. Off the scale deliberately — see DESIGN. */
+    width: 40px;
+    height: 40px;
     color: var(--control-glyph);
 
     animation: bubble-in var(--dur-quick) var(--ease-out) backwards;
   }
 
-  .bubble.engaged {
-    color: var(--signal-engaged);
-  }
-
   .bubble:hover {
     color: var(--ink-primary);
-  }
-
-  .bubble.engaged:hover {
-    color: var(--signal-engaged);
   }
 
   /* Arrives from the centre, staggered, one after another — the founder's own
@@ -175,13 +164,17 @@
     }
   }
 
-  /* Size and stacking come from `.lozenge`. */
+  /*
+    The pixel glyphs fill rather than stroke, and are pinned to 24px rather
+    than taking `.lozenge`'s proportional 58%: at any other size the grid falls
+    between screen pixels and the glyph turns to mush. Stacking still comes
+    from `.lozenge`.
+  */
   .bubble svg {
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    stroke: none;
   }
 
   /* The hovered action's name, in the middle of the ring — the one place

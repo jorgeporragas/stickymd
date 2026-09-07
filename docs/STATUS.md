@@ -607,6 +607,30 @@ Notes: The founder asked whether it was normal that a block's closing fence sits
   Found while measuring that: faint seams between code lines. The lines abut exactly — the gap measures 0 — but their tops land on fractional device pixels at 2x, so each boundary is antialiased and the window behind shows through a sliver. The same failure as the pale window edges in `docs/FIXES.md`, three orders of magnitude smaller. Every line but the first now bleeds half a pixel upward in the panel's own colour; upward only, and not the first, so nothing escapes the rounded corners.
   Also answered while there: syntax highlighting is implemented and works, including the lazily-loaded languages — verified with a Python fence, `def` and `return` as keywords, the comment muted, the f-string a string. Six languages are wired: JS/TS/JSX/TSX, HTML, CSS, Python, Rust, JSON. Anything else renders as an unhighlighted code block.
 
+### [SMD-076] The radial menu becomes an insert menu
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  scoped by the founder
+  2026-09-06  shipped
+Notes: ADR-038. The ring holds six inserts now — table, code block, task, bulleted list, numbered list, link — and the four window actions it carried are gone rather than moved aside. Each of those four already has a control of its own; the markdown that is a nuisance to type had nothing.
+  ADR-034 claimed the contents would be cheap to change. Tested: the ring, the clamped centre, the hovered label, the backdrop and Escape are untouched. One array and the glyphs changed.
+  The insert lands at the **pointer**, not at the caret. Right-clicking does not move the caret, so a table asked for at the foot of a note would otherwise appear wherever the caret last was. The window hands the editor the coordinates; it does not get the view.
+  Glyphs are Pixelarticons, vendored, MIT, six paths with the licence beside them. They are pixel art on a 24-unit grid and only sharp at 24px, which is why the ring's bubbles are 40px rather than the scale's 32 — the one place in the inventory where a size is set by its contents.
+  **A placement bug, found by a harness rather than by reading it.** The rule for where a block goes was written against the insertion point instead of the caret, and on a blank line the start and the end of the line are the same position — so an insert into an empty note read as "mid-line" and opened a newline nobody asked for. Every note would have started with a blank line. Eight cases now checked against the real command: empty note, blank line between text, mid-line, line start, line end, last line without a trailing newline, and a link with and without a selection.
+
+### [SMD-077] The caret was nearly invisible, and gone inside code
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder
+  2026-09-06  shipped
+Notes: My own regression, from ADR-025: a blanket replace of `var(--accent)` with `var(--rule)`, meant for the blockquote border, also took the caret. `--rule` is a 14%-alpha hairline colour, so the caret was drawn at the weight of a divider — and inside a code panel, where the ground is darker, it disappeared entirely.
+  `drawSelection()` was the second half of it. It replaces the native caret with a drawn element, which no `caret-color` can reach, so a per-surface caret colour was impossible while it was on. It is gone; the native caret honours `caret-color`, and `::selection` keeps the selection styled.
+  The caret is `--signal-engaged` inside code blocks — the founder's own suggestion — and ink elsewhere. Colour carrying function, which is the case ADR-025 allows.
+
 ### [SMD-074] A mistyped formatting chord fails silently
 Type:    bug
 State:   idea
