@@ -21,12 +21,14 @@
   on-or-off in this application's own language, and it cannot overshoot
   anything.
 
-  Lit is `--signal-engaged` with the check in that hue taken most of the way to
-  black, as on every other lit lozenge (ADR-028).
+  Lit is `--signal-engaged` with a dot in that hue taken most of the way to
+  black, as on every other lit lozenge (ADR-028). A dot rather than a check
+  because a check is an *action* being confirmed, and this is a state being
+  held — the same reason the pin draws a pin rather than a tick.
 -->
 <button
   class="lozenge toggle"
-  class:on
+  class:lit={on}
   type="button"
   role="switch"
   aria-checked={on}
@@ -35,7 +37,7 @@
 >
   {#if on}
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-      <path d="M3.2 6.3 5.1 8.2 8.9 4.1" />
+      <circle cx="6" cy="6" r="2.1" />
     </svg>
   {/if}
 </button>
@@ -45,33 +47,15 @@
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    width: var(--space-5);
-    height: var(--space-5);
+    /* The diameter every other bubble in the application uses. */
+    width: var(--space-4);
+    height: var(--space-4);
     border-color: var(--rim-control);
-    --lozenge-fill: var(--gloss-control);
-    --lozenge-pressed: var(--gloss-pressed);
     color: var(--control-glyph);
   }
 
-  .toggle.on {
-    border-color: var(--swatch-rim);
+  /* Only the hue. The fill, rim and glyph follow from `.lit`, in src/app.css. */
+  .toggle.lit {
     color: var(--signal-engaged);
-    --lozenge-fill: var(--gloss-tinted);
-    --lozenge-pressed: var(--gloss-tinted-pressed);
-  }
-
-  .toggle svg {
-    /* Above the specular, as on every other seated control: at this size a
-       highlight across the top of a glyph is the difference between reading it
-       and guessing. */
-    position: relative;
-    z-index: 1;
-    width: 11px;
-    height: 11px;
-    stroke: color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade));
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
   }
 </style>

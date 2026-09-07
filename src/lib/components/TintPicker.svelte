@@ -56,7 +56,7 @@
 -->
 <div class="picker">
   <button
-    class="lozenge swatch"
+    class="lozenge lit swatch"
     class:revealed
     data-tint-swatch={tint}
     type="button"
@@ -69,7 +69,7 @@
     <div class="palette" class:closing role="group" aria-label="Note colour" onanimationend={settled}>
       {#each TINTS as option (option)}
         <button
-          class="lozenge dot"
+          class="lozenge lit dot"
           class:selected={option === tint}
           data-tint-swatch={option}
           type="button"
@@ -94,12 +94,6 @@
     greyed-out state all follow from one declaration per tint. The disc itself
     is `.lozenge`, in src/app.css — the window's controls wear it too.
   */
-  .swatch,
-  .dot {
-    --lozenge-fill: var(--gloss-tinted);
-    --lozenge-pressed: var(--gloss-tinted-pressed);
-  }
-
   /* One diameter for every disc in the window — the founder's call, and the
      traffic lights' own proportion: small, and read by colour and position
      rather than by size. */

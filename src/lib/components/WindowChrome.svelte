@@ -50,6 +50,7 @@
       class="lozenge control"
       class:revealed
       class:active={alwaysOnTop}
+      class:lit={alwaysOnTop}
       type="button"
       aria-label="Keep this note on top"
       aria-pressed={alwaysOnTop}
@@ -96,8 +97,6 @@
     width: var(--space-4);
     height: var(--space-4);
     border-color: var(--rim-control);
-    --lozenge-fill: var(--gloss-control);
-    --lozenge-pressed: var(--gloss-pressed);
     color: var(--control-glyph);
 
     /* Small control, not a glass surface: fading is cheap and correct.
@@ -143,9 +142,6 @@
   .control.active,
   .control.active:hover {
     color: var(--signal-engaged);
-    --lozenge-fill: var(--gloss-tinted);
-    --lozenge-pressed: var(--gloss-tinted-pressed);
-    border-color: var(--swatch-rim);
   }
 
   /* The glyph cannot be `currentColor` here — that is now the fill's own hue.
@@ -155,18 +151,9 @@
     stroke: color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade));
   }
 
+  /* Size, stacking, and the lit glyph's colour all come from `.lozenge` in
+     src/app.css. */
   .control svg {
-    /* Proportioned to the disc rather than to the icon: the traffic lights
-       run about 0.58 of their diameter, and the glyph is there to be
-       recognised, not read.
-
-       Above the specular, which is where Aqua drew it too — its glyphs sit on
-       the glass, not under it. At nine pixels a highlight across the top of a
-       glyph is the difference between reading it and guessing. */
-    position: relative;
-    z-index: 1;
-    width: 9px;
-    height: 9px;
     stroke: currentColor;
     stroke-width: 1.5;
     stroke-linecap: round;

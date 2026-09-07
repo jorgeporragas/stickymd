@@ -138,6 +138,13 @@ body {
   padding: 0;
   border-radius: 50%;
   border: 1px solid var(--swatch-rim);
+
+  /* The neutral fill is the default here rather than something each control
+     re-declares. A control that set it itself would win over `.lit` below —
+     same specificity, and component styles are injected after this file — so a
+     lit control came out grey. Set the exception, not the rule. */
+  --lozenge-fill: var(--gloss-control);
+  --lozenge-pressed: var(--gloss-pressed);
   background: var(--lozenge-fill);
   box-shadow: var(--gloss-seat);
   cursor: pointer;
@@ -151,6 +158,47 @@ body {
  */
 .lozenge:active {
   background: var(--lozenge-pressed, var(--lozenge-fill));
+}
+
+/*
+ * Lit: a lozenge holding something on — the pin, a settings toggle, an engaged
+ * action in the ring, the save indicator. Written here once because it was
+ * written out in four components, which is three times too many.
+ *
+ * The component supplies only the hue, as `color`. The fill, the pressed fill,
+ * the rim and the glyph all follow from it.
+ */
+.lozenge.lit {
+  --lozenge-fill: var(--gloss-tinted);
+  --lozenge-pressed: var(--gloss-tinted-pressed);
+  border-color: var(--swatch-rim);
+}
+
+/*
+ * A glyph inside a lozenge, at the traffic lights' own proportion of the
+ * diameter, so it scales with the disc rather than being restated per size.
+ *
+ * Above the specular, which is where Aqua drew its glyphs too: at these sizes a
+ * highlight across the top of one is the difference between reading it and
+ * guessing.
+ */
+.lozenge svg {
+  position: relative;
+  z-index: 1;
+  width: 58%;
+  height: 58%;
+}
+
+/* On a lit lozenge `currentColor` is the fill's own hue, so the glyph cannot
+   use it directly: it is that hue taken most of the way to black. */
+.lozenge.lit svg {
+  stroke: color-mix(in oklab, currentColor 25%, var(--rim-shade));
+  fill: none;
+}
+
+.lozenge.lit svg circle {
+  fill: color-mix(in oklab, currentColor 25%, var(--rim-shade));
+  stroke: none;
 }
 
 /*
@@ -201,6 +249,13 @@ body {
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* The thumb stops short of both ends rather than running into the window's
+   corners. A scrollbar that reaches the very bottom reads as part of the
+   window's edge; held off it, it reads as sitting on the surface. */
+::-webkit-scrollbar-track {
+  margin-block: var(--space-2);
 }
 
 ::-webkit-scrollbar-thumb {

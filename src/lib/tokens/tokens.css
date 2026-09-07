@@ -69,9 +69,13 @@
 
   /* A swatch's rim is its own hue darkened, never a neutral border — a grey
      ring is what made seven tints read as seven generic dots. */
-  /* The glyph on a lit control: its own hue taken most of the way to black,
-     which is how Aqua drew a traffic light's. 7.34:1 against the fill. */
-  --signal-engaged: var(--tide-600-diluted);
+  /* Anything held on: the pin, a settings toggle, a lit action in the ring.
+     The founder's pick, and the same green the application mark is made of, so
+     "selected" is one colour everywhere rather than one per surface.
+     Its glyph is this hue taken most of the way to black, as Aqua drew a
+     traffic light's — 6.80:1 against the fill at full strength, and more
+     against the lighter top of the gloss. */
+  --signal-engaged: var(--tide-400);
 
   --swatch-rim: color-mix(in oklab, currentColor 62%, var(--rim-shade));
   --rim-shade: #000000;
@@ -103,16 +107,6 @@
   --tide-900: #1e6091;
   --tide-1000: #184e77;
 
-  /* A control holding a setting on: `--tide-600` diluted toward the light
-     surface, which is the founder's pick from the ramp rendered at strength.
-     Written out rather than mixed at read time so it cannot drift with the
-     note's tint — the disc carries its own colour, and its glyph is derived
-     from that colour, so nothing behind it should change either.
-
-     Not diluted with `opacity`: that would fade the rim, the seat and the
-     specular along with the fill, and a lozenge with a faded rim reads as
-     switched off rather than as quietly on. */
-  --tide-600-diluted: #78bec0;
 
   /* Code. The one place in the application where hue tells several things
      apart at once, which is the functional use ADR-025 allows — and the one

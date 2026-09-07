@@ -22,7 +22,7 @@
 -->
 {#if reason}
   <button
-    class="lozenge trouble"
+    class="lozenge lit trouble"
     type="button"
     title={`${reason} Click to try again.`}
     aria-label={`${reason} Click to try again.`}
@@ -42,21 +42,11 @@
     width: var(--space-4);
     height: var(--space-4);
     color: var(--signal-danger);
-    --lozenge-fill: var(--gloss-tinted);
-    --lozenge-pressed: var(--gloss-tinted-pressed);
-    border-color: var(--swatch-rim);
   }
 
+  /* Size, stacking and colour come from `.lozenge.lit`. */
   .trouble svg {
-    position: relative;
-    z-index: 1;
-    width: 9px;
-    height: 9px;
-    /* Not `currentColor`: that is the fill's own hue here. The hue taken most
-       of the way to black, as on every other lit lozenge. */
-    stroke: color-mix(in oklab, var(--signal-danger) 25%, var(--rim-shade));
     stroke-width: 1.8;
     stroke-linecap: round;
-    fill: none;
   }
 </style>

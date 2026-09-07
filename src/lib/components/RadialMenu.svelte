@@ -86,6 +86,7 @@
     <button
       class="lozenge bubble"
       class:engaged={action.engaged}
+      class:lit={action.engaged}
       role="menuitem"
       type="button"
       aria-label={action.label}
@@ -144,8 +145,6 @@
     width: var(--space-8);
     height: var(--space-8);
     border-color: var(--rim-control);
-    --lozenge-fill: var(--gloss-control);
-    --lozenge-pressed: var(--gloss-pressed);
     color: var(--control-glyph);
 
     animation: bubble-in var(--dur-quick) var(--ease-out) backwards;
@@ -153,9 +152,6 @@
 
   .bubble.engaged {
     color: var(--signal-engaged);
-    --lozenge-fill: var(--gloss-tinted);
-    --lozenge-pressed: var(--gloss-tinted-pressed);
-    border-color: var(--swatch-rim);
   }
 
   .bubble:hover {
@@ -179,20 +175,13 @@
     }
   }
 
+  /* Size and stacking come from `.lozenge`. */
   .bubble svg {
-    position: relative;
-    z-index: 1;
-    width: 14px;
-    height: 14px;
     stroke: currentColor;
     stroke-width: 1.2;
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
-  }
-
-  .bubble.engaged svg {
-    stroke: color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade));
   }
 
   /* The hovered action's name, in the middle of the ring — the one place

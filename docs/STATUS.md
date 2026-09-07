@@ -583,6 +583,19 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-068] One selected colour, and the lit lozenge extracted
+Type:    feature
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  logged and shipped (founder)
+Notes: Three of the founder's, and one thing found by looking.
+  `--signal-engaged` is `--tide-400` now — the same green the application mark is made of — so "selected" is one colour across the application rather than one per surface. The diluted teal it replaced is gone rather than left as a token nothing reads.
+  The settings toggle shows a dot rather than a check, and is `--space-4` like every other bubble. A dot because a check is an action being confirmed and this is a state being held.
+  The scrollbar's track is inset at both ends, so the thumb stops short of the window's corners rather than running into them.
+  The reuse check the founder asked for turned up one real duplication: the lit-lozenge recipe — tinted fill, pressed fill, swatch rim, and a glyph in the hue taken most of the way to black — was written out in four components, and glyph sizing in four. Both moved to `.lozenge` and `.lozenge.lit` in `src/app.css`; the tint swatches joined them, since a swatch is a lit lozenge by any other name. Components now supply only a hue.
+  **The extraction broke something, and looking is what caught it.** A lit toggle came out grey in the dark theme: `.lozenge.lit` and a component's own `.toggle` have equal specificity, and component styles are injected after `app.css`, so the neutral fill won even when lit. The neutral is now the default on `.lozenge` and `.lit` the exception — set the exception, not the rule.
+
 ### [SMD-067] The toggle overshoots, and the scrollbars ignore the theme
 Type:    bug
 State:   shipped
