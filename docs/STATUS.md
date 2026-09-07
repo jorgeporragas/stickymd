@@ -583,6 +583,19 @@ Notes: The swatch was at the leading edge of the chrome; the founder asked for i
   The palette had to be re-anchored with it. It opened down and to the right from a control that is now near the window's trailing edge, and `.surface` clips what leaves it, so it would have been cut in half. It opens leftward from its right edge now, and scales out of that corner.
   The founder also reported the palette reading as see-through with text behind it, which it was: it painted itself with `--surface-paint`, and in Glass mode that is a translucent tint meant to sit over the compositor's blur — but what is behind a popover is the note's own text, not the desktop. It uses `--surface-solid` now, the same colour the note would be if it were opaque, which is the founder's own second suggestion and reads as part of the note rather than as a panel from elsewhere.
 
+### [SMD-067] The toggle overshoots, and the scrollbars ignore the theme
+Type:    bug
+State:   shipped
+Created: 2026-09-06
+History:
+  2026-09-06  reported by the founder from the settings window
+  2026-09-06  shipped
+Notes: Two faults, both mine, both from building more than the situation asked for.
+  The toggle was a sliding switch with a `.lozenge` as its knob, and the knob travelled past the end of its track. The founder's fix is better than a corrected travel distance: make it the bubble itself, lit when held, which is what the always-on-top pin already is. A switch has a track, a travel distance and an end stop to get wrong; a bubble has none of them. One component's worth of geometry deleted rather than debugged.
+  The scrollbars were never styled at all, so they were the engine's default: an opaque light strip that stayed light in the dark theme and read as a pale rectangle laid over the glass rather than part of the window. Fixed in two halves, and it needs both — a transparent track with a rounded, inset thumb, and a colour scheme declared per theme. The scheme is what stops the platform drawing a light scrollbar on a dark window; no amount of styling the thumb reaches that.
+  The `-webkit-` pseudo-elements are used rather than the standard `scrollbar-color`, deliberately: setting that property switches the engine to its own drawing and ignores the rest, and it can neither round the thumb nor inset it.
+  Verified in both themes in the running dev server.
+
 ### [SMD-064] The settings window
 Type:    feature
 State:   shipped

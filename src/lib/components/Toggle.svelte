@@ -12,15 +12,20 @@
 </script>
 
 <!--
-  A switch, with the seated lozenge as its knob — the same object the window's
-  controls are made of, at the same diameter, so a setting reads as something
-  you press rather than as a form control that wandered in.
+  One seated bubble that lights when the setting is held — the same control the
+  always-on-top pin is, doing the same job.
 
-  On is `--signal-engaged`, which is what a held setting looks like everywhere
-  else in the application (ADR-028).
+  It was a sliding switch first, with the bubble as its knob. That was one
+  component too many: a switch has a track, a travel distance and an end stop
+  to get wrong, and the knob overshot its track. The bubble already says
+  on-or-off in this application's own language, and it cannot overshoot
+  anything.
+
+  Lit is `--signal-engaged` with the check in that hue taken most of the way to
+  black, as on every other lit lozenge (ADR-028).
 -->
 <button
-  class="track"
+  class="lozenge toggle"
   class:on
   type="button"
   role="switch"
@@ -28,46 +33,45 @@
   aria-label={label}
   onclick={() => onChange(!on)}
 >
-  <span class="lozenge knob"></span>
+  {#if on}
+    <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+      <path d="M3.2 6.3 5.1 8.2 8.9 4.1" />
+    </svg>
+  {/if}
 </button>
 
 <style>
-  .track {
+  .toggle {
     flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    width: calc(var(--space-4) * 2 + var(--space-1));
-    padding: 2px;
-    border: 1px solid var(--rule);
-    border-radius: var(--space-4);
-    background: var(--control-hover);
-    cursor: pointer;
-    transition: background-color var(--dur-quick) var(--ease-out);
-  }
-
-  .track.on {
-    background: color-mix(in oklab, var(--signal-engaged) 35%, transparent);
-    border-color: var(--swatch-rim);
-  }
-
-  .knob {
-    width: var(--space-4);
-    height: var(--space-4);
+    display: grid;
+    place-items: center;
+    width: var(--space-5);
+    height: var(--space-5);
+    border-color: var(--rim-control);
     --lozenge-fill: var(--gloss-control);
     --lozenge-pressed: var(--gloss-pressed);
-    border-color: var(--rim-control);
-
-    /* Moves rather than fades: the knob is an object, and objects travel.
-       See docs/DESIGN.md section 'Motion'. */
-    transform: translateX(0);
-    transition: transform var(--dur-quick) var(--ease-out);
+    color: var(--control-glyph);
   }
 
-  .track.on .knob {
+  .toggle.on {
+    border-color: var(--swatch-rim);
+    color: var(--signal-engaged);
     --lozenge-fill: var(--gloss-tinted);
     --lozenge-pressed: var(--gloss-tinted-pressed);
-    color: var(--signal-engaged);
-    border-color: var(--swatch-rim);
-    transform: translateX(calc(var(--space-4) + var(--space-1) - 2px));
+  }
+
+  .toggle svg {
+    /* Above the specular, as on every other seated control: at this size a
+       highlight across the top of a glyph is the difference between reading it
+       and guessing. */
+    position: relative;
+    z-index: 1;
+    width: 11px;
+    height: 11px;
+    stroke: color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade));
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
   }
 </style>

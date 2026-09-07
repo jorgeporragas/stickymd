@@ -255,10 +255,18 @@
   --ink-muted: var(--neutral-500);
   --ink-syntax: var(--neutral-400);
 
-  /* Accent */
+  /* Signals. Not an accent — there has not been one since ADR-025. */
   --signal-danger: var(--red-600);
 
   --focus-ring: var(--neutral-950);
+
+  /* The scrollbar. Its track is always transparent — see src/app.css — so only
+     the thumb is named. The scheme declaration matters as much as the colour:
+     without it the platform draws its own light scrollbar over a dark window,
+     and no amount of styling the thumb fixes the rest of it. */
+  --scrollbar-thumb: rgba(26, 26, 23, 0.22);
+  --scrollbar-thumb-hover: rgba(26, 26, 23, 0.38);
+  color-scheme: light;
 
   /* A control carries no tint, so its gloss is named rather than mixed, and
      its rim is neutral — a rim mixed from the glyph's own ink would draw a
@@ -338,6 +346,10 @@
 
   --signal-danger: var(--red-300);
   --focus-ring: #f2efe8;
+
+  --scrollbar-thumb: rgba(242, 239, 232, 0.22);
+  --scrollbar-thumb-hover: rgba(242, 239, 232, 0.38);
+  color-scheme: dark;
 
   --gloss-neutral: radial-gradient(circle at 50% 18%, #4a4945 0%, #33322f 60%, #232220 100%);
   --rim-neutral: rgba(255, 255, 255, 0.22);

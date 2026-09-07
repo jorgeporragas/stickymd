@@ -176,3 +176,44 @@ body {
   background: var(--gloss-specular);
   pointer-events: none;
 }
+
+/*
+ * Scrollbars, everywhere one appears: the hub's list, the settings window, and
+ * the editor's own scroller.
+ *
+ * The track is transparent rather than coloured. The default is an opaque
+ * strip, which on a translucent window reads as a pale rectangle laid over the
+ * glass — the scrollbar looking like something on the window rather than part
+ * of it.
+ *
+ * These are the `-webkit-` pseudo-elements rather than the standard
+ * `scrollbar-color`, deliberately: setting that property switches the engine to
+ * its own drawing and ignores these, and it can neither round the thumb nor
+ * inset it from the edge. The scheme declaration in the token file does the
+ * other half — it is what stops the platform drawing a light scrollbar on a
+ * dark window.
+ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+
+  /* A transparent border, clipped away, is what insets the thumb from the
+     window's edge: a scrollbar thumb takes no padding. */
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
