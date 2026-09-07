@@ -193,11 +193,14 @@ It is defined in `src-tauri/tauri.conf.json` with `create: false`, so its dimens
 
 ## Application mark
 
-An irregular blob with a spike at the top, lobes down the left, and two leg-like protrusions at the bottom. Rugged rather than smooth: the roughness is what reads as *sticky*, and a clean geometric blob does not.
+The application's own seated lozenge, in `--tide-400`, carrying the letter **S** from Departure Mono. Source: `assets/icon/stickymd.svg` — the vector, never a generated size.
 
-`assets/icon/stickymd.svg` is the single source. Every platform size is generated from it with `npx tauri icon assets/icon/stickymd.svg`, which writes into `src-tauri/icons/`. Never hand-edit a generated size.
+Two things about it are deliberate rather than convenient. The glyph is **rectangles, not text**: its grid was sampled from the face rendered in the running application, so the mark needs no font present to draw. And every colour is `--tide-400` mixed in oklab, the same way `color-mix` does it in the stylesheet, so the mark is the same green as the controls rather than nearly.
 
-The silhouette is the identity. Any change to the mark is checked by rasterising to a real pixel grid at 16px — scaling the vector down cannot show what is lost, and 16px in a taskbar is where this shape spends most of its life.
+The rim is the one proportion that does *not* follow the interface. A control's rim is a sixteenth of its diameter, which is a hairline at 16px and a heavy ring at 1024; the mark's is scaled to read as a hairline at the sizes an icon is actually seen at.
+
+Temporary, at the founder's word, until he draws the mark properly.
+
 
 ## Motion
 

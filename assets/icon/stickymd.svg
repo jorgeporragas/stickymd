@@ -1,19 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <title>sticky.md</title>
-  <desc>The letter S set in Departure Mono, on a rounded tile. The glyph is
-  drawn as rectangles rather than text, so the mark needs no font to render.
-  The grid was sampled from the face itself rather than redrawn by eye.</desc>
+  <desc>The application's own seated lozenge, in --tide-400, carrying the
+  letter S from Departure Mono. The glyph is drawn as rectangles rather than
+  text, so the mark needs no font to render, and its grid was sampled from the
+  face itself rather than redrawn by eye. Every colour is --tide-400 mixed in
+  oklab, the same way color-mix does it in the stylesheet, so the mark and the
+  controls are the same green rather than nearly.</desc>
 
-  <rect width="512" height="512" rx="113" ry="113" fill="#1a759f"/>
+  <defs>
+    <radialGradient id="gloss" cx="50%" cy="18%" r="75%">
+      <stop offset="0%" stop-color="#c3e7ce"/>
+      <stop offset="52%" stop-color="#76c893"/>
+      <stop offset="100%" stop-color="#5c9e73"/>
+    </radialGradient>
 
-  <rect x="203" y="116" width="105" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="168" y="151" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="308" y="151" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="168" y="186" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="203" y="221" width="105" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="308" y="256" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="308" y="291" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="168" y="326" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="308" y="326" width="35" height="35" fill="var(--mark-ink, #f7f6f3)"/>
-  <rect x="203" y="361" width="105" height="35" fill="var(--mark-ink, #f7f6f3)"/>
+    <radialGradient id="specular">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="256" cy="256" r="234.0" fill="url(#gloss)"
+          stroke="#3b684b" stroke-width="13.2"/>
+
+  <ellipse cx="256" cy="112"
+           rx="106" ry="46" fill="url(#specular)"/>
+
+  <rect x="211" y="136" width="90" height="30" fill="#09180e"/>
+  <rect x="181" y="166" width="30" height="30" fill="#09180e"/>
+  <rect x="301" y="166" width="30" height="30" fill="#09180e"/>
+  <rect x="181" y="196" width="30" height="30" fill="#09180e"/>
+  <rect x="211" y="226" width="90" height="30" fill="#09180e"/>
+  <rect x="301" y="256" width="30" height="30" fill="#09180e"/>
+  <rect x="301" y="286" width="30" height="30" fill="#09180e"/>
+  <rect x="181" y="316" width="30" height="30" fill="#09180e"/>
+  <rect x="301" y="316" width="30" height="30" fill="#09180e"/>
+  <rect x="211" y="346" width="90" height="30" fill="#09180e"/>
 </svg>
