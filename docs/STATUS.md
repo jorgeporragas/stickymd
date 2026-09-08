@@ -14,7 +14,9 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **Phase 7.** Auto-update (SMD-005) is the phase's own work; SMD-074, the chord validation, is being taken alongside it at the founder's word.
 
-One thing waits on him, and only one: **installing the published build the way a user would**. Both artefacts have been built by the runner and downloaded by nobody. That is the last claim in `MASTER.md § Deployment` with no on-device confirmation behind it — the installer's wizard, the portable zip's extract-and-run, and the SmartScreen path the README promises.
+v1.0.0 and v1.0.1 are published and the founder is running 1.0.1, installed from the runner's own build. The updater is wired, signed and half-proven: an installed copy checks, reaches GitHub, reads the manifest and correctly reports itself current.
+
+What is left is one release. The download-and-install path cannot be tested without a version newer than the one running, and that is the only thing standing between SMD-005 and `shipped`.
 
 ---
 
@@ -86,7 +88,10 @@ Notes: Must prompt before replacing anything. Requires a minisign keypair genera
   The manifest is skipped when there is no signature. A manifest the updater cannot verify is worse than no manifest — it turns every check into an error rather than a quiet "you are up to date".
   2026-09-07 — **the key exists and the public half is wired.** `plugins.updater.pubkey` carries it; minisign key `91BFF250E1BA98CB`.
   **A near miss worth recording.** The command handed to the founder used `%USERPROFILE%`, which the shell he ran it in did not expand — so the generator wrote the keypair into a literal `%USERPROFILE%` directory *inside the working tree*. It was untracked but not ignored, which means the next `git add -A` would have committed a signing key to a public repository. Caught before that happened, moved to `~/.tauri`, and `*.key` is now in `.gitignore` so the same slip cannot land. A leaked signing key is not recoverable: anyone holding it can sign an "update" that installs whatever they like on every machine running the application.
-  **Left `active`, and what remains needs a second release rather than more code.** The two GitHub secrets are the founder's to set, and none of this has been exercised end to end: a v1.0.0 install cannot find an update until a v1.0.1 exists to find. That is the test, and it is the next release rather than a task of its own.
+  **2026-09-08 — half of it is proven end to end.** v1.0.1 built, signed and published: the workflow found a `.sig` beside the installer and therefore wrote `latest.json` rather than skipping it, which is the signal that the founder's signing secrets took. The signature's minisign key id is `91BFF250E1BA98CB` and so is the public key compiled into the binary — compared byte for byte from both payloads, so this release verifies against the application that will receive it. The endpoint `releases/latest/download/latest.json` returns 200 and serves version 1.0.1.
+  On the founder's machine, an installed 1.0.1 checked and was told it is current. That exercises the endpoint, the manifest's shape, the signature format and the version comparison — everything except the download.
+  Two costs of the plugin, measured rather than assumed: the lockfile grew from 467 crates to 505, and the release build went from 8m24s to 12m3s on a cold runner.
+  **Left `active`, and what remains needs a second release rather than more code.** What is untested is the half that installs: an existing copy finding a newer version, downloading it, verifying the signature against its own compiled-in key, and restarting into it. That needs a release after 1.0.1 and cannot be faked — v1.0.0 could never have tested it either, since the updater shipped after that tag.
   `CLAUDE.md`'s "no dependency that makes a network request at runtime" now carries this as a named exception rather than being quietly contradicted. The updater runs in Rust, so the Content Security Policy is untouched.
 
 ### [SMD-006] Verify Handjet axis behaviour and metrics
@@ -953,7 +958,8 @@ Notes: The release workflow could not be run — that needs a remote and a tag, 
   `npm run tauri build` completes: release profile in 2m45s, NSIS fetched and verified, installer produced at **1.6 MB**. The portable zip was assembled with the workflow's own PowerShell and comes to **1.84 MB**, holding `stickymd.exe` (3.79 MB uncompressed), `LICENSE` and `README.md` in a versioned folder. Both artefacts are what `MASTER.md § Deployment` promises.
   **One thing stopped the first tag, by design.** Both manifests said `0.1.0`, and the workflow refuses a tag that disagrees with them — an installer named after the wrong version is only ever noticed after someone has downloaded it. Bumped to `1.0.0` on 2026-09-07: `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` alongside them. The workflow checks the first two; the third is the crate's own version and a manifest disagreeing with its own crate is a trap waiting for whoever reads it next.
   **The first run is green.** Run 34091349993, on the `v1.0.0` tag: every step, including the manifest check that had been refusing the tag and the `cargo test` the release path runs before it builds anything. It produced a draft with both assets — installer 1.72 MB, portable zip 1.98 MB — and the release was published 2026-09-07 with written notes, which is what `MASTER.md § Deployment` asks of a release.
-  What the founder's own download will settle, and nothing here can: whether the installer's wizard, the portable zip's extract-and-run and the SmartScreen path behave as the README says. Assets built by a runner and never installed are still only a claim.
+  **Settled on 2026-09-08.** The founder installed the runner's own build — v1.0.1, straight over the 1.0.0 already there — and it installs and runs. That was the last claim in `MASTER.md § Deployment` with nothing behind it: assets built by a runner and never installed are only a claim, and this one is now evidence.
+  Installed over rather than uninstalled first, deliberately: that is the path a user takes and the same one the updater takes, so uninstalling would have tested a path nobody uses. Notes and settings live outside the install directory and were untouched, which the upgrade also demonstrated.
 
 ### [SMD-049] The release workflow
 Type:    chore
