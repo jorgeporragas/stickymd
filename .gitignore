@@ -15,6 +15,16 @@ src-tauri/gen/
 .env
 .env.local
 
+# Signing keys. The updater's private key signs every release, and a leaked one
+# is not recoverable — anybody holding it can sign an "update" that installs
+# whatever they like on every machine running this application.
+#
+# Belt and braces rather than paranoia: the key belongs in ~/.tauri and never in
+# a repository, and this one was written into the working tree once already, by
+# a `%USERPROFILE%` that never expanded. The public half is wilfully committed —
+# it is in tauri.conf.json — so only the private one is matched here.
+*.key
+
 # OS
 .DS_Store
 Thumbs.db

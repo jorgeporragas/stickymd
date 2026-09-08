@@ -66,7 +66,7 @@
       "endpoints": [
         "https://github.com/jorgeporragas/stickymd/releases/latest/download/latest.json"
       ],
-      "pubkey": "",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkxQkZGMjUwRTFCQTk4Q0IKUldUTG1McmhVUEsva1lNRit0R2QxUENEQXJBZUorUlFIb1ZxYWs4VDZhdHRTREIxZytzRE1pbysK",
       "windows": {
         "installMode": "passive"
       }
