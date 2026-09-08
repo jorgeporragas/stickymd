@@ -14,9 +14,9 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **Phase 7.** Auto-update (SMD-005) is the phase's own work; SMD-074, the chord validation, is being taken alongside it at the founder's word.
 
-v1.0.0 and v1.0.1 are published and the founder is running 1.0.1, installed from the runner's own build. The updater is wired, signed and half-proven: an installed copy checks, reaches GitHub, reads the manifest and correctly reports itself current.
+**Phase 7's work is done.** Three releases published — v1.0.0, v1.0.1, v1.0.2 — all built by the workflow on a clean runner, the last two signed. SMD-005 is shipped: an installed 1.0.1 found 1.0.2, verified it, installed it and restarted into it on the founder's machine.
 
-What is left is one release. The download-and-install path cannot be tested without a version newer than the one running, and that is the only thing standing between SMD-005 and `shipped`.
+The phase is not *closed*, because closing one means running the truth check first, and that is a decision to take deliberately rather than in passing. Nothing in the log is both unblocked and undecided. What remains is ideas — SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil — and Phase 6, cross-platform, which was skipped rather than finished.
 
 ---
 
@@ -75,11 +75,12 @@ Notes: A complete set of token values, not a code change — faint black tint ov
 
 ### [SMD-005] Auto-update via the Tauri updater
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-05
 History:
   2026-09-05  logged and accepted into Phase 7 — Release & Auto-Update, per ADR-014
   2026-09-07  built as far as it goes without the founder's signing key
+  2026-09-08  shipped — commit 0101cf2, key wired in 644bec5, proven end to end on v1.0.2
 Notes: Must prompt before replacing anything. Requires a minisign keypair generated locally and a version manifest published alongside releases.
   2026-09-07 — **everything but the key is built.** `tauri-plugin-updater` and `tauri-plugin-process` are registered, the capability grants `updater:default` and `process:allow-restart` and nothing wider, `bundle.createUpdaterArtifacts` is on so the build emits signatures, and the release workflow signs the installer and writes `latest.json` beside the assets.
   The flow never advances on its own: **checking is a button, installing is a second button after the version is named, and restarting is a third.** ADR-014's condition was that it prompts before replacing anything and never installs silently, and the way this keeps that promise is by having no code that could break it — no check at startup, no timer.
@@ -91,7 +92,9 @@ Notes: Must prompt before replacing anything. Requires a minisign keypair genera
   **2026-09-08 — half of it is proven end to end.** v1.0.1 built, signed and published: the workflow found a `.sig` beside the installer and therefore wrote `latest.json` rather than skipping it, which is the signal that the founder's signing secrets took. The signature's minisign key id is `91BFF250E1BA98CB` and so is the public key compiled into the binary — compared byte for byte from both payloads, so this release verifies against the application that will receive it. The endpoint `releases/latest/download/latest.json` returns 200 and serves version 1.0.1.
   On the founder's machine, an installed 1.0.1 checked and was told it is current. That exercises the endpoint, the manifest's shape, the signature format and the version comparison — everything except the download.
   Two costs of the plugin, measured rather than assumed: the lockfile grew from 467 crates to 505, and the release build went from 8m24s to 12m3s on a cold runner.
-  **Left `active`, and what remains needs a second release rather than more code.** What is untested is the half that installs: an existing copy finding a newer version, downloading it, verifying the signature against its own compiled-in key, and restarting into it. That needs a release after 1.0.1 and cannot be faked — v1.0.0 could never have tested it either, since the updater shipped after that tag.
+  **2026-09-08 — proven end to end.** v1.0.2 was cut as a bare version bump carrying no functional change, deliberately, so that a failure would have had nothing else in the way of it. An installed 1.0.1 on the founder's machine found it, downloaded it, verified the signature against its own compiled-in key, installed it and restarted into 1.0.2. Every stage of ADR-014's promise held: three separate presses, and nothing replaced until he said so.
+  Nothing is left untested. The one thing that could never be faked — an existing copy replacing itself — was done on his own machine, against releases the workflow built and his key signed.
+  **An update does not trip SmartScreen, though a fresh install does.** Not obvious, and worth more than it looks: the warning comes from the Mark of the Web that a *browser* attaches to a downloaded file, and the updater fetches the installer itself, from a process Windows already trusts. The friction `README.md` discloses is therefore a first-install cost rather than a per-version one — which makes the updater the only path that avoids the warning entirely, and a stronger argument for it than convenience was.
   `CLAUDE.md`'s "no dependency that makes a network request at runtime" now carries this as a named exception rather than being quietly contradicted. The updater runs in Rust, so the Content Security Policy is untouched.
 
 ### [SMD-006] Verify Handjet axis behaviour and metrics
