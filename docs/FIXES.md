@@ -333,3 +333,26 @@ Never:    Never conclude an icon is wrong because the application still shows
           Windows also caches icons for the taskbar and Explorer separately
           from the running process, so a pinned entry can lag behind a window
           that is already correct.
+
+### The macOS branches cannot be compiled on the development machine
+Area:     Tauri bundler and release workflow configuration
+Date:     2026-09-10
+Commit:   12cf412
+Problem:  Every `#[cfg(target_os = "macos")]` branch is invisible to the
+          compiler on Windows, so `cargo check` passing says nothing whatever
+          about the code that only runs on a Mac — and three commits of it had
+          accumulated that way before anyone noticed. The obvious answer does
+          not work either: `rustup target add aarch64-apple-darwin` succeeds,
+          and `cargo check --target aarch64-apple-darwin` then stops at
+          `objc2-exception-helper`, whose build script compiles a `.m` file and
+          wants clang together with the macOS SDK. Neither is obtainable here.
+Fix:      `.github/workflows/check.yml` runs `cargo test` on `macos-latest` on
+          every push. That builds the binary target, so every macOS branch in
+          it goes through a compiler — and the tests it runs are the path and
+          name validation, which is the code most likely to differ on a
+          filesystem that is not Windows'.
+Never:    Never take a macOS branch as compiled because `cargo check` passed
+          locally, and never delete the Check workflow to save runner minutes:
+          it is the only compiler that sees that code before a tag is pushed,
+          and the alternative is proving the build by cutting a release. After
+          changing anything under a macOS cfg, watch Check on the push.

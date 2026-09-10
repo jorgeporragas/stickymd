@@ -673,6 +673,7 @@ Created: 2026-09-10
 History:
   2026-09-10  opened — the build half of SMD-095's scoping pass
   2026-09-10  steps 1 to 3 — commit 2ec1da6
+  2026-09-10  steps 4 and 5 — commit 12cf412
 Notes: Built in the order SMD-095 set, which put the unverifiable parts last on purpose.
 
   **Steps 1 to 3, in `2ec1da6`.** `window-vibrancy` off the Windows-only gate; a macOS arm in `surface.rs` using `NSVisualEffectMaterial::Sidebar` with `NSVisualEffectState::Active`; `bundle.targets` gaining `app` and `dmg`; the Cmd+Option chord bug; and a `macos` CI job that runs after `windows` because both write the same draft release and the same `latest.json`.
