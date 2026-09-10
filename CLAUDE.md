@@ -107,7 +107,7 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 
 ## Cross-platform discipline
 
-Windows is the current build target. Hold these from the first commit regardless — retrofitting them costs far more than writing them correctly now.
+Windows and macOS on Apple Silicon are the build targets; Linux is next. These rules were held from the first commit while Windows was the only one, and that is why the macOS port was a week of work rather than a rewrite — five platform branches in the whole of Rust. Hold them for Linux the same way.
 
 - Resolve modifier keys through the platform abstraction. Never hardcode `Ctrl` or `Cmd` in a shortcut definition.
 - Never bind a `Ctrl+Alt` chord. On Latin American, Spanish and most European layouts that combination is AltGr, and the shortcut silently never fires. It works on a US layout, which is what makes it dangerous.
@@ -137,7 +137,7 @@ Run the app with `npm run tauri dev`. Never start a dev server with a bare `npm 
 ## Build and release
 
 - Build artifacts are produced by GitHub Actions on a `v*` tag, never by hand for distribution.
-- Every release carries both the NSIS installer and the portable zip.
+- Every Windows release carries both the NSIS installer and the portable zip; a macOS release carries the `.app` and the `.dmg`.
 - Vendor all fonts and assets into the repository with their licence files alongside. Never fetch an asset over the network at runtime or at build time.
 - The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
 - Do not add a dependency that makes a network request at runtime. **One exception, and it is named rather than general:** the Tauri updater, per ADR-014 and Phase 7. It carries no note content, checks only when a person presses a button, and prompts before replacing anything. Anything else that reaches the network is a bug, and a second exception needs its own decision.

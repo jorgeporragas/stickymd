@@ -18,6 +18,10 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **What is left is mostly the founder's**, and it is the part that was always going to be: the vibrancy material, the menu-bar mark beside real system icons, whether an undecorated window can still be resized from its edges, and whether a Dock icon alongside a menu-bar extra is the right shape for something that lives in the tray.
 
+**SMD-092, SMD-093 and SMD-094 are verified** — the founder confirmed all three in a running window on 2026-09-10, the palette's pop included, which was worth watching because it reversed a retract he had asked for and liked. They are on `main` and in no release: `v1.1.0` predates them, so a tag is owed before anyone but him sees them.
+
+**One thing came back from that pass.** SMD-098: the placeholder is all but invisible on a tinted dark note, and the same token takes a bare URL with it. Logged at his word rather than built.
+
 **The Check job earned itself on its first run**, finding SMD-097 — a note name carrying the other platform's separator, in the code CLAUDE.md names as handling untrusted input. It had been asserted by a test since the day the test was written and no compiler had ever run it.
 
 **Step 6, the updater, waits on two things.** The six Apple secrets, listed in SMD-096, which are his to create and which nobody here should ever see. And one macOS build proving the job runs — the new Check workflow answers that on the next push rather than costing a tag.
@@ -33,7 +37,7 @@ The rest of the log is ideas: SMD-001 search, SMD-002 custom themes, SMD-010 sig
 | | |
 |---|---|
 | Development machine | Windows 11 Pro |
-| Build target | Windows x64 |
+| Build target | Windows x64, and macOS arm64 since 2026-09-10 — built by CI, verified on no Mac |
 | Node | v24.19.0, npm 11.17.0 — verified present 2026-09-05 |
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
 | MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Both halves build and the application runs. |
@@ -668,6 +672,33 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-098] Muted ink goes the wrong way on a tinted dark note
+Type:    bug
+State:   idea
+Created: 2026-09-10
+History:
+  2026-09-10  reported by the founder while verifying SMD-094 — logged, not built, at his word
+Notes: "The placeholder text 'Write something.' doesn't quite read well in it. In fact, it's not that visible in dark windows at all, since it's gray."
+
+  Measured, and it is worse than grey. `.cm-placeholder` reads `--ink-muted`, which is `#7e7a73` on Dark:
+
+  | | opaque | glass over a mid backdrop |
+  |---|---|---|
+  | clear dark note | 4.23 | 2.79 |
+  | any of the six dark tints | 1.74–1.80 | **1.21–1.25** |
+
+  So on a clear dark note it is quiet but present, and on a tinted one it is all but gone — which is exactly the case he was in, because he found it while checking SMD-094.
+
+  **The cause, and it is already written down one line above the token.** `--ink-muted` is *darker* than every dark tinted surface: the tints sit around L 0.51 while the clear dark note is near-black, so a mark that is subordinate on black is beneath the surface on a tint. `--ink-syntax` had this identical bug and was fixed by moving it *above* the surface rather than below — the comment in `tokens.css` says so in as many words. `--ink-muted` was left behind.
+
+  **He is right that the answer is "lighter", and the precedent decides the shape.** What it does not decide is which token moves, and that is the real question, because `--ink-muted` has nine uses and they are not on the same ground:
+  - **Seven sit on surfaces that are never tinted** — `Field`, `NoteRow`, `HubWindow`, `SettingsWindow`. There it measures 4.23/2.79 and is fine. Lightening the token wholesale would over-brighten every one of them to fix two.
+  - **Two sit on a note**, which is the only surface that carries a tint: `.cm-placeholder` and `t.url` in `highlight.ts`.
+
+  So the likely fix is not to retune `--ink-muted` but to have note-surface ink read through a token that already knows it lives on a tint — the family `--ink-syntax` belongs to — and to keep whatever lands subordinate to `--ink-primary`, since a placeholder that reads as strongly as writing is a different bug. For scale: `--ink-syntax` itself would give 4.74 worst opaque and 3.28 through glass; `--ink-secondary` 3.64 and 2.52.
+
+  **A second instance he did not report.** `t.url` reads the same token, so a bare autolink in a tinted dark note is as invisible as the placeholder. Worth fixing in the same pass rather than waiting for it to be noticed separately.
+
 ### [SMD-097] A note name could carry the other platform's separator
 Type:    bug
 State:   shipped
@@ -710,6 +741,8 @@ Notes: Built in the order SMD-095 set, which put the unverifiable parts last on 
   **The activation policy is left at Regular, deliberately.** Accessory would drop the Dock icon and match the Windows shape exactly, and it is one line. It is not taken because the menu bar is what makes Cmd+Q and the clipboard work, and whether an accessory app keeps its key equivalents without one needs a Mac to answer rather than a guess. The founder's call, once he can see both.
 
   **What the founder must create** before step 6 can notarise anything, none of which should ever be pasted into a conversation: `APPLE_CERTIFICATE` (a Developer ID Application certificate, base64 `.p12`), `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` (an app-specific password rather than his own), `APPLE_TEAM_ID`. Without them the build still succeeds and produces an unsigned `.app` that Gatekeeper refuses.
+
+  **The README owes a line the day a macOS build ships.** CLAUDE.md requires the SmartScreen disclosure while Windows builds are unsigned, and Gatekeeper is the same obligation with more force — its refusal reads as the application being damaged rather than as a warning to click through. If the Apple secrets are in place the build is notarised and nothing is owed; if they are not, the disclosure is.
 
   **A Check workflow landed alongside**, because the asymmetry it removes is what made steps 1 to 5 uncomfortable: Windows is compiled before every commit, and macOS was compiled by nobody until a tag was pushed. It cannot be done locally either — cross-compiling stops at `objc2-exception-helper`, which builds a `.m` file and wants clang and the macOS SDK. `docs/FIXES.md` carries that so the next session does not spend an afternoon on it.
 
@@ -757,6 +790,7 @@ Created: 2026-09-11
 History:
   2026-09-11  logged by the founder
   2026-09-11  shipped — commit ab8229e
+  2026-09-10  verified by the founder in a running window
 Notes: The founder asked for the staggered entry and the pop on the palette's discs. Half of it was already there — the entry has staggered at 28ms since SMD-080 — so what he was actually asking for was the *exit*, which retracted into the swatch rather than popping.
   That retract was his own request on 2026-09-09 and he liked it, so it was worth asking before reversing rather than assuming. He chose the pop.
   It is the right call for a reason the retract could not answer: these are bubbles wherever they appear, and a bubble that shrinks in one place and bursts in another is two ideas about what a bubble is. `.bubble-out` is now the one exit in the application.
@@ -769,6 +803,7 @@ Created: 2026-09-11
 History:
   2026-09-11  reported by the founder
   2026-09-11  shipped — commit ab8229e
+  2026-09-10  verified by the founder in a running window
 Notes: "Dark yellow doesn't look good. The rest look alright." Measured, and he is right for a reason that is structural rather than a bad pick: the six dark tints all sit at L 0.51 and C 0.06 in oklch, and sun sat there on hue 96 — where **that lightness simply is olive.** Yellow only reads as yellow when it is light, so the one tint whose identity depends on lightness was the one that could not survive being darkened.
   Turned to hue 60 with a little more chroma: `rgba(137, 92, 53, 0.77)`, an amber. That is the warm slot in the largest unused gap on the wheel, and it still holds ADR-036's floors — 4.64:1 against a mid backdrop and 3.09:1 against white, against the 4.5 and 3.0 required.
   The light tint is untouched. A pale yellow note was never the problem, and the swatch that names the tint in the picker is theme-independent by design (a tint is a wash whose alpha is computed; a swatch is the flat colour that names it).
@@ -780,6 +815,7 @@ Created: 2026-09-11
 History:
   2026-09-11  logged by the founder
   2026-09-11  shipped — commit ab8229e
+  2026-09-10  verified by the founder in a running window
 Notes: `--signal-engaged` was `--tide-400` everywhere. The founder: it looks right on a clear note and less right once the window has a colour, and what he wanted was the note's own hue turned up rather than a different colour laid on top.
   **Each tint's engaged value *is* the green.** `--tide-400` is L 0.766, C 0.111, H 154.5 in oklch; each tint takes that lightness and that chroma at its own hue. Same weight on the page in every case, because it is one colour with the hue rotated — which is exactly "same colour, just a little bit stronger" expressed as arithmetic rather than as six separate picks.
   Clear keeps the green, because the green *is* the application's own hue and a note with no colour has no other to offer.
