@@ -12,15 +12,13 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 ## Current Active Step
 
-**Phase 7's work is done and nothing is blocked.** Three releases are published; the updater is proven end to end.
+**Nothing is open.** Eleven items from the founder's own use shipped on 2026-09-09 and 2026-09-10 — SMD-082 through SMD-091 — and every one is confirmed on his machine.
 
-Since then, eleven items from the founder's own use — SMD-082 through SMD-091 — all shipped, all but one confirmed on his machine. What is open:
+**Next direction, in his words: macOS and Linux builds.** That is Phase 6 — Cross-Platform Expansion, which was skipped rather than finished when he chose auto-update first. Nothing has been started on it. Worth knowing before it is: `docs/FIXES.md` holds several entries that are Windows-specific by construction — the DWM corner rounding, the acrylic backdrop and its unfrosting of inactive windows, the WebView2 shortcut reservations — and each is a place where the other platforms need their own answer rather than a port of this one.
 
-- **SMD-091, the hub's live list, is shipped but unconfirmed.** Rust emits `notes-changed` and the hub re-reads on it, so a note written in another window now moves a hub that is merely open. He has not reported on it. One consequence to watch for rather than discover: the list is newest-first and autosave writes about 600ms after typing stops, so a note being typed elsewhere climbs to the top of a hub in plain sight. That is the list being true, and it is also movement that was not there before — if it reads as restless, sorting by name or reordering only on focus are both small.
+The rest of the log is ideas: SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil.
 
-Nothing else in the log is both unblocked and undecided. What remains is ideas — SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil — and Phase 6, cross-platform, which was skipped rather than finished.
-
-**Closing the phase is still owed and still deliberate.** It means running the truth check first, and the last one earned its keep: it found 38 shipped items citing no commit, and the missing pre-commit check that let them through.
+**Closing Phase 7 is still owed and still deliberate.** It means running the truth check first, and the last one earned its keep: it found 38 shipped items citing no commit, and the missing pre-commit check that let them through. A phase transition is also the natural moment to open Phase 6.
 
 ---
 
@@ -676,6 +674,7 @@ Notes: The hub re-read the folder on `window.onfocus`, which is right for coming
   **The focus refresh stays.** The event covers a change this application made; focus covers one it did not — a note edited in another editor, or dropped into the folder. Neither subsumes the other.
   The emit went into `save_into` on the first attempt, which is the pure helper the unit tests drive with a scratch folder and which has no `AppHandle` by design. It failed to compile, which is the design working: that function is kept free of the app so renaming a user's file can be tested, and it should stay that way. It lives in `save_note` instead.
   A consequence worth expecting rather than discovering: autosave writes about 600ms after typing stops, so a note being typed in another window now climbs to the top of a visible hub as its modified time changes. That is the list being true rather than a defect, but it is movement that was not there before.
+  **Confirmed by the founder, 2026-09-10.** The climbing did not bother him.
 
 ### [SMD-090] A ticked checkbox dropped 2.25px
 Type:    bug
