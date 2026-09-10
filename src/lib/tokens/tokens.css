@@ -164,6 +164,20 @@
   --dur-quick: 160ms;
   --dur-settle: 240ms;
 
+  /* How long a window stays opaque before dissolving into glass.
+   *
+   * Not a taste value and not on the scale with the others: it is a wait for
+   * the compositor. A window is shown the moment it has painted, and DWM has
+   * not finished composing its backdrop by then — so a window that became
+   * translucent too early showed the desktop through it, unblurred. The first
+   * attempt dissolved a frame after showing and the founder still saw it,
+   * which says the blur takes longer than the 240ms dissolve that followed.
+   *
+   * Empirical, and the only number to change if the timing is wrong: too short
+   * and the desktop shows through again, too long and a summoned note sits
+   * opaque while you are already typing in it. */
+  --dur-glass-hold: 320ms;
+
   /* Easing */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);

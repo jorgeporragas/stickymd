@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { settleSurface } from './surface';
+import { glassHoldMs, settleSurface } from './surface';
 
 /**
  * Opening note windows.
@@ -68,8 +68,11 @@ export async function revealWindow(): Promise<void> {
   }
 
   // Opaque until here, then it dissolves into glass — see `settleSurface`.
-  // The hold is a frame rather than a duration: the window has been shown and
-  // the backdrop asked for again, and the dissolve is long enough to cover
-  // whatever the compositor still owes.
-  requestAnimationFrame(() => settleSurface());
+  //
+  // The hold was one frame and that was not enough: the founder still caught
+  // the desktop unblurred behind a window that had already turned translucent,
+  // which means the compositor takes longer to compose its backdrop than the
+  // dissolve takes to run. It waits `--dur-glass-hold` now, which is the one
+  // number to change if the timing is still wrong.
+  setTimeout(() => settleSurface(), glassHoldMs());
 }

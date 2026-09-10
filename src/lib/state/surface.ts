@@ -74,3 +74,22 @@ export function settleSurface(): void {
   document.documentElement.dataset.surface = settling;
   settling = undefined;
 }
+
+/**
+ * How long to stay opaque first, from `--dur-glass-hold`.
+ *
+ * Read from the stylesheet rather than written here: durations live in the
+ * token layer, and this one exists to be tuned by whoever is watching a window
+ * open. Falls back to nothing if the token is unreadable — an early dissolve
+ * is a worse look than no delay, but it is not a broken window.
+ */
+export function glassHoldMs(): number {
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue('--dur-glass-hold')
+    .trim();
+
+  if (value.endsWith('ms')) return Number.parseFloat(value) || 0;
+  if (value.endsWith('s')) return (Number.parseFloat(value) || 0) * 1000;
+
+  return 0;
+}
