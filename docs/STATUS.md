@@ -662,6 +662,19 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-091] The hub only refreshed when it was clicked on
+Type:    bug
+State:   shipped
+Created: 2026-09-10
+History:
+  2026-09-10  reported by the founder
+  2026-09-10  shipped — commit 7504498
+Notes: The hub re-read the folder on `window.onfocus`, which is right for coming back to it and wrong for looking straight at it: a note written or deleted in another window left the list showing whatever it showed when it was last clicked.
+  Rust now emits `notes-changed` from the two commands that can change what the list says — `save_note` and `delete_note` — and the hub refreshes on it. Broadcast rather than addressed, because the hub may not be open and nothing else listening is harmed by knowing.
+  **The focus refresh stays.** The event covers a change this application made; focus covers one it did not — a note edited in another editor, or dropped into the folder. Neither subsumes the other.
+  The emit went into `save_into` on the first attempt, which is the pure helper the unit tests drive with a scratch folder and which has no `AppHandle` by design. It failed to compile, which is the design working: that function is kept free of the app so renaming a user's file can be tested, and it should stay that way. It lives in `save_note` instead.
+  A consequence worth expecting rather than discovering: autosave writes about 600ms after typing stops, so a note being typed in another window now climbs to the top of a visible hub as its modified time changes. That is the list being true rather than a defect, but it is movement that was not there before.
+
 ### [SMD-090] A ticked checkbox dropped 2.25px
 Type:    bug
 State:   shipped
