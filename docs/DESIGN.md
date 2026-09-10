@@ -114,7 +114,7 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | Token | Role |
 |---|---|
 | `--signal-danger` | A control that takes something away |
-| `--signal-engaged` | A control holding a setting on — the always-on-top pin |
+| `--signal-engaged` | A control holding a setting on — the always-on-top pin. **Follows the note's colour:** on a clear note it is the green the application mark is made of, and on a tinted one it is that same colour with only its hue turned to the note's, so a blue note gets a stronger blue. Identical lightness and chroma in every case, so "selected" carries the same weight whatever the note is |
 | `--scrollbar-thumb`, `--scrollbar-thumb-hover` | The scrollbar's thumb. Its track is always transparent: the default is an opaque strip, which on a translucent window reads as a pale rectangle laid over the glass. Each theme also declares its colour scheme, which is what stops the platform drawing a light scrollbar on a dark window — the colours alone do not fix that. |
 | `--code-surface` | The panel behind a fenced block. Dark in both themes; darker than the note on Frost, lighter than it on Dark, because on a dark surface a darker panel reads as a hole. |
 | `--code-ink`, `--code-muted`, `--code-keyword`, `--code-string`, `--code-number`, `--code-type` | How a fenced block's tokens are told apart. The one place a hue is not a signal — and still not decoration, since inside a block colour is doing work. Drawn from the `--tide-*` ramp so code reads as part of this application. See ADR-030. |
@@ -138,6 +138,8 @@ Every signal value is computed, never picked: it clears 4.5:1 against the worst 
 **A note window's controls wear the note's colour.** Disc, rim and glyph all derive from the tint, so the chrome belongs to the note rather than sitting on it. Untinted, they resolve to the neutral disc. One recipe covers both themes, because the disc carries its own hue and the glyph is derived from it.
 
 A state can be a colour when the state is the thing the control exists to report. The always-on-top pin lights to `--signal-engaged` when held, and stops receding — a pin you cannot see is a note you do not know is floating. It lights by taking the hue as `color`, feeding the same fill and rim every tint swatch uses, so it stays one kind of object rather than becoming a second kind of control.
+
+**Which hue depends on the note.** A fixed green reads well on a clear note and like a sticker on a coloured one — the founder's observation, and the fix is not a different colour but the same one turned: each tint's engaged value is `--tide-400` at its own lightness and chroma with the hue rotated to that tint's. The glyph on top clears 8.4:1 at worst across the six. The comparison that matters is against what the green already did on the notes it already sat on: 1.86:1 on a clear Frost note against 1.74–1.86 for the six, so nothing is dimmer than it was. On Dark it is lower — 3.4–3.8 against the green's 9.0 — because a tinted dark note is far lighter than the near-black clear one, and 3:1 is the floor a control of this kind has to hold.
 
 Note tints are not interface colour. They are the note's own paper, and ADR-025 leaves them untouched.
 

@@ -56,12 +56,13 @@
   }
 
   /**
-   * Called by the disc nearest the swatch, which is the last one to leave.
+   * Called by one named disc, so the palette unmounts once rather than six
+   * times.
    *
-   * The palette retracts into the swatch, so the far end goes first and this
-   * one goes last — when it is done, there is nothing left on screen. It has to
-   * be a specific disc rather than whichever animation happens to end: they all
-   * report, and the first to finish would take the rest down with it.
+   * They all pop together and they all report, so any of them would do — but it
+   * has to be a *named* one. Taking whichever animation ends first would be the
+   * same event six times over, and the first would take the other five off
+   * screen while they were still going.
    */
   function settled(): void {
     if (!closing) return;
@@ -94,11 +95,13 @@
     <div class="palette" class:closing role="group" aria-label="Note colour">
       {#each shown as option, index (option)}
         <button
-          class="lozenge lit dot bubble-in"
+          class="lozenge lit dot"
+          class:bubble-in={!closing}
+          class:bubble-out={closing}
           data-tint-swatch={option}
           type="button"
           aria-label={option}
-          style="animation-delay: {(closing ? shown.length - 1 - index : index) * 28}ms"
+          style="animation-delay: {closing ? 0 : index * 28}ms"
           onclick={() => choose(option)}
           onanimationend={index === 0 ? settled : undefined}
         ></button>
@@ -163,9 +166,9 @@
     /*
       Reversed, so the first disc in the markup is the one nearest the swatch.
 
-      That is what makes the order mean something: the discs arrive outward
-      from the swatch and retract back into it, and both are the same index
-      counted in opposite directions.
+      That is what makes the arrival's order mean something: the discs come out
+      of the swatch, nearest first, rather than appearing left to right in a
+      row whose left end is nowhere in particular.
     */
     flex-direction: row-reverse;
     /* Wider than it was, because there is no longer a panel holding the discs
@@ -189,28 +192,26 @@
   }
 
   /*
-    Retracting: the same motion run backwards, and the same order counted from
-    the other end — the far disc goes first and the one against the swatch goes
-    last, so the row draws back into the control it came out of. Quicker than
-    the arrival, because leaving is getting out of the way.
+    Leaving is `.bubble-out` in src/app.css — the same pop the insert ring
+    uses, at the founder's word.
 
-    `forwards`, so a disc that has gone stays gone: without it each one would
-    snap back to full size the moment its own animation ended, and the row
-    would reassemble itself while the last disc was still leaving.
+    It retracted into the swatch before, staggered from the far end, which had
+    its own logic: the row came out of the control and went back into it. The
+    pop wins on a different one. These are bubbles wherever they appear, and a
+    bubble that shrinks in one place and bursts in another is two ideas about
+    what a bubble is. One exit, everywhere.
+
+    All at once rather than staggered, for the reason the ring's is: a stagger
+    on the way in is the row assembling itself and worth its time; on the way
+    out it is a queue of waits between the click and the colour changing.
+
+    Back to the centre for the pop. The arrival grows each disc out of the edge
+    facing the swatch, which is what makes the row read as opening from the
+    control — but a burst is not directional, and one swelling off its own
+    right edge would lurch leftwards instead of bursting.
   */
-  .palette.closing .dot {
-    animation: disc-out var(--dur-instant) var(--ease-in-out) forwards;
-  }
-
-  @keyframes disc-out {
-    from {
-      opacity: 1;
-      transform: scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: scale(0.4);
-    }
+  .dot.bubble-out {
+    transform-origin: center;
   }
 
   .dot {

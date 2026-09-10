@@ -117,6 +117,27 @@
   --swatch-lilac: #dcd4f7;
   --swatch-blush: #fbd5e0;
 
+  /* What "selected" looks like on a note of each colour.
+   *
+   * The founder's observation: the green reads well on a clear note and less
+   * well once the window has a colour of its own, and what he wanted was the
+   * note's own hue turned up rather than a different colour laid over it.
+   *
+   * So each of these *is* the green — `--tide-400` at L 0.766 and C 0.111 in
+   * oklch — with only the hue turned to the tint's own. Same lightness, same
+   * chroma, same weight on the page; a blue note gets a stronger blue, and the
+   * control carries exactly the presence it has always had.
+   *
+   * Computed, not picked. The glyph on top is this hue taken 25% toward black,
+   * as on every lit control, and clears 8.38:1 at worst across the six — the
+   * green's own figure against its own fill is 9.11. */
+  --swatch-sun-engaged: #ccb15a;
+  --swatch-spring-engaged: #6ec99a;
+  --swatch-aqua-engaged: #4ac6dc;
+  --swatch-sky-engaged: #7fb7f8;
+  --swatch-lilac-engaged: #b9a4f2;
+  --swatch-blush-engaged: #ed94b2;
+
   /* The palette, as the founder set it: one ramp from a yellow-green through
      teal to a deep blue. Light to dark, numbered the way the neutrals are.
      Primitives name values; only the stops a role reaches for are in use, and
@@ -527,26 +548,32 @@
 
 :root[data-tint='sun'] {
   --control-hue: var(--swatch-sun);
+  --signal-engaged: var(--swatch-sun-engaged);
 }
 
 :root[data-tint='spring'] {
   --control-hue: var(--swatch-spring);
+  --signal-engaged: var(--swatch-spring-engaged);
 }
 
 :root[data-tint='aqua'] {
   --control-hue: var(--swatch-aqua);
+  --signal-engaged: var(--swatch-aqua-engaged);
 }
 
 :root[data-tint='sky'] {
   --control-hue: var(--swatch-sky);
+  --signal-engaged: var(--swatch-sky-engaged);
 }
 
 :root[data-tint='lilac'] {
   --control-hue: var(--swatch-lilac);
+  --signal-engaged: var(--swatch-lilac-engaged);
 }
 
 :root[data-tint='blush'] {
   --control-hue: var(--swatch-blush);
+  --signal-engaged: var(--swatch-blush-engaged);
 }
 
 :root[data-theme='frost'][data-tint='sun'] {
@@ -554,9 +581,21 @@
   --surface-solid: #fbf0cf;
 }
 
+/* Amber rather than olive.
+ *
+ * The other five dark tints sit at L 0.51 and C 0.06 in oklch and read as
+ * themselves. Sun sat at the same lightness on hue 96, and at that lightness
+ * hue 96 *is* olive — yellow only reads as yellow when it is light, which is
+ * why the founder found this one muddy while the rest were fine.
+ *
+ * Turned to hue 60 and given a little more chroma, which is the warm slot in
+ * the largest unused gap on the wheel. Still holds ADR-036's floors: 4.64:1
+ * against a mid backdrop and 3.09:1 against white, against the 4.5 and 3.0
+ * that rule asks for. The light tint is untouched — a pale yellow note was
+ * never the problem. */
 :root[data-theme='dark'][data-tint='sun'] {
-  --surface-tint: rgba(115, 103, 62, 0.77);
-  --surface-solid: #5e5436;
+  --surface-tint: rgba(137, 92, 53, 0.77);
+  --surface-solid: #6e4c2f;
 }
 :root[data-theme='frost'][data-tint='spring'] {
   --surface-tint: rgba(199, 240, 216, 0.59);
