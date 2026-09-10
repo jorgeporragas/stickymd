@@ -102,6 +102,7 @@ fn main() {
             windows::claim_note,
             windows::new_note_window,
             windows::open_note_window,
+            windows::reveal_window,
             windows::show_hub,
             windows::show_settings,
             preferences::read_preferences,

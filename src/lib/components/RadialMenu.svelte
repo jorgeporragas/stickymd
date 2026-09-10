@@ -34,8 +34,43 @@
    * things you can aim at.
    */
   const RADIUS = 60;
+
+  /**
+   * A bubble's diameter.
+   *
+   * Off the spacing scale deliberately: the glyphs are pixel art on a 24-unit
+   * grid and are only sharp at 24px, so the bubble is sized to its contents.
+   * See docs/DESIGN.md § Iconography.
+   *
+   * Here rather than in the stylesheet because the label's width is derived
+   * from it below, and two sources for one size is how they drift.
+   */
+  const BUBBLE = 40;
+
   /** Half a bubble plus a little, so none of the ring meets the window edge. */
   const MARGIN = 30;
+
+  /**
+   * How wide the centre label may be before it meets the bubbles.
+   *
+   * The clear space is a circle of `RADIUS - BUBBLE / 2`, less a gutter so the
+   * pill visibly clears the glass rather than grazing it. A box centred in that
+   * circle fits when its own half-diagonal does, which is what this solves for.
+   *
+   * Derived rather than chosen: change the radius or the bubble and the label
+   * follows, instead of quietly starting to overlap. That is the bug this
+   * replaces — "Bulleted list" was simply wider than the ring, and nothing in
+   * the code said so.
+   *
+   * **The centre holds one line.** Measured: a line box is 22px and two of
+   * them, at any width worth having, push past the circle. So a label longer
+   * than this wraps and will graze the bubbles — the remedy is the action's
+   * own `short` form, not a wider ring.
+   */
+  const LABEL_LINE = 22;
+  const GUTTER = 6;
+  const CLEAR = RADIUS - BUBBLE / 2 - GUTTER;
+  const MAX_LABEL = Math.floor(2 * Math.sqrt(CLEAR ** 2 - (LABEL_LINE / 2) ** 2));
 
   let hovered = $state<string | undefined>(undefined);
 
@@ -142,6 +177,8 @@
     <span class="seat" style="left: {x}px; top: {y}px">
       <button
         class="lozenge bubble"
+        style:width="{BUBBLE}px"
+        style:height="{BUBBLE}px"
         class:bubble-in={!leaving}
         class:bubble-out={leaving}
         role="menuitem"
@@ -161,7 +198,10 @@
   {/each}
 
   {#if named}
-    <span class="lozenge label" style="left: {centre.x}px; top: {centre.y}px">
+    <span
+      class="lozenge label"
+      style="left: {centre.x}px; top: {centre.y}px; max-width: {MAX_LABEL}px"
+    >
       {named.short ?? named.label}
     </span>
   {/if}
@@ -188,16 +228,13 @@
     transform: translate(-50%, -50%);
   }
 
+  /* Size comes from `BUBBLE` above, applied inline: the label's width is
+     derived from the same number, and it may not be written twice. */
   .bubble {
     pointer-events: auto;
 
     display: grid;
     place-items: center;
-    /* 40px rather than the scale's 32: the glyphs are pixel art on a 24-unit
-       grid and are only sharp at 24px, so the bubble has to be large enough to
-       carry one at its own size. Off the scale deliberately — see DESIGN. */
-    width: 40px;
-    height: 40px;
     color: var(--control-glyph);
   }
 
@@ -264,7 +301,17 @@
     letter-spacing: var(--tracking-display);
     line-height: var(--line-height-ui);
     color: var(--ink-primary);
-    white-space: nowrap;
+
+    /*
+      It wraps rather than running on, inside a width the ring's own geometry
+      decides (`MAX_LABEL` above). A label longer than the ring is a bug that
+      says nothing about itself — "Bulleted list" simply overlapped the bubbles
+      and only a person looking at it would ever know. Two short lines fit the
+      clear circle better than one long one, so the constraint is structural
+      and a name can be as long as it is true.
+    */
+    text-align: center;
+    text-wrap: balance;
 
     /* Not a control: nothing here is clickable, and a pointer over the middle
        of the ring should reach the backdrop that dismisses it. */

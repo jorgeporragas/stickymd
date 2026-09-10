@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 
 /**
  * Opening note windows.
@@ -58,9 +57,10 @@ export async function revealWindow(): Promise<void> {
   });
 
   try {
-    const window = getCurrentWindow();
-    await window.show();
-    await window.setFocus();
+    // Rust shows it, rather than this side calling `show` itself: the surface
+    // is re-applied at the same moment, and that has to happen where the
+    // compositor is spoken to. See `reveal_window`.
+    await invoke('reveal_window');
   } catch {
     // No backend — the window is being served in a plain browser for testing,
     // where there is nothing to show and nothing was ever hidden.

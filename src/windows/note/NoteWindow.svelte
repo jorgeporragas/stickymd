@@ -82,11 +82,12 @@
    */
   const menuActions: (RadialAction & { command: StateCommand })[] = [
     { id: 'table', label: 'Table', icon: 'table', command: insertTable },
-    { id: 'code', label: 'Code block', icon: 'code', command: insertCodeBlock },
+    { id: 'code', label: 'Code block', short: 'Code', icon: 'code', command: insertCodeBlock },
     { id: 'task', label: 'Task', icon: 'task', command: insertTaskList },
-    // Short forms in the ring, full ones for screen readers. Two words wide is
-    // what the centre holds before the pill meets the bubbles, and markdown's
-    // own marks are the shortest true names these have.
+    // Short forms in the ring, full ones for screen readers. The centre holds
+    // one line of about six characters before the pill meets the bubbles —
+    // measured, not guessed — so the long names are shortened to markdown's
+    // own marks, which are the shortest true names these have.
     { id: 'list', label: 'Bulleted list', short: '* list', icon: 'list', command: insertBulletList },
     {
       id: 'numbered',

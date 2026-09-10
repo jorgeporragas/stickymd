@@ -671,7 +671,10 @@ History:
   2026-09-10  shipped — commit 32ccdcc
 Notes: "Bulleted list" and "Numbered list" ran wide enough that the pill met the bubbles either side of it. `RadialAction` takes a `short` now — `* list` and `# list`, markdown's own marks, which are the shortest true names these have.
   **`label` stays the accessible name.** A screen reader saying "star list" would be worse than one saying "bulleted list", and the reason to shorten is entirely about a pill bumping into buttons — which is a fact about the ring, not about the action.
-  Measured after: every label clears the nearest bubble, `* list` and `# list` by 19px. **`Code block` is now the tightest at 84px wide and 11px clear** — it does not touch, and it was not reported, so it is left as it is and named here rather than changed unasked.
+  **The first measurement of this was wrong and the number it produced was reported to the founder.** It was taken in a hidden browser pane, which runs no animation frames, so every bubble was frozen at the arrival's `scale(0.4)` — the ring was measured at two fifths of its size and the clearances came out roughly five times too generous. Neutralising the animation before measuring is now part of doing it.
+  Measured properly, against the bubbles' circles rather than their bounding boxes — a box corner is nearer than the glass ever gets: `* list` and `# list` clear by 10px, `Table` by 14, and `Code`, `Task` and `Link` by 15. Every label is one line.
+  2026-09-10 — `Code block` shortened to `Code` at the founder's word, which also settled the wrapping question. Two lines do not fit: a line box is 22px, and two of them at any width worth having push past the clear circle. Wrapped, `Code block` measured 71×38 and **touched** the bubbles. The centre holds one line of about six characters, and that is now written where the bound is computed.
+  The bound is derived rather than chosen: the clear circle is the ring's radius less half a bubble less a gutter, and a label fits when its half-diagonal does. `BUBBLE` moved into the component as the one authority for that size and the bubbles take it inline, because the label's width is computed from the same number and two sources for one size is how they drift.
 
 ### [SMD-088] Two controls for one setting
 Type:    feature
@@ -696,6 +699,8 @@ Notes: "It's first kind of grayish and then the actual window builds." The cause
   So the windows are built hidden and each shows itself once it has painted. Two animation frames, not one: `requestAnimationFrame` fires *before* the paint it is scheduled alongside, and the second callback is the earliest moment the surface is really on screen.
   **One failure mode insured against.** A front end that never runs — a missing dev server, an error before mount — would leave the window hidden forever, which reads as the application refusing to launch. That is far worse than the flash this replaced, so Rust shows any window still hidden after two seconds and says so on stderr. In the ordinary case it wakes to find the window already visible and does nothing.
   A restored window is also placed while hidden now, so it no longer jumps from centre to its saved position in view.
+  2026-09-10 — the founder reports what is left: "a fraction of a second that the blur doesn't actually come in so the window is just an opaque block". The surface was applied when the window was built, which is well before it is shown — but a backdrop set on a window nobody has shown yet is one the compositor has had no reason to compose. Showing now goes through `reveal_window`, which shows, focuses, and applies the surface again with the window on screen.
+  **Not observed, and said plainly rather than claimed as fixed.** The flash lasts a fraction of a second on a real compositor and cannot be seen from a browser pane, so this is the likeliest cause addressed at the cost of one extra call, not a confirmed fix. If it survives, the next suspect is the arrival sheen — `--surface-sheen` paints a white wash at full strength and fades it over 240ms, which on a dark note would read as exactly this.
 
 ### [SMD-082] The hub has no way to make a note
 Type:    feature

@@ -129,6 +129,32 @@ fn reveal_eventually(window: &WebviewWindow) {
     });
 }
 
+/// Show a window, now that its front end says there is something to see.
+///
+/// Called from `revealWindow` once the surface has painted. The window is built
+/// hidden so that the gap before that paint is not a grey pane of raw
+/// compositor backdrop (SMD-089).
+///
+/// **The surface is applied again here, after the window is on screen.** It was
+/// already applied when the window was built, and that should be enough — but a
+/// backdrop set on a window nobody has shown yet is a backdrop the compositor
+/// has had no reason to compose, and the founder reports a fraction of a second
+/// where a new note is opaque before the blur arrives. Asking again once the
+/// window exists on screen costs one call and removes the only moment DWM could
+/// have been holding the request.
+///
+/// Async because it is a command: a synchronous one runs on the main thread
+/// inside the event loop's own callback, which is what wedged the application
+/// once already. See `docs/FIXES.md`.
+#[tauri::command]
+pub async fn reveal_window(window: WebviewWindow) -> Result<(), NoteError> {
+    let _ = window.show();
+    let _ = window.set_focus();
+    let _ = surface::apply(&window);
+
+    Ok(())
+}
+
 /// Put a restored window back where it was.
 ///
 /// Failures are ignored on purpose: a saved position can be off-screen after a
