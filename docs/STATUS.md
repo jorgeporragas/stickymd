@@ -664,6 +664,42 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-095] Scoping macOS
+Type:    chore
+State:   active
+Created: 2026-09-11
+History:
+  2026-09-11  asked for by the founder, before any macOS code is written
+Notes: A read of what is actually Windows-specific, so Phase 6 starts from evidence rather than from a guess about how much there is.
+  **The headline is that there is less than expected, and CLAUDE.md's cross-platform section is why.** Modifiers already resolve through `Mod`/`CmdOrCtrl` and are never written literally; every path is a `PathBuf`; deletion goes through the `trash` crate; the chrome is custom, so there are no native decorations to lose. Rust has **five** platform branches in total and all five are in `surface.rs`. Those rules were written on day one for a build target that did not exist yet, and they are the reason this is a week rather than a rewrite.
+
+  **What is genuinely Windows-only today**
+
+  1. `window-vibrancy` is declared under `[target.'cfg(windows)'.dependencies]`, so on macOS it would not even be compiled in. The crate supports macOS — `apply_vibrancy` with `NSVisualEffectMaterial` — so this is a gating change, not a missing capability.
+  2. `surface.rs` returns Solid on every non-Windows target: `transparency_enabled()` is hardcoded `false`, `apply()` is a no-op, `watch()` is a no-op. macOS would therefore run correctly and look wrong — no vibrancy at all, which is `docs/DESIGN.md` principle 3 unimplemented rather than violated.
+  3. The transparency *setting* is read from the Windows registry. macOS has its own — Accessibility's "Reduce transparency" — and it needs its own reader or Solid mode never engages there.
+  4. `bundle.targets` is `["nsis"]`. macOS needs `app` and `dmg`.
+  5. The release workflow is `runs-on: windows-latest` with PowerShell throughout, and it globs `*.exe` out of `bundle/nsis`. It needs a matrix and a second set of asset steps.
+  6. The updater manifest names one platform, `windows-x86_64`. macOS needs `darwin-aarch64` and `darwin-x86_64`, and its update artefact is a tarred `.app` rather than an installer.
+  7. The tray icon is `default_window_icon()` — the full-colour mark. macOS menu-bar extras are template images: monochrome, masked, following the menu bar's own light or dark. The colour icon will look like a sticker.
+
+  **What the FIXES entries say about portability.** Four of the five window-transparency entries are Windows-specific by construction — DWM corner rounding, raw acrylic in uncovered slivers, `shadow: true` framing an undecorated window, `apply_acrylic` succeeding with transparency off. None of them ports; each is a place macOS needs its own answer, and none of them is a bug waiting to recur there. The two shortcut entries are the interesting pair: WebView2's reserved accelerators are Windows-only, but the *shape* of that fix — register it globally from Rust so the web view never sees it — is exactly what macOS will need for its own reserved set.
+
+  **One real bug found while reading, not a porting task.** `chordFrom` in `src/lib/keys.ts` treats `ctrlKey || metaKey` as the platform modifier and then refuses any chord where that and Alt are both held, because Ctrl+Alt is AltGr. On macOS that same test refuses **Cmd+Option**, which is an ordinary and widely used combination there and has nothing to do with AltGr. The hazard is Ctrl+Alt specifically; the check needs to say so.
+
+  **Order of work, chosen so the unverifiable parts come last**
+
+  1. Compile and bundle on macOS: move the vibrancy dependency off the Windows gate, per-platform `bundle.targets`, a CI matrix. Provable by CI alone.
+  2. The Cmd+Option refusal. A bug on its own terms, fixable and testable without a Mac.
+  3. Surface: vibrancy, and reading Reduce Transparency. The first thing needing the founder's eyes.
+  4. Tray: a template icon for the menu bar.
+  5. Chrome and window behaviour: dragging, resizing and closing a window with no traffic lights, and whether macOS's expectation of a menu bar and Cmd+Q needs answering in a tray-resident app.
+  6. Updater: darwin entries in the manifest, and the `.app` artefact.
+
+  **Two questions that are the founder's rather than mine**, both recorded here because they change what step 6 can promise:
+  - **Signing.** An unsigned `.app` downloaded from the internet is quarantined, and Gatekeeper's refusal is materially harder to get past than SmartScreen's — it reads as the app being damaged rather than as a warning to click through. The Apple Developer Program is roughly $99 a year. `SMD-010` already carries the Windows version of this question and the answer there was no; macOS raises it again with more force.
+  - **Architecture.** Apple Silicon only, or a universal binary. It decides whether the manifest carries one darwin entry or two, and it doubles the build.
+
 ### [SMD-092] The tint palette retracted where the ring popped
 Type:    feature
 State:   shipped
