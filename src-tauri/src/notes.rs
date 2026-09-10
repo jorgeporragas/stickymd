@@ -56,13 +56,28 @@ impl From<std::io::Error> for NoteError {
 /// Names arrive from the frontend, so they are untrusted. Rejecting anything
 /// that is not a single ordinary path component is what stops `../../` — or a
 /// Windows stream name like `note.md:evil` — from being written outside the
-/// folder. Never relax this into a substring check: `..` is a legitimate
+/// folder. Never relax that into a substring check: `..` is a legitimate
 /// substring of a title, and a blocklist of characters would miss a component
 /// that resolves upward on some other platform.
+///
+/// The separator check below is an addition to that rule rather than a
+/// relaxation of it, and the two catch different things. `Path::components`
+/// knows only the separators of the machine it is running on: on Unix a
+/// backslash is an ordinary character, so `..\escape.md` arrives as a single
+/// `Normal` component and passes — while that same name is a traversal on
+/// Windows. The test had asserted it since the day it was written and only
+/// Windows had ever run it; the macOS CI job caught it on its first run.
 fn safe_name(name: &str) -> Result<&str, NoteError> {
     let reject = || NoteError::UnsafeName { name: name.to_string() };
 
     if name.is_empty() || name.len() > 255 || !name.ends_with(".md") {
+        return Err(reject());
+    }
+
+    // Both separators, on every platform. A note is a plain file in a folder
+    // people sync between machines, so a name is only safe if it is safe on
+    // all of them — and a name carrying a separator was never wanted anyway.
+    if name.contains('/') || name.contains('\\') {
         return Err(reject());
     }
 
