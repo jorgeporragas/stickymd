@@ -12,13 +12,15 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 ## Current Active Step
 
-**Phase 7.** Auto-update (SMD-005) is the phase's own work; SMD-074, the chord validation, is being taken alongside it at the founder's word.
+**Phase 7's work is done and nothing is blocked.** Three releases are published; the updater is proven end to end.
 
-**Five from the founder, all shipped 2026-09-09** — SMD-082 through SMD-086. One needs his eyes and is the only thing outstanding: SMD-085's system-following cannot be seen resolving a real theme from a browser, because the Tauri window API is not there. His machine reports `AppsUseLightTheme = 0`, so switching Windows to light with **Follow the system** on is the whole test.
+Since then, eleven items from the founder's own use — SMD-082 through SMD-091 — all shipped, all but one confirmed on his machine. What is open:
 
-**Phase 7's work is done.** Three releases published — v1.0.0, v1.0.1, v1.0.2 — all built by the workflow on a clean runner, the last two signed. SMD-005 is shipped: an installed 1.0.1 found 1.0.2, verified it, installed it and restarted into it on the founder's machine.
+- **SMD-091, the hub's live list, is shipped but unconfirmed.** Rust emits `notes-changed` and the hub re-reads on it, so a note written in another window now moves a hub that is merely open. He has not reported on it. One consequence to watch for rather than discover: the list is newest-first and autosave writes about 600ms after typing stops, so a note being typed elsewhere climbs to the top of a hub in plain sight. That is the list being true, and it is also movement that was not there before — if it reads as restless, sorting by name or reordering only on focus are both small.
 
-The phase is not *closed*, because closing one means running the truth check first, and that is a decision to take deliberately rather than in passing. Nothing in the log is both unblocked and undecided. What remains is ideas — SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil — and Phase 6, cross-platform, which was skipped rather than finished.
+Nothing else in the log is both unblocked and undecided. What remains is ideas — SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil — and Phase 6, cross-platform, which was skipped rather than finished.
+
+**Closing the phase is still owed and still deliberate.** It means running the truth check first, and the last one earned its keep: it found 38 shipped items citing no commit, and the missing pre-commit check that let them through.
 
 ---
 
@@ -734,6 +736,7 @@ Notes: "It's first kind of grayish and then the actual window builds." The cause
   2026-09-10, third report — the dissolve did not help either: "still behaves the same". Checked before changing anything, because it would have changed the answer: `EnableTransparency` is `1`, so the application really is in Glass and the dissolve really is running. Which narrows it to one number. The window was dissolving a frame after being shown, so if the compositor takes longer than the 240ms dissolve to compose its backdrop, the window is translucent again before there is anything behind it to be translucent against.
   So the window now holds opaque for `--dur-glass-hold` before dissolving — 320ms, plus the 240ms dissolve, so about 560ms to full glass. **Empirical and the only number to change:** too short and the desktop shows through again, too long and a summoned note sits opaque while you are already typing in it. The hold is a token because durations live in the token layer, and this one exists to be tuned by whoever is watching a window open.
   Verified on a fresh load rather than the open one: the token reads `320ms` and parses to 320. It read *empty* on the page that had been open through the change, which is worth knowing — a stale stylesheet makes `glassHoldMs` fall back to zero and the hold vanishes without any error.
+  **Confirmed by the founder, 2026-09-10: "Longer hold was the right fix — verified."** Which closes this, and closes it on the third attempt: showing the window after it painted, then dissolving a frame later, then holding 320ms first. The first two each helped and neither finished it, and the thing that made the last one findable was checking `EnableTransparency` before touching anything — had transparency been off, the same report would have had an entirely different cause.
 
 ### [SMD-082] The hub has no way to make a note
 Type:    feature
