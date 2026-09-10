@@ -12,13 +12,15 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 ## Current Active Step
 
-**Nothing is open.** Eleven items from the founder's own use shipped on 2026-09-09 and 2026-09-10 — SMD-082 through SMD-091 — and every one is confirmed on his machine.
+**v1.1.0 is published** — tagged and released 2026-09-10, carrying SMD-082 through SMD-091. Recorded here because it was not: the bump commit landed after STATUS was last written, and reconciliation at the next session start is what caught it.
 
-**Next direction, in his words: macOS and Linux builds.** That is Phase 6 — Cross-Platform Expansion, which was skipped rather than finished when he chose auto-update first. Nothing has been started on it. Worth knowing before it is: `docs/FIXES.md` holds several entries that are Windows-specific by construction — the DWM corner rounding, the acrylic backdrop and its unfrosting of inactive windows, the WebView2 shortcut reservations — and each is a place where the other platforms need their own answer rather than a port of this one.
+**Phase 6 — Cross-Platform Expansion is the founder's next direction, macOS first, then Linux.** He has a Mac to test on, which is what makes it worth starting: the parts that matter are exactly the parts CI cannot judge.
+
+Three of his own items shipped today — SMD-092, SMD-093, SMD-094 — all colour and motion, none of them touching what Phase 6 will.
 
 The rest of the log is ideas: SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil.
 
-**Closing Phase 7 is still owed and still deliberate.** It means running the truth check first, and the last one earned its keep: it found 38 shipped items citing no commit, and the missing pre-commit check that let them through. A phase transition is also the natural moment to open Phase 6.
+**Closing Phase 7 is owed before Phase 6 opens.** That means the truth check, and the last one earned its keep: it found 38 shipped items citing no commit and the missing pre-commit check that let them through.
 
 ---
 
@@ -661,6 +663,41 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
+
+### [SMD-092] The tint palette retracted where the ring popped
+Type:    feature
+State:   shipped
+Created: 2026-09-11
+History:
+  2026-09-11  logged by the founder
+  2026-09-11  shipped — commit ab8229e
+Notes: The founder asked for the staggered entry and the pop on the palette's discs. Half of it was already there — the entry has staggered at 28ms since SMD-080 — so what he was actually asking for was the *exit*, which retracted into the swatch rather than popping.
+  That retract was his own request on 2026-09-09 and he liked it, so it was worth asking before reversing rather than assuming. He chose the pop.
+  It is the right call for a reason the retract could not answer: these are bubbles wherever they appear, and a bubble that shrinks in one place and bursts in another is two ideas about what a bubble is. `.bubble-out` is now the one exit in the application.
+  Two details the swap needed. The stagger goes on the way out — a stagger inbound is the row assembling itself, outbound it is a queue of waits between the click and the colour changing. And the transform origin goes back to the centre: the arrival grows each disc out of the edge facing the swatch, which is what makes the row read as opening from the control, but a burst is not directional and one swelling off its own right edge would lurch sideways.
+
+### [SMD-093] Dark yellow was olive
+Type:    bug
+State:   shipped
+Created: 2026-09-11
+History:
+  2026-09-11  reported by the founder
+  2026-09-11  shipped — commit ab8229e
+Notes: "Dark yellow doesn't look good. The rest look alright." Measured, and he is right for a reason that is structural rather than a bad pick: the six dark tints all sit at L 0.51 and C 0.06 in oklch, and sun sat there on hue 96 — where **that lightness simply is olive.** Yellow only reads as yellow when it is light, so the one tint whose identity depends on lightness was the one that could not survive being darkened.
+  Turned to hue 60 with a little more chroma: `rgba(137, 92, 53, 0.77)`, an amber. That is the warm slot in the largest unused gap on the wheel, and it still holds ADR-036's floors — 4.64:1 against a mid backdrop and 3.09:1 against white, against the 4.5 and 3.0 required.
+  The light tint is untouched. A pale yellow note was never the problem, and the swatch that names the tint in the picker is theme-independent by design (a tint is a wash whose alpha is computed; a swatch is the flat colour that names it).
+
+### [SMD-094] Selected was one green on every note
+Type:    feature
+State:   shipped
+Created: 2026-09-11
+History:
+  2026-09-11  logged by the founder
+  2026-09-11  shipped — commit ab8229e
+Notes: `--signal-engaged` was `--tide-400` everywhere. The founder: it looks right on a clear note and less right once the window has a colour, and what he wanted was the note's own hue turned up rather than a different colour laid on top.
+  **Each tint's engaged value *is* the green.** `--tide-400` is L 0.766, C 0.111, H 154.5 in oklch; each tint takes that lightness and that chroma at its own hue. Same weight on the page in every case, because it is one colour with the hue rotated — which is exactly "same colour, just a little bit stronger" expressed as arithmetic rather than as six separate picks.
+  Clear keeps the green, because the green *is* the application's own hue and a note with no colour has no other to offer.
+  Contrast, measured rather than assumed. The glyph — the hue taken 25% toward black, as on every lit control — clears 8.38:1 at worst across the six against the green's own 9.11. Against the notes they sit on: 1.74–1.86 on Frost, where the green already scored 1.86 on a clear note, so nothing is dimmer than it was. On Dark it is 3.36–3.76 against the green's 9.0, and that is worth stating plainly: a tinted dark note is far lighter than the near-black clear one, so the lit control stands out less there than it used to. It holds the 3:1 floor a control of this kind needs, and no more.
 
 ### [SMD-091] The hub only refreshed when it was clicked on
 Type:    bug
