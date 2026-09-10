@@ -14,6 +14,8 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **Phase 7.** Auto-update (SMD-005) is the phase's own work; SMD-074, the chord validation, is being taken alongside it at the founder's word.
 
+**Five from the founder, all shipped 2026-09-09** — SMD-082 through SMD-086. One needs his eyes and is the only thing outstanding: SMD-085's system-following cannot be seen resolving a real theme from a browser, because the Tauri window API is not there. His machine reports `AppsUseLightTheme = 0`, so switching Windows to light with **Follow the system** on is the whole test.
+
 **Phase 7's work is done.** Three releases published — v1.0.0, v1.0.1, v1.0.2 — all built by the workflow on a clean runner, the last two signed. SMD-005 is shipped: an installed 1.0.1 found 1.0.2, verified it, installed it and restarted into it on the founder's machine.
 
 The phase is not *closed*, because closing one means running the truth check first, and that is a decision to take deliberately rather than in passing. Nothing in the log is both unblocked and undecided. What remains is ideas — SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil — and Phase 6, cross-platform, which was skipped rather than finished.
@@ -661,49 +663,66 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
 
 ### [SMD-082] The hub has no way to make a note
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-09
 History:
   2026-09-09  logged by the founder
+  2026-09-09  shipped — commit 4d27081
 Notes: The hub lists notes, opens them and deletes them, and cannot create one. Every other route exists — the global chord, the tray — but the window whose whole subject is notes is the one place you cannot make one.
   A plus, as the founder asked. It goes in the window's chrome beside the close control, which is where every control in this application lives, and it recedes with the rest of the chrome per `docs/DESIGN.md` principle 2.
   Its glyph is hand-drawn strokes rather than the pixel set: chrome controls are 16px with the glyph at 58% of that, and the pixel icons are only sharp at 24px. See DESIGN § Iconography.
+  Shipped as a chrome control beside the close button, hand-drawn strokes on the same 12-unit grid as its neighbours. The hub is not closed afterwards: the new note takes focus, and a hub that shut itself would be answering a question nobody asked.
+  **It forced an extraction.** The button is rendered into `WindowChrome`'s `controls` snippet, so its markup belongs to the hub — and Svelte scopes styles per component, which put it out of reach of every rule that makes a chrome control look like one. That is CLAUDE.md's second use, so `.chrome-control` is in `src/app.css` and both windows read it. Writing the three declarations again would have been the copy-paste the DRY rule names.
 
 ### [SMD-083] The syntax marks are close to invisible
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-09-09
 History:
   2026-09-09  reported by the founder
+  2026-09-09  shipped — commit 4d27081
 Notes: `**`, `#` and the rest, shown on the cursor's own line, are drawn in `--ink-syntax`. Measured against all seven tints in both themes, over an opaque surface and over white, mid and black wallpapers: **the worst case is 1.02:1 and nothing anywhere reaches 3:1.** The founder's "barely visible" is generous.
   Dark is the worse half and for a structural reason: its `--ink-syntax` is `#6a6760`, *darker* than the ink around it and barely above the surface. When a bright wallpaper lightens a glass window, mark and surface converge — 1.02:1, which is no contrast at all.
+  Frost's mark is `--neutral-600` — a new ramp value between 500 and 700 — at 5.22:1 on Frost's own design basis and 3.25:1 over a mid backdrop. Dark's is `#d2cec5`, which puts it *above* the surface where the rest of that theme's ink lives: 3.29:1 on Dark's basis (ADR-036's mid backdrop), 4.74:1 opaque.
+  Both stay about a third of `--ink-primary`'s contrast. The bug was that they were below legible, not that they were quiet, and a mark as loud as the text would be a different bug.
+  **One number stated rather than buried:** over a white wallpaper, Dark's mark is 2.19:1 — under the 3:1 floor ADR-036 holds for the tints. In that case the primary ink itself only reaches 3.00, so no mark can be both subordinate to the text and above the floor the text is standing on.
+  Verified in the running editor rather than only on paper: the token reaches the marks in both themes, `rgb(96, 94, 89)` on Frost and `rgb(210, 206, 197)` on Dark.
 
 ### [SMD-084] The insert ring has no exit
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-09
 History:
   2026-09-09  logged by the founder
+  2026-09-09  shipped — commit cc755c9
 Notes: The ring arrives bubble by bubble and then vanishes in a frame. The founder asked for a pop, on the reasoning that the things leaving are bubbles — which is the right instinct: the arrival already spent 300ms establishing them as objects, and objects do not blink out.
   The tint palette already stays mounted while it leaves and unmounts on one named element's `animationend` (SMD-080). That mechanism is reused; the motion is not, because a retraction and a pop are different gestures.
+  The bubbles swell past full size and go, over `--dur-instant`, all at once rather than staggered — a stagger on the way in is the ring assembling itself and worth its 300ms, while on the way out it would be six waits before the window can act on what you clicked.
+  The ring outlives the click that ended it, and `onChoose`/`onDismiss` fire when the animation is done, so the choice lands at the moment the ring is gone. The first bubble reports it, because it is the last to finish and the first `animationend` would cut the others off mid-pop.
 
 ### [SMD-085] The theme cannot follow the system
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-09
 History:
   2026-09-09  logged by the founder
+  2026-09-09  shipped — commit 20a7541
 Notes: Theme is Frost or Dark and nothing else, so a machine that switches at sunset leaves the application behind.
   Tauri exposes both halves the frontend needs — the window's current theme and an event when the operating system changes it — so following can be resolved per window in `state/theme.ts`, which is already where the theme is applied and where windows already listen for changes. Rust stores the *preference*, including `system`; it does not resolve it.
+  Two toggles rather than a three-way control: the founder asked for a button, and a greyed-out Dark switch would be a dead control where this one means what it does. Dark reads the *resolved* theme, so it never says "off" while the window is plainly dark, and taking it is always an explicit choice that stops the following. Turning following off pins what is on screen, so the switch changes nothing visible — only what happens at sunset.
+  **Rust stores the preference and never interprets it.** `system` is resolved per window because the operating system's setting is something a window can ask for and be told about, and Rust would have to ask a window to find out. A window listening for system changes stops the moment the preference stops being `system`, or it would repaint over a choice made since.
+  **Not yet seen resolving a real system theme.** The Tauri window API is unavailable in a plain browser, so what is verified here is the fallback: the live query and the change event need the application itself.
 
 ### [SMD-086] The ring's hovered label is furniture, not chrome
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-09-09
 History:
   2026-09-09  logged by the founder
+  2026-09-09  shipped — commit cc755c9
 Notes: The label in the middle of the ring is a flat opaque chip with a hairline border, sitting inside a ring of glass bubbles it does not belong to. The founder asked for it on a see-through pill with the buttons' own texture, and in the display face rather than the content face.
   Both are right for a reason worth stating: the label is part of the ring rather than a tooltip over it, and the display face is what this application uses for its own voice — the hub's title, the window titles — as against sentences it says to the user.
+  It wears `.lozenge` now — the same glass, seat and frosting as the bubbles it names — as a pill rather than a disc, and is set in the display face. Verified in the running window: `lozenge label`, Departure Mono, the translucent gloss, `blur(8px)`, and `pointer-events: none` so the middle of the ring still reaches the backdrop that dismisses it.
 
 ### [SMD-081] Thirty-eight shipped items cited no commit
 Type:    bug
