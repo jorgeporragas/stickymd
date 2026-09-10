@@ -128,6 +128,60 @@ body {
 }
 
 /*
+ * A control on a window's chrome: its size, its glyph colour, and the
+ * receding that docs/DESIGN.md principle 2 asks of chrome.
+ *
+ * Shared the moment a second window grew one. `WindowChrome` renders its own
+ * controls and also takes a `controls` snippet whose markup belongs to the
+ * calling window — and Svelte scopes styles per component, so a control passed
+ * in cannot reach the chrome's own rules. Without this the hub's new-note
+ * button would be a copy of three declarations that then drift.
+ *
+ * The disc under it is `.lozenge`. This is only what makes a lozenge a control
+ * rather than a swatch: one size, the quiet glyph, and the fade.
+ */
+.chrome-control {
+  display: grid;
+  place-items: center;
+  width: var(--space-4);
+  height: var(--space-4);
+  color: var(--control-glyph);
+
+  /* Small control, not a glass surface: fading is cheap and correct.
+     See docs/DESIGN.md section 'Never Allowed'. */
+  opacity: 0;
+  transition:
+    opacity var(--dur-quick) var(--ease-out),
+    color var(--dur-quick) var(--ease-out),
+    background-color var(--dur-quick) var(--ease-out);
+}
+
+.chrome-control.revealed,
+.chrome-control:focus-visible {
+  opacity: 1;
+}
+
+/* Hover darkens the glyph rather than colouring it: on a tinted control the
+   glyph is already the note's hue taken most of the way to black, and there is
+   nowhere darker for it to go that means anything. */
+.chrome-control:hover {
+  color: var(--ink-primary);
+}
+
+/* Chrome glyphs are drawn, not pixel art — a 12-unit grid, one stroke weight.
+   See docs/DESIGN.md § Iconography for which set goes where.
+
+   Aqua's weight rather than a modern hairline: at 58% of a 16px disc a thin
+   stroke is a glyph you infer rather than see. */
+.chrome-control svg {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+/*
  * A bubble arriving in a group: out of nothing, staggered, one after another.
  *
  * Shared because two things do it — the insert ring and the tint palette — and

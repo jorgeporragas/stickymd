@@ -4,6 +4,7 @@
   import Scramble from '../../lib/components/Scramble.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
   import { deleteNote, listNotes, openNote, whenModified, type NoteSummary } from '../../lib/state/hub';
+  import { openNewNoteWindow } from '../../lib/state/windows';
 
   let notes = $state<NoteSummary[]>([]);
   let loaded = $state(false);
@@ -18,6 +19,18 @@
     if (await deleteNote(name)) {
       await refresh();
     }
+  }
+
+  /**
+   * Make a note from the window whose whole subject is notes.
+   *
+   * The hub is not closed afterwards. The new note takes focus, and a hub that
+   * shut itself would be answering a question nobody asked — the list is where
+   * you were, and it now has one more thing in it.
+   */
+  async function newNote(): Promise<void> {
+    await openNewNoteWindow();
+    await refresh();
   }
 
   onMount(() => {
@@ -40,7 +53,25 @@
 <svelte:body onpointerenter={() => (revealed = true)} onpointerleave={() => (revealed = false)} />
 
 <div class="surface">
-  <WindowChrome {revealed} closeLabel="Close the notes list" />
+  <WindowChrome {revealed} closeLabel="Close the notes list">
+    {#snippet controls()}
+      <button
+        class="lozenge chrome-control"
+        class:revealed
+        type="button"
+        aria-label="New note"
+        onclick={newNote}
+      >
+        <!-- Two strokes on the same 12-unit grid the other chrome glyphs use.
+             Hand-drawn rather than the pixel set: a chrome control is 16px with
+             its glyph at 58% of that, and those are only sharp at 24px. See
+             docs/DESIGN.md § Iconography. -->
+        <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+          <path d="M6 2.6v6.8M2.6 6h6.8" />
+        </svg>
+      </button>
+    {/snippet}
+  </WindowChrome>
 
   <h1><Scramble text="notes" /></h1>
 
@@ -64,7 +95,6 @@
 </div>
 
 <style>
-
   h1 {
     margin: 0;
     padding: 0 var(--space-4) var(--space-2);

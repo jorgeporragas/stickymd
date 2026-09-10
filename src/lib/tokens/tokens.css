@@ -18,6 +18,7 @@
   /* Neutrals — warm, so the surface never reads clinical. */
   --neutral-950: #1a1a17;
   --neutral-700: #4a4945;
+  --neutral-600: #605e59;
   --neutral-500: #8b8a85;
   --neutral-400: #a8a6a0;
   --neutral-050: #f7f6f3;
@@ -271,7 +272,17 @@
   --ink-primary: var(--neutral-950);
   --ink-secondary: var(--neutral-700);
   --ink-muted: var(--neutral-500);
-  --ink-syntax: var(--neutral-400);
+  /* The markdown characters, shown only on the cursor's own line.
+   *
+   * `--neutral-400` before, which measured 1.96:1 against a white-backed glass
+   * window and 1.22:1 over a mid one — the founder reported them as barely
+   * visible and the numbers agreed. This is 5.22:1 on Frost's own design basis
+   * (a white backdrop, ADR-018) and 3.25:1 over a mid one.
+   *
+   * Still a third of the primary ink's contrast, which is the point: these are
+   * meant to be read as markup rather than as text, and the fix was that they
+   * were below legible, not that they were quiet. */
+  --ink-syntax: var(--neutral-600);
 
   /* Signals. Not an accent — there has not been one since ADR-025. */
   --signal-danger: var(--red-600);
@@ -394,7 +405,20 @@
   --ink-primary: #f2efe8;
   --ink-secondary: #b9b5ac;
   --ink-muted: #7e7a73;
-  --ink-syntax: #6a6760;
+  /* Lighter than the surface here, not darker — which is the whole bug.
+   *
+   * `#6a6760` sat *below* every other ink in this theme and barely above the
+   * window itself, so a bright wallpaper behind a glass note lightened the
+   * surface until mark and ground met: 1.02:1, measured, which is no contrast
+   * at all. It belongs with the inks, above the surface, like everything else
+   * written on this theme.
+   *
+   * 3.29:1 on Dark's own design basis (a mid backdrop, ADR-036) and 4.74:1 on
+   * an opaque one. Over a *white* wallpaper it is 2.19:1 — below the 3:1 floor
+   * ADR-036 holds for the tints, and deliberately so: in that case the primary
+   * ink itself only reaches 3.00, so no mark can be both subordinate to the
+   * text and above the floor the text is sitting on. */
+  --ink-syntax: #d2cec5;
 
   --signal-danger: var(--red-300);
   --focus-ring: #f2efe8;

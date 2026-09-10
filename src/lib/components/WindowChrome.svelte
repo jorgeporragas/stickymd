@@ -47,7 +47,7 @@
 
   {#if onAlwaysOnTop}
     <button
-      class="lozenge control"
+      class="lozenge chrome-control"
       class:revealed
       class:active={alwaysOnTop}
       class:lit={alwaysOnTop}
@@ -63,7 +63,7 @@
     </button>
   {/if}
 
-  <button class="lozenge control" class:revealed type="button" aria-label={closeLabel} onclick={close}>
+  <button class="lozenge chrome-control" class:revealed type="button" aria-label={closeLabel} onclick={close}>
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
       <path d="M3.8 3.8 8.2 8.2M8.2 3.8 3.8 8.2" />
     </svg>
@@ -91,33 +91,14 @@
     by a tint, and mixing a rim out of the glyph's own ink would draw a hard
     ring around a control whose job is to stay quiet.
   */
-  .control {
-    display: grid;
-    place-items: center;
-    width: var(--space-4);
-    height: var(--space-4);
-    color: var(--control-glyph);
+  /* Size, glyph colour and the receding are `.chrome-control` in src/app.css —
+     shared with the hub's new-note button, which is rendered into the snippet
+     above and so cannot reach anything scoped to this component.
 
-    /* Small control, not a glass surface: fading is cheap and correct.
-       See docs/DESIGN.md section 'Never Allowed'. */
-    opacity: 0;
-    transition:
-      opacity var(--dur-quick) var(--ease-out),
-      color var(--dur-quick) var(--ease-out),
-      background-color var(--dur-quick) var(--ease-out);
-  }
-
-  .control.revealed,
-  .control.active,
-  .control:focus-visible {
+     What stays here is the one thing that is this chrome's alone: the pin does
+     not recede. */
+  .chrome-control.active {
     opacity: 1;
-  }
-
-  /* Hover darkens the glyph rather than colouring it: on a tinted control the
-     glyph is already the note's hue taken most of the way to black, and there
-     is nowhere darker for it to go that means anything. */
-  .control:hover {
-    color: var(--ink-primary);
   }
 
   /*
@@ -138,27 +119,16 @@
     floating, which is the same reason a tinted swatch stays put: chrome
     recedes, chrome that is carrying information does not.
   */
-  .control.active,
-  .control.active:hover {
+  .chrome-control.active,
+  .chrome-control.active:hover {
     color: var(--signal-engaged);
   }
 
   /* The glyph cannot be `currentColor` here — that is now the fill's own hue.
      The hue taken most of the way to black is how Aqua drew a traffic light's
      glyph, and it holds against both ends of the gradient. */
-  .control.active svg {
+  .chrome-control.active svg {
     stroke: color-mix(in oklab, var(--signal-engaged) 25%, var(--rim-shade));
   }
 
-  /* Size, stacking, and the lit glyph's colour all come from `.lozenge` in
-     src/app.css. */
-  .control svg {
-    stroke: currentColor;
-    /* Aqua's weight, not a modern hairline: at 58% of a 16px disc a thin
-       stroke is a glyph you infer rather than see. */
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
-  }
 </style>
