@@ -79,7 +79,9 @@
     "active": true,
     "createUpdaterArtifacts": true,
     "targets": [
-      "nsis"
+      "nsis",
+      "app",
+      "dmg"
     ],
     "category": "Productivity",
     "shortDescription": "A markdown scratchpad.",

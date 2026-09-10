@@ -89,7 +89,19 @@ pub fn transparency_enabled() -> bool {
     value != 0
 }
 
-#[cfg(not(target_os = "windows"))]
+/// macOS decides this for itself.
+///
+/// An `NSVisualEffectView` goes opaque on its own when Accessibility's "Reduce
+/// transparency" is on, so there is no setting to read and nothing to watch —
+/// the platform does here what `apply` and `watch` have to do by hand on
+/// Windows. Reporting Glass is therefore honest: the window really is asking
+/// for vibrancy, and the system decides what that means.
+#[cfg(target_os = "macos")]
+pub fn transparency_enabled() -> bool {
+    true
+}
+
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
 pub fn transparency_enabled() -> bool {
     false
 }
@@ -162,7 +174,44 @@ pub fn apply(window: &WebviewWindow) -> SurfaceMode {
         }
     }
 
-    #[cfg(not(target_os = "windows"))]
+    #[cfg(target_os = "macos")]
+    {
+        use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectState};
+
+        // `Sidebar` rather than `HudWindow`, which is the other candidate for a
+        // small floating window: HudWindow forces a dark appearance whatever
+        // the system is set to, and this application already paints its own
+        // tint on top and expects the blur underneath to be neutral. Sidebar
+        // follows the system's light or dark and stays out of the way.
+        //
+        // A first pick, and the one value to change if the glass reads wrong on
+        // a Mac — the same shape as `--dur-glass-hold`.
+        //
+        // `Active` rather than `FollowsWindowActiveState`: macOS would
+        // otherwise dim the material when the window is not frontmost, which is
+        // the behaviour the founder disliked on Windows and had removed there
+        // (SMD-079). One answer on both platforms.
+        //
+        // The radius has to agree with `--radius-window` in the token file.
+        // Rust cannot read a CSS token, so this is the one place a size is
+        // written twice, and the reason is the same one `round_corners` records
+        // for Windows: the compositor rounds its own backdrop, and a CSS radius
+        // alone leaves the corners showing raw material.
+        match apply_vibrancy(
+            window,
+            NSVisualEffectMaterial::Sidebar,
+            Some(NSVisualEffectState::Active),
+            Some(8.0),
+        ) {
+            Ok(()) => SurfaceMode::Glass,
+            Err(error) => {
+                eprintln!("sticky.md: could not apply vibrancy: {error}");
+                SurfaceMode::Solid
+            }
+        }
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
     {
         let _ = window;
         SurfaceMode::Solid
@@ -262,6 +311,12 @@ pub fn watch(app: AppHandle) {
     });
 }
 
+/// Nothing to watch anywhere but Windows.
+///
+/// The Windows implementation exists because the transparency setting lives in
+/// the registry and the only way to hear it change is to watch the key. macOS
+/// has no equivalent to watch: the view responds to Reduce Transparency itself,
+/// without the application being told.
 #[cfg(not(target_os = "windows"))]
 pub fn watch(app: AppHandle) {
     let _ = app;

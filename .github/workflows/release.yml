@@ -151,3 +151,125 @@ jobs:
             gh release create $tag --draft --title $tag --notes "Draft. Release notes go here before publishing."
           }
           gh release upload $tag $assets --clobber
+
+  # macOS runs after Windows rather than beside it, for one reason: both jobs
+  # write to the same release and the same `latest.json`, and two jobs creating
+  # one draft is a race with a silent loser. By the time this starts, the draft
+  # exists and the manifest has its Windows half.
+  #
+  # Apple Silicon only, at the founder's decision. A universal binary doubles
+  # the build for a second architecture he does not have and cannot test.
+  macos:
+    needs: windows
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustup target add aarch64-apple-darwin
+          rustc --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The same tests the Windows job runs. They cover path and name
+      # validation, which is the code that handles untrusted input, and it is
+      # worth knowing they pass on a platform whose path rules differ.
+      - name: Test
+        working-directory: src-tauri
+        run: cargo test
+
+      # Two kinds of signing are in play here and they are unrelated.
+      #
+      # APPLE_* is Apple's: it signs the .app with a Developer ID certificate
+      # and notarises it, which is what stops Gatekeeper refusing to open a
+      # downloaded application. TAURI_SIGNING_* is the updater's minisign key,
+      # the same one the Windows job uses, and it signs the update artefact so
+      # an installed copy can verify what it is about to install.
+      #
+      # Absent either, the build still succeeds and simply produces less: no
+      # notarisation, or no signature to put in the manifest.
+      - name: Build
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run tauri build -- --target aarch64-apple-darwin
+
+      # Merged into the manifest rather than written over it. `latest.json` is
+      # one file describing every platform, and the Windows job has already put
+      # its own entry in — fetching, adding and re-uploading is what keeps both.
+      - name: Add macOS to the update manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          out="src-tauri/target/aarch64-apple-darwin/release/bundle"
+
+          archive=$(find "$out/macos" -name '*.app.tar.gz' | head -1)
+          signature="${archive}.sig"
+
+          if [ ! -f "$signature" ]; then
+            echo "No signature beside the archive — the updater key is not set, so macOS is left out of the manifest."
+            exit 0
+          fi
+
+          gh release download "$GITHUB_REF_NAME" --pattern latest.json --clobber || true
+
+          python3 - "$version" "$archive" "$signature" <<'PY'
+          import json, os, pathlib, sys
+
+          version, archive, signature = sys.argv[1], sys.argv[2], sys.argv[3]
+          path = pathlib.Path('latest.json')
+
+          # The Windows half if it is there, a fresh manifest if it is not. A
+          # macOS-only release is not a thing this project ships, but a manifest
+          # that silently dropped Windows would be far worse than one written
+          # from scratch.
+          manifest = json.loads(path.read_text()) if path.exists() else {
+              'version': version,
+              'pub_date': None,
+              'notes': f'See the release notes for {version}.',
+              'platforms': {},
+          }
+
+          manifest['platforms']['darwin-aarch64'] = {
+              'signature': pathlib.Path(signature).read_text().strip(),
+              'url': f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/"
+                     f"{os.environ['GITHUB_REF_NAME']}/{pathlib.Path(archive).name}",
+          }
+
+          path.write_text(json.dumps(manifest, indent=2))
+          print(path.read_text())
+          PY
+
+          gh release upload "$GITHUB_REF_NAME" latest.json --clobber
+
+      - name: Attach the macOS assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          out="src-tauri/target/aarch64-apple-darwin/release/bundle"
+
+          assets=()
+          while IFS= read -r f; do assets+=("$f"); done < <(find "$out/dmg" -name '*.dmg' 2>/dev/null || true)
+          while IFS= read -r f; do assets+=("$f"); done < <(find "$out/macos" -name '*.app.tar.gz' 2>/dev/null || true)
+
+          for asset in "${assets[@]}"; do echo "$asset"; done
+          gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber

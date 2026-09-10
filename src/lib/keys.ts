@@ -71,7 +71,14 @@ export function chordFrom(event: KeyboardEvent): Chord | ChordProblem {
   // the chord is never delivered, and it works on a US layout, which is what
   // makes it dangerous. See docs/FIXES.md. Refused rather than warned about:
   // a warning you can click past is a shortcut that does not work.
-  if (mod && alt) {
+  //
+  // **`ctrlKey` specifically, not the platform modifier.** The two are the same
+  // key on Windows and Linux and are not on macOS, where the modifier is Cmd
+  // and Ctrl is a key of its own. Testing `mod` here refused Cmd+Option, which
+  // is an ordinary macOS chord with nothing to do with AltGr — found while
+  // scoping the macOS build (SMD-095), before there was a macOS build to find
+  // it in.
+  if (event.ctrlKey && alt) {
     return 'Ctrl and Alt together is AltGr on many keyboard layouts. Pick another.';
   }
 
@@ -138,7 +145,6 @@ export function parseChord(value: string, format: ChordFormat): Chord | undefine
   }
 
   if (!chord.mod && !chord.alt) return undefined;
-  if (chord.mod && chord.alt) return undefined;
 
   if (key.length === 1) chord.key = key.toLowerCase();
   else if (!NAMED.has(key) && !isFunctionKey(key)) return undefined;
