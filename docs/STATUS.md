@@ -662,6 +662,18 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-090] A ticked checkbox dropped 2.25px
+Type:    bug
+State:   shipped
+Created: 2026-09-10
+History:
+  2026-09-10  reported by the founder
+  2026-09-10  shipped — commit d0de06d
+Notes: Ticking a task-list box moved it down slightly. The founder guessed it was the pressed-state give the seated controls have. Reasonable, and wrong: `.cm-md-task` has no `:active` rule at all and nothing about it presses.
+  **It is a CSS baseline rule.** An `inline-grid` with no in-flow content takes its baseline from its own bottom margin edge; one with content takes it from the content. The box was empty when unchecked and held the tick's `<svg>` when checked, so ticking it moved where its baseline was, and `vertical-align: -0.15em` then landed it somewhere else. Measured before: 28.25px from the top of its line unchecked, 30.50px checked - 2.25px, which is exactly the `vertical-align` offset.
+  The tick is now always in the DOM and hidden with `visibility` when the box is empty, so the element has one child in both states and its baseline never moves. `visibility` rather than `display`, because the point is to keep it *in flow*. Measured after: both states at 30.50px, drift 0.
+  Worth keeping: the report was accurate and the explanation was not, and taking the explanation on trust would have sent me looking at `:active` states that do not exist.
+
 ### [SMD-087] Two ring labels were wider than the ring
 Type:    bug
 State:   shipped
@@ -700,7 +712,12 @@ Notes: "It's first kind of grayish and then the actual window builds." The cause
   **One failure mode insured against.** A front end that never runs — a missing dev server, an error before mount — would leave the window hidden forever, which reads as the application refusing to launch. That is far worse than the flash this replaced, so Rust shows any window still hidden after two seconds and says so on stderr. In the ordinary case it wakes to find the window already visible and does nothing.
   A restored window is also placed while hidden now, so it no longer jumps from centre to its saved position in view.
   2026-09-10 — the founder reports what is left: "a fraction of a second that the blur doesn't actually come in so the window is just an opaque block". The surface was applied when the window was built, which is well before it is shown — but a backdrop set on a window nobody has shown yet is one the compositor has had no reason to compose. Showing now goes through `reveal_window`, which shows, focuses, and applies the surface again with the window on screen.
-  **Not observed, and said plainly rather than claimed as fixed.** The flash lasts a fraction of a second on a real compositor and cannot be seen from a browser pane, so this is the likeliest cause addressed at the cost of one extra call, not a confirmed fix. If it survives, the next suspect is the arrival sheen — `--surface-sheen` paints a white wash at full strength and fades it over 240ms, which on a dark note would read as exactly this.
+  **Not observed, and said plainly rather than claimed as fixed.** The flash lasts a fraction of a second on a real compositor and cannot be seen from a browser pane, so this was the likeliest cause addressed at the cost of one extra call.
+  2026-09-10, second report — it helped and did not finish it: "there's still a fraction of a second when you can see the background without blur". Which settles what is happening. The window is shown at the right moment and the backdrop is asked for twice, so the gap is not in *when* it is asked for; the compositor has simply not composed the blur by the first frame, and a window painting its translucent tint into that gap shows the desktop through it, sharp.
+  The founder's own fix is the right one and is what shipped: **the window opens as a solid block and dissolves into glass.** Every window paints Solid to begin with whatever its mode, and `settleSurface` lets it become glass a frame after it is up. There is no longer a moment where a window claims to be transparent over something that is not yet frosted.
+  The dissolve is `.surface`'s existing `background-color` transition, and that is worth naming precisely: `docs/DESIGN.md` forbids animating a glass surface's alpha and prescribes animating the tint layer instead. This is the second — a paint over a backdrop that does not change, nothing re-blurred per frame.
+  Verified as far as a browser allows: `--surface-paint` resolves to `#f7f6f3` under Solid and `rgba(255, 255, 255, 0.55)` under Glass, and the transition is declared at 240ms. The dissolve itself cannot be watched there, because a hidden pane freezes transitions as surely as it freezes animations.
+  Also checked, since the reveal depends on it: the two-second Rust fallback has never fired in a dev session, so windows really are showing themselves rather than being rescued.
 
 ### [SMD-082] The hub has no way to make a note
 Type:    feature
