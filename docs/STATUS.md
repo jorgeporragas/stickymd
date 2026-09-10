@@ -659,6 +659,52 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-082] The hub has no way to make a note
+Type:    feature
+State:   active
+Created: 2026-09-09
+History:
+  2026-09-09  logged by the founder
+Notes: The hub lists notes, opens them and deletes them, and cannot create one. Every other route exists — the global chord, the tray — but the window whose whole subject is notes is the one place you cannot make one.
+  A plus, as the founder asked. It goes in the window's chrome beside the close control, which is where every control in this application lives, and it recedes with the rest of the chrome per `docs/DESIGN.md` principle 2.
+  Its glyph is hand-drawn strokes rather than the pixel set: chrome controls are 16px with the glyph at 58% of that, and the pixel icons are only sharp at 24px. See DESIGN § Iconography.
+
+### [SMD-083] The syntax marks are close to invisible
+Type:    bug
+State:   active
+Created: 2026-09-09
+History:
+  2026-09-09  reported by the founder
+Notes: `**`, `#` and the rest, shown on the cursor's own line, are drawn in `--ink-syntax`. Measured against all seven tints in both themes, over an opaque surface and over white, mid and black wallpapers: **the worst case is 1.02:1 and nothing anywhere reaches 3:1.** The founder's "barely visible" is generous.
+  Dark is the worse half and for a structural reason: its `--ink-syntax` is `#6a6760`, *darker* than the ink around it and barely above the surface. When a bright wallpaper lightens a glass window, mark and surface converge — 1.02:1, which is no contrast at all.
+
+### [SMD-084] The insert ring has no exit
+Type:    feature
+State:   active
+Created: 2026-09-09
+History:
+  2026-09-09  logged by the founder
+Notes: The ring arrives bubble by bubble and then vanishes in a frame. The founder asked for a pop, on the reasoning that the things leaving are bubbles — which is the right instinct: the arrival already spent 300ms establishing them as objects, and objects do not blink out.
+  The tint palette already stays mounted while it leaves and unmounts on one named element's `animationend` (SMD-080). That mechanism is reused; the motion is not, because a retraction and a pop are different gestures.
+
+### [SMD-085] The theme cannot follow the system
+Type:    feature
+State:   active
+Created: 2026-09-09
+History:
+  2026-09-09  logged by the founder
+Notes: Theme is Frost or Dark and nothing else, so a machine that switches at sunset leaves the application behind.
+  Tauri exposes both halves the frontend needs — the window's current theme and an event when the operating system changes it — so following can be resolved per window in `state/theme.ts`, which is already where the theme is applied and where windows already listen for changes. Rust stores the *preference*, including `system`; it does not resolve it.
+
+### [SMD-086] The ring's hovered label is furniture, not chrome
+Type:    feature
+State:   active
+Created: 2026-09-09
+History:
+  2026-09-09  logged by the founder
+Notes: The label in the middle of the ring is a flat opaque chip with a hairline border, sitting inside a ring of glass bubbles it does not belong to. The founder asked for it on a see-through pill with the buttons' own texture, and in the display face rather than the content face.
+  Both are right for a reason worth stating: the label is part of the ring rather than a tooltip over it, and the display face is what this application uses for its own voice — the hub's title, the window titles — as against sentences it says to the user.
+
 ### [SMD-081] Thirty-eight shipped items cited no commit
 Type:    bug
 State:   shipped
