@@ -72,6 +72,10 @@ sticky.md renders every window in one of two surface modes.
 
 Both modes read from the same semantic tokens. A component never branches on surface mode; the tokens carry the difference.
 
+**Every window is built hidden and shows itself once it has painted.** A transparent window exists before its web view has drawn anything, and what fills that gap is the compositor's own backdrop — a grey pane that then fills in as the page arrives. Holding the *blur* back instead would only change the colour of the flash: the transparency is there from the first instant, and it is the paint that is missing.
+
+`revealWindow` waits two animation frames, since one fires *before* the paint it is scheduled alongside, then hands over to `reveal_window` in Rust — which shows, focuses, and applies the surface **again**, because a backdrop set on a window nobody has shown yet is one the compositor has had no reason to compose. Rust also shows any window still hidden after two seconds: a front end that never runs would otherwise leave the application invisible, which is a worse failure than the flash this replaced.
+
 ---
 
 ## Token contract
