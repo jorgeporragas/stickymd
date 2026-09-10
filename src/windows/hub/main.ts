@@ -1,6 +1,7 @@
 import '../../app.css';
 import { mount } from 'svelte';
 import { applySurfaceMode } from '../../lib/state/surface';
+import { revealWindow } from '../../lib/state/windows';
 import { applyTheme } from '../../lib/state/theme';
 import HubWindow from './HubWindow.svelte';
 
@@ -14,4 +15,11 @@ if (!target) {
 // once, rather than appearing solid and flicking to glass.
 await Promise.all([applySurfaceMode(), applyTheme()]);
 
-export default mount(HubWindow, { target });
+const app = mount(HubWindow, { target });
+
+// The window is built hidden and shown here, once the surface has been
+// painted — see `revealWindow`. Not awaited: nothing below depends on it, and
+// the mount is what it is waiting for.
+void revealWindow();
+
+export default app;

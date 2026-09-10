@@ -32,6 +32,7 @@ The phase is not *closed*, because closing one means running the truth check fir
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
 | MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Both halves build and the application runs. |
 | WebView2 | Ships with Windows 11 |
+| Notes folder (dev) | The founder pointed the **dev build** at a folder of its own on 2026-09-10, to keep it out of the notes he actually uses. So `Documents\sticky.md` is the default and the installed build's folder, and is *not* where a `npm run tauri dev` session writes. Anything reading notes off disk during development should ask the application rather than assume the default. |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
 ---
@@ -661,6 +662,41 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-087] Two ring labels were wider than the ring
+Type:    bug
+State:   shipped
+Created: 2026-09-10
+History:
+  2026-09-10  reported by the founder
+  2026-09-10  shipped — commit pending
+Notes: "Bulleted list" and "Numbered list" ran wide enough that the pill met the bubbles either side of it. `RadialAction` takes a `short` now — `* list` and `# list`, markdown's own marks, which are the shortest true names these have.
+  **`label` stays the accessible name.** A screen reader saying "star list" would be worse than one saying "bulleted list", and the reason to shorten is entirely about a pill bumping into buttons — which is a fact about the ring, not about the action.
+  Measured after: every label clears the nearest bubble, `* list` and `# list` by 19px. **`Code block` is now the tightest at 84px wide and 11px clear** — it does not touch, and it was not reported, so it is left as it is and named here rather than changed unasked.
+
+### [SMD-088] Two controls for one setting
+Type:    feature
+State:   shipped
+Created: 2026-09-10
+History:
+  2026-09-10  logged by the founder
+  2026-09-10  shipped — commit pending
+Notes: The theme was a Dark switch and a Follow-the-system switch, and the founder is right that it should never have been: two controls for one setting means every combination has to be given a meaning, including the ones that have none. One `Theme` field now holds three radios — Light, Dark, Follow.
+  Built from what exists. `Toggle` gained a `role` of `switch` or `radio`; the control looks identical and the difference is what it is announced as, since "switch, off" said three times over a three-way choice describes the wrong thing. A radio pressed while already on does nothing — you cannot deselect one of three themes into having none.
+  The captions are load-bearing. Three identical discs with no words is a puzzle, and this is the one control in the window where which is which cannot be inferred from position.
+
+### [SMD-089] A new window flashes grey before it draws
+Type:    bug
+State:   shipped
+Created: 2026-09-10
+History:
+  2026-09-10  reported by the founder
+  2026-09-10  shipped — commit pending
+Notes: "It's first kind of grayish and then the actual window builds." The cause is that windows were created *visible*: a transparent window exists before its web view has painted anything, and what fills that gap is the compositor's own backdrop.
+  **The founder's proposed fix was the wrong way round, and worth saying so.** He suggested letting the layout build and turning transparency on a few milliseconds later. But the transparency is there from the first instant — it is the paint that is missing, and holding the blur back would replace a grey translucent pane with a grey opaque one. Same flash, different colour.
+  So the windows are built hidden and each shows itself once it has painted. Two animation frames, not one: `requestAnimationFrame` fires *before* the paint it is scheduled alongside, and the second callback is the earliest moment the surface is really on screen.
+  **One failure mode insured against.** A front end that never runs — a missing dev server, an error before mount — would leave the window hidden forever, which reads as the application refusing to launch. That is far worse than the flash this replaced, so Rust shows any window still hidden after two seconds and says so on stderr. In the ordinary case it wakes to find the window already visible and does nothing.
+  A restored window is also placed while hidden now, so it no longer jumps from centre to its saved position in view.
+
 ### [SMD-082] The hub has no way to make a note
 Type:    feature
 State:   shipped
@@ -697,6 +733,7 @@ History:
   2026-09-09  shipped — commit cc755c9
 Notes: The ring arrives bubble by bubble and then vanishes in a frame. The founder asked for a pop, on the reasoning that the things leaving are bubbles — which is the right instinct: the arrival already spent 300ms establishing them as objects, and objects do not blink out.
   The tint palette already stays mounted while it leaves and unmounts on one named element's `animationend` (SMD-080). That mechanism is reused; the motion is not, because a retraction and a pop are different gestures.
+  2026-09-10 — extracted at the founder's word, before a second use rather than after it. `.bubble-out` sits in `src/app.css` beside `.bubble-in`, which is the point: the pair is one decision about how bubbles come and go, and splitting it across a component and a stylesheet is how the two halves drift. The ring applies it as a class rather than reaching for it through a descendant selector, so anything else that needs a bubble to leave can wear it.
   The bubbles swell past full size and go, over `--dur-instant`, all at once rather than staggered — a stagger on the way in is the ring assembling itself and worth its 300ms, while on the way out it would be six waits before the window can act on what you clicked.
   The ring outlives the click that ended it, and `onChoose`/`onDismiss` fire when the animation is done, so the choice lands at the moment the ring is gone. The first bubble reports it, because it is the last to finish and the first `animationend` would cut the others off mid-pop.
 

@@ -2,6 +2,7 @@ import '../../app.css';
 import { mount } from 'svelte';
 import { loadNote } from '../../lib/state/note';
 import { applySurfaceMode } from '../../lib/state/surface';
+import { revealWindow } from '../../lib/state/windows';
 import { applyTheme } from '../../lib/state/theme';
 import { readPreferences } from '../../lib/state/preferences';
 import NoteWindow from './NoteWindow.svelte';
@@ -22,7 +23,7 @@ const [, , note, prefs] = await Promise.all([
   readPreferences()
 ]);
 
-export default mount(NoteWindow, {
+const app = mount(NoteWindow, {
   target,
   props: {
     initial: note.body,
@@ -31,3 +32,10 @@ export default mount(NoteWindow, {
     formatting: prefs.formatting
   }
 });
+
+// The window is built hidden and shown here, once the surface has been
+// painted — see `revealWindow`. Not awaited: nothing below depends on it, and
+// the mount is what it is waiting for.
+void revealWindow();
+
+export default app;

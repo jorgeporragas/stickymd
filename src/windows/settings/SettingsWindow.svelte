@@ -59,34 +59,24 @@
   const following = $derived(prefs?.theme === 'system');
 
   /**
-   * Turning Dark on or off is always an explicit choice, and taking it stops
-   * following the system.
+   * The three themes, as one choice.
    *
-   * The alternative was to grey this out while following, and a dead control
-   * is a worse answer than one that means what it does: this is how you leave
-   * system mode, and you leave it by saying what you want instead.
+   * It was two switches — Dark, and Follow the system — and the founder is
+   * right that it should never have been: two controls for one setting means
+   * every combination has to be given a meaning, including the ones that have
+   * none. This is one question with three answers.
    */
-  async function toggleDark(on: boolean): Promise<void> {
-    const theme: ThemePreference = on ? 'dark' : 'frost';
-    if (prefs) prefs.theme = theme;
+  const THEMES: { value: ThemePreference; label: string }[] = [
+    { value: 'frost', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+    { value: 'system', label: 'Follow' }
+  ];
+
+  async function chooseTheme(preference: ThemePreference): Promise<void> {
+    if (prefs) prefs.theme = preference;
 
     // Applied here as well as saved: this window listens for the same event it
     // is about to cause, but seeing it happen should not wait on a round trip.
-    resolved = await applyPreference(theme);
-    await setTheme(theme);
-  }
-
-  /**
-   * Follow the system, or stop following it.
-   *
-   * Stopping pins whatever is on screen at that moment rather than snapping to
-   * a default — turning the switch off should change nothing you can see, and
-   * only change what happens at sunset.
-   */
-  async function toggleFollow(on: boolean): Promise<void> {
-    const preference: ThemePreference = on ? 'system' : resolved;
-    if (prefs) prefs.theme = preference;
-
     resolved = await applyPreference(preference);
     await setTheme(preference);
   }
@@ -252,22 +242,25 @@
       </div>
     {:else}
       <Field
-        label="Follow the system"
-        note="Match Windows, and change with it."
-      >
-        {#snippet control()}
-          <Toggle on={following} label="Follow the system theme" onChange={toggleFollow} />
-        {/snippet}
-      </Field>
-
-      <Field
-        label="Dark"
+        label="Theme"
         note={following
-          ? 'Following the system, which is currently ' + (resolved === 'dark' ? 'dark.' : 'light.')
+          ? 'Following Windows, which is currently ' + (resolved === 'dark' ? 'dark.' : 'light.')
           : 'Applies to every window, including the ones already open.'}
       >
         {#snippet control()}
-          <Toggle on={resolved === 'dark'} label="Dark theme" onChange={toggleDark} />
+          <div class="choice" role="radiogroup" aria-label="Theme">
+            {#each THEMES as option (option.value)}
+              <span class="option">
+                <Toggle
+                  on={prefs?.theme === option.value}
+                  label={option.label}
+                  role="radio"
+                  onChange={() => chooseTheme(option.value)}
+                />
+                <span class="caption">{option.label}</span>
+              </span>
+            {/each}
+          </div>
         {/snippet}
       </Field>
 
@@ -346,6 +339,29 @@
 </div>
 
 <style>
+  /*
+    Three bubbles in a row, each captioned. The captions are what make it a
+    choice rather than three unrelated switches — an unlabelled ring of
+    identical discs is a puzzle, and this is the one control in the window
+    where which one is which cannot be inferred from position.
+  */
+  .choice {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .option {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-1);
+  }
+
+  .caption {
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-ui);
+    color: var(--ink-secondary);
+  }
+
   h1 {
     margin: 0;
     padding: 0 var(--space-4) var(--space-2);

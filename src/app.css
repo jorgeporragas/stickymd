@@ -210,6 +210,39 @@ body {
 }
 
 /*
+ * A bubble leaving: swelling past full size and going.
+ *
+ * The counterpart to `.bubble-in`, and named beside it so the pair is one
+ * decision rather than two. An arrival that spends 300ms establishing objects
+ * has to be answered by something that treats them as objects on the way out —
+ * a thing that blinks out of existence was never one.
+ *
+ * Overshooting is what makes it a pop rather than a fade: a soap bubble is
+ * biggest the instant before it is gone.
+ *
+ * `--dur-instant`, and the caller should not stagger it. A stagger inbound is a
+ * group assembling itself and worth its time; outbound it is a queue of waits
+ * between the click and whatever the click was for.
+ *
+ * `forwards`, so a popped bubble stays gone rather than snapping back to full
+ * size while its neighbours are still going.
+ */
+.bubble-out {
+  animation: bubble-pop var(--dur-instant) var(--ease-out) forwards;
+}
+
+@keyframes bubble-pop {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+/*
  * The Aqua lozenge: the window's controls and the tint swatches alike.
  *
  * Shape, seat and specular — size, fill and rim belong to whatever is using

@@ -4,8 +4,15 @@
 
   export interface RadialAction {
     id: string;
-    /** What it does, for screen readers and the hovered label. */
+    /** What it does. The accessible name, and the label unless `short` says otherwise. */
     label: string;
+    /**
+     * A shorter form for the ring's centre, where space is the radius less a
+     * bubble. `label` stays the accessible name — a screen reader saying
+     * "star list" would be worse than one saying "bulleted list", and the
+     * reason to shorten is entirely about a pill bumping into the buttons.
+     */
+    short?: string;
     icon: PixelIcon;
   }
 
@@ -31,6 +38,9 @@
   const MARGIN = 30;
 
   let hovered = $state<string | undefined>(undefined);
+
+  /** The hovered action itself, which is what the centre names. */
+  const named = $derived(actions.find((action) => action.id === hovered));
 
   /**
    * Whether the ring is playing its exit.
@@ -131,7 +141,9 @@
          its centre needs a translate that the keyframe would overwrite. -->
     <span class="seat" style="left: {x}px; top: {y}px">
       <button
-        class="lozenge bubble bubble-in"
+        class="lozenge bubble"
+        class:bubble-in={!leaving}
+        class:bubble-out={leaving}
         role="menuitem"
         type="button"
         aria-label={action.label}
@@ -148,9 +160,9 @@
     </span>
   {/each}
 
-  {#if hovered}
+  {#if named}
     <span class="lozenge label" style="left: {centre.x}px; top: {centre.y}px">
-      {actions.find((action) => action.id === hovered)?.label}
+      {named.short ?? named.label}
     </span>
   {/if}
 </div>
@@ -193,39 +205,11 @@
     color: var(--ink-primary);
   }
 
-  /*
-    The pop. Bubbles swell and go, rather than blinking out.
+  /* The pop itself is `.bubble-out` in src/app.css, applied above — shared with
+     anything else that ever needs a bubble to leave, and named beside the
+     arrival it answers.
 
-    The founder's word for it and the right instinct: the arrival spends 300ms
-    establishing six objects, and an object that vanishes in a frame was never
-    one. Overshooting past full size before it goes is what makes it read as a
-    burst rather than a fade — the same reason a soap bubble looks bigger the
-    instant before it is gone.
-
-    All at once, not staggered. A stagger on the way in is the ring assembling
-    itself and is worth its 300ms; on the way out it would be six waits before
-    the window can act on the thing you clicked. `--dur-instant` for the same
-    reason.
-
-    `forwards`, so a popped bubble stays gone rather than snapping back to full
-    size while the rest are still going.
-  */
-  .ring.leaving .bubble {
-    animation: bubble-pop var(--dur-instant) var(--ease-out) forwards;
-  }
-
-  @keyframes bubble-pop {
-    from {
-      opacity: 1;
-      transform: scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: scale(1.35);
-    }
-  }
-
-  /* The label goes with them, and faster: it is a caption on a thing that is
+     The label goes with them, and faster: it is a caption on a thing that is
      leaving, and a name left hanging over an empty ring reads as a bug. */
   .ring.leaving .label {
     animation: label-out var(--dur-instant) var(--ease-out) forwards;

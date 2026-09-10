@@ -84,8 +84,17 @@
     { id: 'table', label: 'Table', icon: 'table', command: insertTable },
     { id: 'code', label: 'Code block', icon: 'code', command: insertCodeBlock },
     { id: 'task', label: 'Task', icon: 'task', command: insertTaskList },
-    { id: 'list', label: 'Bulleted list', icon: 'list', command: insertBulletList },
-    { id: 'numbered', label: 'Numbered list', icon: 'numbered', command: insertNumberedList },
+    // Short forms in the ring, full ones for screen readers. Two words wide is
+    // what the centre holds before the pill meets the bubbles, and markdown's
+    // own marks are the shortest true names these have.
+    { id: 'list', label: 'Bulleted list', short: '* list', icon: 'list', command: insertBulletList },
+    {
+      id: 'numbered',
+      label: 'Numbered list',
+      short: '# list',
+      icon: 'numbered',
+      command: insertNumberedList
+    },
     { id: 'link', label: 'Link', icon: 'link', command: insertLink }
   ];
 

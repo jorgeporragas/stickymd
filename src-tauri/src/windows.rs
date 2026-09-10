@@ -86,10 +86,47 @@ fn build(app: &AppHandle, template: &str, label: &str) -> Result<WebviewWindow, 
     // rather than on the builder.
     config.label = label.to_string();
 
-    WebviewWindowBuilder::from_config(app, &config)
+    let window = WebviewWindowBuilder::from_config(app, &config)
         .map_err(|error| NoteError::Io { message: error.to_string() })?
         .build()
-        .map_err(|error| NoteError::Io { message: error.to_string() })
+        .map_err(|error| NoteError::Io { message: error.to_string() })?;
+
+    reveal_eventually(&window);
+
+    Ok(window)
+}
+
+/// How long a window may stay hidden waiting for its own front end.
+const REVEAL_DEADLINE: std::time::Duration = std::time::Duration::from_millis(2000);
+
+/// Show a window that never showed itself.
+///
+/// Every window is built hidden and shows itself once it has painted — see
+/// `revealWindow` in `src/lib/state/windows.ts`. That is the whole fix for the
+/// grey flash, and it has one failure mode worth insuring against: a front end
+/// that never runs. A missing dev server, a JavaScript error before mount, a
+/// bad build — and the window would stay hidden forever, which the user reads
+/// as the application refusing to launch. That is a far worse failure than the
+/// flash this replaced.
+///
+/// So the deadline is a floor, not a mechanism: in the ordinary case the front
+/// end has already shown the window and `is_visible` is true when this wakes.
+fn reveal_eventually(window: &WebviewWindow) {
+    let window = window.clone();
+
+    std::thread::spawn(move || {
+        std::thread::sleep(REVEAL_DEADLINE);
+
+        // Asked rather than assumed: showing an already-visible window would
+        // also raise it, stealing focus from whatever the user moved on to.
+        if matches!(window.is_visible(), Ok(false)) {
+            eprintln!(
+                "sticky.md: window '{}' did not show itself within {REVEAL_DEADLINE:?} — showing it anyway.",
+                window.label()
+            );
+            let _ = window.show();
+        }
+    });
 }
 
 /// Put a restored window back where it was.

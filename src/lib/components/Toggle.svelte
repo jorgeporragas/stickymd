@@ -5,10 +5,20 @@
     /** What the toggle is for, for screen readers. The visible label is the
         field it sits in. */
     label: string;
+    /**
+     * `switch` for a setting that is on or off, `radio` for one of a set.
+     *
+     * The control looks the same either way and the difference is entirely
+     * what it is announced as: a screen reader saying "switch, off" three
+     * times over a three-way choice is telling the user the wrong thing about
+     * what happens when they press one. A radio belongs in a `radiogroup`,
+     * which is the caller's to provide.
+     */
+    role?: 'switch' | 'radio';
     onChange: (value: boolean) => void;
   }
 
-  let { on, label, onChange }: Props = $props();
+  let { on, label, role = 'switch', onChange }: Props = $props();
 </script>
 
 <!--
@@ -25,15 +35,19 @@
   black, as on every other lit lozenge (ADR-028). A dot rather than a check
   because a check is an *action* being confirmed, and this is a state being
   held — the same reason the pin draws a pin rather than a tick.
+
+  It also serves as one of a set: `role="radio"` inside a caller's radiogroup.
+  Pressing a radio that is already on does nothing, where pressing a switch
+  turns it off — you cannot deselect one of three themes into having none.
 -->
 <button
   class="lozenge toggle"
   class:lit={on}
   type="button"
-  role="switch"
+  {role}
   aria-checked={on}
   aria-label={label}
-  onclick={() => onChange(!on)}
+  onclick={() => onChange(role === 'radio' ? true : !on)}
 >
   {#if on}
     <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
