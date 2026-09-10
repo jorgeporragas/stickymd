@@ -3,7 +3,14 @@
   import NoteRow from '../../lib/components/NoteRow.svelte';
   import Scramble from '../../lib/components/Scramble.svelte';
   import WindowChrome from '../../lib/components/WindowChrome.svelte';
-  import { deleteNote, listNotes, openNote, whenModified, type NoteSummary } from '../../lib/state/hub';
+  import {
+    deleteNote,
+    listNotes,
+    onNotesChanged,
+    openNote,
+    whenModified,
+    type NoteSummary
+  } from '../../lib/state/hub';
   import { openNewNoteWindow } from '../../lib/state/windows';
 
   let notes = $state<NoteSummary[]>([]);
@@ -35,6 +42,12 @@
 
   onMount(() => {
     void refresh();
+
+    // Refreshed when the folder changes, not only when this window is clicked.
+    // Being focused is a fine moment to re-read and a poor one to rely on —
+    // the case that matters is a note written in another window while the list
+    // is in plain sight.
+    return onNotesChanged(() => void refresh());
   });
 </script>
 
@@ -46,6 +59,9 @@
 <svelte:window
   onfocus={() => {
     revealed = true;
+    // Still re-read on focus, as well as on the event. The event covers a
+    // change this application made; this covers one it did not — a note edited
+    // in another editor, or dropped into the folder.
     void refresh();
   }}
   onblur={() => (revealed = false)}

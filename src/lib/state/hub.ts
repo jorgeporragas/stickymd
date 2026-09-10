@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 
 /**
  * The hub's view of the notes folder.
@@ -69,4 +70,23 @@ export function whenModified(modifiedMs: number): string {
   }
 
   return format.format(Math.round(value), 'year');
+}
+
+/**
+ * Call `changed` whenever the notes folder changes under us.
+ *
+ * The hub used to refresh on being focused, which is right for the case where
+ * you come back to it and wrong for the case where you are looking straight at
+ * it: a note written or deleted in another window left the list showing what it
+ * showed when you last clicked on it.
+ *
+ * Rust emits from the two commands that can change what the list says — a
+ * write and a delete. Returns a function that stops listening.
+ */
+export function onNotesChanged(changed: () => void): () => void {
+  const listening = listen('notes-changed', () => changed()).catch(() => undefined);
+
+  return () => {
+    void listening.then((stop) => stop?.());
+  };
 }

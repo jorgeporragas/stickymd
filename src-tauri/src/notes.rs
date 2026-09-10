@@ -7,7 +7,7 @@
 use std::path::{Component, Path, PathBuf};
 
 use serde::Serialize;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 use crate::index::{self, IndexLock};
 
@@ -282,6 +282,17 @@ fn free_name(dir: &Path, slug: &str) -> String {
 ///
 /// Callers debounce. Never call this on every keystroke — CLAUDE.md section
 /// 'Backend'.
+/// The event the hub listens for: something in the notes folder changed.
+///
+/// Emitted by the two commands that can change what the list shows — a note
+/// being written and a note being deleted. The hub refreshed only when it was
+/// focused before this existed, so a note written in another window left it
+/// showing yesterday's list until someone clicked on it.
+///
+/// Broadcast rather than addressed: the hub may not be open, and nothing else
+/// listening is harmed by knowing.
+pub const NOTES_CHANGED: &str = "notes-changed";
+
 #[tauri::command]
 pub fn save_note(
     app: AppHandle,
@@ -301,6 +312,10 @@ pub fn save_note(
             index::rename_entry(&dir, previous, &name)?;
         }
     }
+
+    // The list shows a title and a modified time, and a write can change
+    // either — including the filename, when the first line changed.
+    let _ = app.emit(NOTES_CHANGED, ());
 
     Ok(name)
 }
@@ -337,6 +352,7 @@ fn save_into(
     }
 
     std::fs::write(dir.join(&name), body)?;
+
     Ok(name)
 }
 
@@ -375,7 +391,11 @@ pub fn delete_note(
     trash::delete(&path).map_err(|error| NoteError::Trash { message: error.to_string() })?;
 
     let _guard = index::guard(&lock)?;
-    index::forget_entry(&dir, &name)
+    index::forget_entry(&dir, &name)?;
+
+    let _ = app.emit(NOTES_CHANGED, ());
+
+    Ok(())
 }
 
 #[cfg(test)]

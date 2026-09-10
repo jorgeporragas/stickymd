@@ -205,6 +205,8 @@ Dimensions are a window property, not a style: they live in `src-tauri/tauri.con
 
 A taller window listing every note, newest first. Its heading and its empty state are set in the display face; everything a note contains stays in the content face, which is Principle 1 applied across windows rather than only within one.
 
+**The list is live.** Rust emits `notes-changed` whenever a note is written or deleted and the hub re-reads on it, so a note written in another window moves in a hub that is merely open rather than one that is focused. It re-reads on focus as well: the event covers a change this application made, focus covers one it did not — a note edited elsewhere, or dropped into the folder. Newest first means a note being typed in climbs to the top while you watch, which is the list being true rather than restless.
+
 It is defined in `src-tauri/tauri.conf.json` with `create: false`, so its dimensions live in the same place as the note window's without a window being built at startup. There is only ever one hub: a second list of the same notes would be two things to keep in step for no gain.
 
 ---
