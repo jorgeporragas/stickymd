@@ -668,7 +668,7 @@ State:   shipped
 Created: 2026-09-10
 History:
   2026-09-10  reported by the founder
-  2026-09-10  shipped — commit pending
+  2026-09-10  shipped — commit 32ccdcc
 Notes: "Bulleted list" and "Numbered list" ran wide enough that the pill met the bubbles either side of it. `RadialAction` takes a `short` now — `* list` and `# list`, markdown's own marks, which are the shortest true names these have.
   **`label` stays the accessible name.** A screen reader saying "star list" would be worse than one saying "bulleted list", and the reason to shorten is entirely about a pill bumping into buttons — which is a fact about the ring, not about the action.
   Measured after: every label clears the nearest bubble, `* list` and `# list` by 19px. **`Code block` is now the tightest at 84px wide and 11px clear** — it does not touch, and it was not reported, so it is left as it is and named here rather than changed unasked.
@@ -679,7 +679,7 @@ State:   shipped
 Created: 2026-09-10
 History:
   2026-09-10  logged by the founder
-  2026-09-10  shipped — commit pending
+  2026-09-10  shipped — commit 32ccdcc
 Notes: The theme was a Dark switch and a Follow-the-system switch, and the founder is right that it should never have been: two controls for one setting means every combination has to be given a meaning, including the ones that have none. One `Theme` field now holds three radios — Light, Dark, Follow.
   Built from what exists. `Toggle` gained a `role` of `switch` or `radio`; the control looks identical and the difference is what it is announced as, since "switch, off" said three times over a three-way choice describes the wrong thing. A radio pressed while already on does nothing — you cannot deselect one of three themes into having none.
   The captions are load-bearing. Three identical discs with no words is a puzzle, and this is the one control in the window where which is which cannot be inferred from position.
@@ -690,7 +690,7 @@ State:   shipped
 Created: 2026-09-10
 History:
   2026-09-10  reported by the founder
-  2026-09-10  shipped — commit pending
+  2026-09-10  shipped — commit 32ccdcc
 Notes: "It's first kind of grayish and then the actual window builds." The cause is that windows were created *visible*: a transparent window exists before its web view has painted anything, and what fills that gap is the compositor's own backdrop.
   **The founder's proposed fix was the wrong way round, and worth saying so.** He suggested letting the layout build and turning transparency on a few milliseconds later. But the transparency is there from the first instant — it is the paint that is missing, and holding the blur back would replace a grey translucent pane with a grey opaque one. Same flash, different colour.
   So the windows are built hidden and each shows itself once it has painted. Two animation frames, not one: `requestAnimationFrame` fires *before* the paint it is scheduled alongside, and the second callback is the earliest moment the surface is really on screen.
