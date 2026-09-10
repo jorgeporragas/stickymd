@@ -131,12 +131,34 @@ fn main() {
         })
         .build(tauri::generate_context!())
         .expect("sticky.md failed to start")
-        .run(|_app, event| {
+        .run(|app, event| match event {
             // Closing the last note window must not end the application: it is
             // tray-resident, and the global shortcut has to have something to
             // reach. An explicit exit carries a code and is honoured.
-            if let tauri::RunEvent::ExitRequested { api, code: None, .. } = event {
+            //
+            // Cmd+Q is not caught here and does not need to be. macOS quits
+            // through `terminate:`, which never asks the run loop — so the
+            // guard cannot swallow it, and the one gesture every Mac user
+            // reaches for still works.
+            tauri::RunEvent::ExitRequested { api, code: None, .. } => {
                 api.prevent_exit();
+            }
+            // The Dock icon, clicked with nothing on screen. macOS asks the
+            // application what it would like to do about that, and the answer
+            // is the one the tray already gives a left click: bring the notes
+            // back. They are the same gesture on two platforms.
+            //
+            // Unanswered, the Dock icon does nothing at all, which reads as a
+            // broken application rather than as a resident one.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { has_visible_windows: false, .. } => {
+                if let Err(error) = windows::open_hub(app) {
+                    eprintln!("sticky.md: the Dock could not open the hub: {error}");
+                }
+            }
+            _ => {
+                // Read on macOS alone, where there is a Dock to click.
+                let _ = app;
             }
         });
 }

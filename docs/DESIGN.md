@@ -223,6 +223,14 @@ The rim is the one proportion that does *not* follow the interface. A control's 
 
 Temporary, at the founder's word, until he draws the mark properly.
 
+### In the macOS menu bar
+
+The mark cannot go there. A menu-bar extra is a **template image**: macOS reads its alpha channel alone and paints the result itself, so the icon follows the bar's own light or dark and its vibrancy — and a full-colour disc reduced to a silhouette is a filled circle with the S gone.
+
+So the menu bar gets **the letter by itself**, drawn from the same 5x8 lattice the SVG uses, in `src-tauri/src/tray.rs`. Not a second drawing of the mark: the same grid, at a size a menu bar can render. Every other platform's tray keeps the mark as it is.
+
+Three numbers, and all three follow from one fact: `tray-icon` shows every macOS tray image at **18 points tall** and scales the width to match. So the pixel height is what decides whether it is crisp — **36** lands 1:1 on a Retina display and halves exactly on any other. **Three pixels to a lattice cell** puts the glyph at 12 points, a cap height that sits beside the menu bar's own 14-point text rather than towering over it. And **4px of padding either side, 6px above and below**, is what keeps it off its neighbours: 23x36 in all, shown at 11.5x18pt.
+
 
 ## Iconography
 

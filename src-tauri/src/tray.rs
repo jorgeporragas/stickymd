@@ -5,8 +5,10 @@
 //! ending it — that is what makes a note summonable a second later without a
 //! cold start.
 //!
-//! The tray is also the only visible affordance for quitting, because the
-//! windows have no menu bar and closing one does not exit.
+//! The tray is also the only visible affordance for quitting on Windows,
+//! because the windows have no menu bar and closing one does not exit. macOS
+//! has its own: Tauri installs a menu there whether or not one is displayed,
+//! and Cmd+Q reaches it.
 
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -81,6 +83,62 @@ fn set_autostart(app: &AppHandle, item: &CheckMenuItem<tauri::Wry>) {
     let _ = item.set_checked(launcher.is_enabled().unwrap_or(false));
 }
 
+/// The letter S from the application mark, as a 5x8 lattice.
+///
+/// macOS menu-bar extras are *template* images: the system reads the alpha
+/// channel alone and paints the result itself, so the icon follows the bar's
+/// own light or dark and its own vibrancy. The full-colour disc that
+/// `default_window_icon()` returns is not one — as a silhouette it is a filled
+/// circle, and the S disappears into it. So the menu bar gets the letter by
+/// itself, which is the part of the mark that identifies it anyway.
+///
+/// Transcribed from assets/icon/stickymd.svg, where the glyph is already drawn
+/// as 30-unit rectangles on exactly this grid rather than as text. It is not a
+/// second drawing of the mark; it is the same lattice at a size a menu bar can
+/// render.
+#[cfg(target_os = "macos")]
+const MENU_BAR_GLYPH: [&str; 8] =
+    [".###.", "#...#", "#....", ".###.", "....#", "....#", "#...#", ".###."];
+
+/// Draw that lattice for the menu bar.
+///
+/// `tray-icon` shows every macOS tray image at 18 points tall and scales the
+/// width to match, so the pixel height chosen here is what decides whether it
+/// is crisp: 36 lands 1:1 on a Retina display and halves exactly on any other.
+/// Within that, three pixels to a cell puts the glyph at 12 points — a cap
+/// height that sits beside the menu bar's own 14-point text rather than
+/// towering over it — and the padding is what keeps it off its neighbours.
+#[cfg(target_os = "macos")]
+fn menu_bar_mark() -> tauri::image::Image<'static> {
+    const CELL: usize = 3;
+    const PAD_X: usize = 4;
+    const PAD_Y: usize = 6;
+    const WIDTH: usize = 5 * CELL + PAD_X * 2;
+    const HEIGHT: usize = 8 * CELL + PAD_Y * 2;
+
+    // Transparent everywhere the glyph is not. What lies under the alpha is
+    // never shown — macOS recolours a template image outright — so leaving the
+    // colour channels at zero is a convention here rather than a choice.
+    let mut rgba = vec![0u8; WIDTH * HEIGHT * 4];
+
+    for (row, cells) in MENU_BAR_GLYPH.iter().enumerate() {
+        for (column, cell) in cells.bytes().enumerate() {
+            if cell != b'#' {
+                continue;
+            }
+
+            for y in 0..CELL {
+                for x in 0..CELL {
+                    let at = ((PAD_Y + row * CELL + y) * WIDTH + PAD_X + column * CELL + x) * 4;
+                    rgba[at + 3] = 255;
+                }
+            }
+        }
+    }
+
+    tauri::image::Image::new_owned(rgba, WIDTH as u32, HEIGHT as u32)
+}
+
 pub fn install(app: &AppHandle) -> tauri::Result<()> {
     // Bound separately: a slice needs one type, and these are several.
     let new_note_item = MenuItem::with_id(app, NEW_NOTE, "New note", true, None::<&str>)?;
@@ -132,6 +190,11 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let autostart_checkbox = autostart_item.clone();
     let dark_checkbox = dark_item.clone();
 
+    // The menu bar gets the template; every other tray gets the mark itself.
+    #[cfg(target_os = "macos")]
+    let icon = menu_bar_mark();
+
+    #[cfg(not(target_os = "macos"))]
     let icon = app.default_window_icon().cloned().ok_or_else(|| {
         tauri::Error::Io(std::io::Error::new(
             std::io::ErrorKind::NotFound,
@@ -141,6 +204,10 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
 
     TrayIconBuilder::with_id("tray")
         .icon(icon)
+        // Ignored everywhere but macOS, and stated as a fact about the icon
+        // rather than as a platform branch: the image above *is* a template on
+        // one platform and is not on the others.
+        .icon_as_template(cfg!(target_os = "macos"))
         .tooltip("sticky.md")
         .menu(&menu)
         // The menu belongs on the right button. Left-clicking a tray icon to be

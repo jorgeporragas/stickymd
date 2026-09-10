@@ -1,0 +1,59 @@
+# Compiles the application on macOS, on every push.
+#
+# This exists because of an asymmetry rather than for its own sake. Windows is
+# compiled and tested on the founder's machine before anything is committed;
+# macOS is not compiled anywhere, by anyone, until a tag is pushed — and the
+# macOS code is written on Windows, where every `#[cfg(target_os = "macos")]`
+# branch is invisible to the compiler. Cross-compiling it locally is not an
+# option either: `objc2-exception-helper` builds a `.m` file, which needs
+# clang and the macOS SDK.
+#
+# So the choice was between proving the macOS build by cutting a release and
+# proving it on every push. This is the second one. It builds nothing anybody
+# downloads and holds no secrets; the release workflow remains the only thing
+# that produces an artefact.
+#
+# The tests are the point rather than a bonus: they cover path and name
+# validation, which is the code that handles untrusted input, and its rules
+# are the ones most likely to differ on a platform whose filesystem is not
+# Windows'.
+
+name: Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+# Reads the repository and writes nothing.
+permissions:
+  contents: read
+
+# A push landing on top of another only needs the newer one checked.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: Apple Silicon
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustup target add aarch64-apple-darwin
+          rustc --version
+
+      # Builds every target in the crate, which is what makes this worth
+      # running: the binary compiles, so the macOS branches in `surface.rs`,
+      # `tray.rs` and `main.rs` have been through a compiler.
+      - name: Test
+        working-directory: src-tauri
+        run: cargo test

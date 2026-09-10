@@ -6,21 +6,23 @@ Everything with a state. This is the only file permitted to contain statements t
 
 ## Current Phase
 
-**Build** — Phase 7 — Release & Auto-Update
+**Build** — Phase 6 — Cross-Platform Expansion, macOS first and then Linux.
 
-Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by the workflow on a clean runner and published with both assets. Phase 6 — Cross-Platform Expansion is deliberately skipped for now, not finished: `MASTER.md` says the numbering records the order phases were defined in rather than a plan with an ending, and the founder wants auto-update before macOS and Linux.
+Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by the workflow on a clean runner and published with both assets. Phase 7 — Release & Auto-Update was taken before Phase 6 at the founder's direction and `v1.1.0` shipped from it on 2026-09-10; `MASTER.md` says the numbering records the order phases were defined in rather than a plan with an ending.
+
+**Closing Phase 7 is still owed** — the truth check, which the last one earned: it found 38 shipped items citing no commit and the missing pre-commit check that let them through. Phase 6 opened before it, at the founder's word.
 
 ## Current Active Step
 
-**v1.1.0 is published** — tagged and released 2026-09-10, carrying SMD-082 through SMD-091. Recorded here because it was not: the bump commit landed after STATUS was last written, and reconciliation at the next session start is what caught it.
+**macOS is written through step 5 of SMD-095's order and verified on no Mac.** SMD-096 carries the work. Steps 1 to 3 landed in `2ec1da6`; steps 4 and 5 — the menu-bar mark, and the window behaviour that turned out to need reading rather than writing — landed today.
 
-**Phase 6 — Cross-Platform Expansion is the founder's next direction, macOS first, then Linux.** He has a Mac to test on, which is what makes it worth starting: the parts that matter are exactly the parts CI cannot judge.
+**What is left is mostly the founder's**, and it is the part that was always going to be: the vibrancy material, the menu-bar mark beside real system icons, whether an undecorated window can still be resized from its edges, and whether a Dock icon alongside a menu-bar extra is the right shape for something that lives in the tray.
 
-Three of his own items shipped today — SMD-092, SMD-093, SMD-094 — all colour and motion, none of them touching what Phase 6 will.
+**Step 6, the updater, waits on two things.** The six Apple secrets, listed in SMD-096, which are his to create and which nobody here should ever see. And one macOS build proving the job runs — the new Check workflow answers that on the next push rather than costing a tag.
+
+**A date to be careful with.** Items SMD-092 through SMD-095 are logged as created 2026-09-11. The commits carrying them are dated 2026-09-10 and the machine agrees, so the day is right and the log is a day ahead. Left as written rather than quietly corrected; worth a glance at the next truth check.
 
 The rest of the log is ideas: SMD-001 search, SMD-002 custom themes, SMD-010 signing, SMD-011 winget and Scoop, SMD-052 line boil.
-
-**Closing Phase 7 is owed before Phase 6 opens.** That means the truth check, and the last one earned its keep: it found 38 shipped items citing no commit and the missing pre-commit check that let them through.
 
 ---
 
@@ -664,12 +666,40 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-096] sticky.md on macOS
+Type:    feature
+State:   active
+Created: 2026-09-10
+History:
+  2026-09-10  opened — the build half of SMD-095's scoping pass
+  2026-09-10  steps 1 to 3 — commit 2ec1da6
+Notes: Built in the order SMD-095 set, which put the unverifiable parts last on purpose.
+
+  **Steps 1 to 3, in `2ec1da6`.** `window-vibrancy` off the Windows-only gate; a macOS arm in `surface.rs` using `NSVisualEffectMaterial::Sidebar` with `NSVisualEffectState::Active`; `bundle.targets` gaining `app` and `dmg`; the Cmd+Option chord bug; and a `macos` CI job that runs after `windows` because both write the same draft release and the same `latest.json`.
+
+  **Step 4 — the menu bar.** The mark cannot go there. A menu-bar extra is a template image: macOS reads the alpha channel alone and paints the result itself, so a full-colour disc reduced to a silhouette is a filled circle with the S gone. The menu bar gets the letter by itself, drawn in `tray.rs` from the same 5x8 lattice the SVG uses; the numbers and why they are those numbers are in `docs/DESIGN.md`. The transcription was checked against the SVG programmatically rather than by eye — the rectangles parsed out of `assets/icon/stickymd.svg`, reduced to a lattice, and compared against the array in the Rust.
+
+  **Step 5 turned out to need reading rather than writing.** Four of the five questions it asked are answered by construction, and finding that out is the work:
+  - **Cmd+Q already works, and the tray-residency guard cannot swallow it.** `prevent_exit` fires on `ExitRequested { code: None }`, and in `tauri-runtime-wry` that variant is reachable only from the last-window-destroyed path. macOS quits through `terminate:`, which never asks the run loop at all.
+  - **Copy and paste already work.** Tauri installs `Menu::default` on macOS unless told not to, and it carries an Edit submenu. A WKWebView needs those menu items or Cmd+C and Cmd+V do nothing — a bug this application would have shipped without ever writing the line that caused it.
+  - **The window is resizable.** `tao` sets `Borderless | Resizable` when `decorations: false`, so the style mask is right. Whether the edges can be *reached* over a WKWebView filling the frame is something to look at on a Mac, not something to read.
+  - **Dragging** is `data-tauri-drag-region` in `WindowChrome.svelte`, which wry implements on macOS.
+
+  The one real gap was the Dock. With every window closed, clicking the Dock icon did nothing — which reads as a broken application rather than a resident one. `RunEvent::Reopen` now opens the hub, the same answer the tray already gives a left click.
+
+  **The activation policy is left at Regular, deliberately.** Accessory would drop the Dock icon and match the Windows shape exactly, and it is one line. It is not taken because the menu bar is what makes Cmd+Q and the clipboard work, and whether an accessory app keeps its key equivalents without one needs a Mac to answer rather than a guess. The founder's call, once he can see both.
+
+  **What the founder must create** before step 6 can notarise anything, none of which should ever be pasted into a conversation: `APPLE_CERTIFICATE` (a Developer ID Application certificate, base64 `.p12`), `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` (an app-specific password rather than his own), `APPLE_TEAM_ID`. Without them the build still succeeds and produces an unsigned `.app` that Gatekeeper refuses.
+
+  **A Check workflow landed alongside**, because the asymmetry it removes is what made steps 1 to 5 uncomfortable: Windows is compiled before every commit, and macOS was compiled by nobody until a tag was pushed. It cannot be done locally either — cross-compiling stops at `objc2-exception-helper`, which builds a `.m` file and wants clang and the macOS SDK. `docs/FIXES.md` carries that so the next session does not spend an afternoon on it.
+
 ### [SMD-095] Scoping macOS
 Type:    chore
-State:   active
+State:   shipped
 Created: 2026-09-11
 History:
   2026-09-11  asked for by the founder, before any macOS code is written
+  2026-09-10  shipped — commit 46573c1. Held open while there was no item to hand the order to; SMD-096 is that item, and a scoping pass whose output is being built from is finished.
 Notes: A read of what is actually Windows-specific, so Phase 6 starts from evidence rather than from a guess about how much there is.
   **The headline is that there is less than expected, and CLAUDE.md's cross-platform section is why.** Modifiers already resolve through `Mod`/`CmdOrCtrl` and are never written literally; every path is a `PathBuf`; deletion goes through the `trash` crate; the chrome is custom, so there are no native decorations to lose. Rust has **five** platform branches in total and all five are in `surface.rs`. Those rules were written on day one for a build target that did not exist yet, and they are the reason this is a week rather than a rewrite.
 
