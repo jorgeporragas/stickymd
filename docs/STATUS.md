@@ -18,6 +18,8 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **What is left is mostly the founder's**, and it is the part that was always going to be: the vibrancy material, the menu-bar mark beside real system icons, whether an undecorated window can still be resized from its edges, and whether a Dock icon alongside a menu-bar extra is the right shape for something that lives in the tray.
 
+**The Check job earned itself on its first run**, finding SMD-097 — a note name carrying the other platform's separator, in the code CLAUDE.md names as handling untrusted input. It had been asserted by a test since the day the test was written and no compiler had ever run it.
+
 **Step 6, the updater, waits on two things.** The six Apple secrets, listed in SMD-096, which are his to create and which nobody here should ever see. And one macOS build proving the job runs — the new Check workflow answers that on the next push rather than costing a tag.
 
 **A date to be careful with.** Items SMD-092 through SMD-095 are logged as created 2026-09-11. The commits carrying them are dated 2026-09-10 and the machine agrees, so the day is right and the log is a day ahead. Left as written rather than quietly corrected; worth a glance at the next truth check.
@@ -665,6 +667,23 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
+
+### [SMD-097] A note name could carry the other platform's separator
+Type:    bug
+State:   shipped
+Created: 2026-09-10
+History:
+  2026-09-10  found by the macOS Check job on its first run
+  2026-09-10  shipped — commit 2784945
+Notes: `safe_name` accepted `..\escape.md`, and `nested\note.md` and `C:\absolute.md` with it.
+
+  `Path::components` knows only the separators of the machine it is running on. On Unix a backslash is an ordinary character, so `..\escape.md` arrives as a single `Normal` component and passes the check — while that same name is a traversal on Windows.
+
+  **The test had asserted all three since the day it was written.** Only Windows had ever run it, and on Windows the component check catches them for free, so the gap could not show. This is the first thing the macOS job found and it found it in the code CLAUDE.md names as handling untrusted input.
+
+  Worth being exact about the severity, in both directions. On macOS it is not an escape: a file called `..\escape.md` is a legal, ugly filename inside the notes folder and goes nowhere. What it is, is a name that stops being safe the moment the folder is opened on Windows or synced to it — and the notes folder is deliberately a folder of plain files that people are expected to sync, grep and open elsewhere.
+
+  Fixed by rejecting both separators outright on every platform, **in addition to** the component check rather than instead of it — the doc comment says which catches what, because a future reader seeing a substring check where the comment forbids one would be right to be suspicious. Nothing legitimate is refused: `slugify` keeps alphanumerics and turns everything else into a hyphen, so it cannot produce either separator.
 
 ### [SMD-096] sticky.md on macOS
 Type:    feature

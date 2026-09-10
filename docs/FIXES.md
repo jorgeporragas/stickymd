@@ -356,3 +356,25 @@ Never:    Never take a macOS branch as compiled because `cargo check` passed
           it is the only compiler that sees that code before a tag is pushed,
           and the alternative is proving the build by cutting a release. After
           changing anything under a macOS cfg, watch Check on the push.
+
+### `Path::components` only knows this platform's separators
+Area:     The sidecar index, and note file rename and deduplication logic
+Date:     2026-09-10
+Commit:   2784945
+Problem:  `safe_name` rejected anything that was not a single ordinary path
+          component, which is the right rule and was not enough. On Unix a
+          backslash is an ordinary character, so `..\escape.md` arrives as one
+          `Normal` component and passes — and so do `nested\note.md` and
+          `C:\absolute.md`. The same names are traversals on Windows, where the
+          component check catches them for free, which is exactly why the gap
+          could not show: the test asserted all three from the day it was
+          written and only Windows had ever run it.
+Fix:      Reject `/` and `\` outright, on every platform, *before* the
+          component check — an addition to that rule, not a replacement for it.
+          The doc comment on `safe_name` says which check catches what.
+Never:    Never remove the separator check as redundant because the component
+          check "already handles paths": it handles them on the platform doing
+          the compiling, and this validates a name that will be read on the
+          others. Equally, never let it replace the component check — `..` and
+          a Windows stream name like `note.md:evil` carry no separator at all.
+          Any change here runs on macOS as well as Windows before it lands.
