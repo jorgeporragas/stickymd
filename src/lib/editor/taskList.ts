@@ -44,10 +44,17 @@ class CheckboxWidget extends WidgetType {
     box.setAttribute('aria-checked', String(this.checked));
     box.setAttribute('aria-label', this.checked ? 'Done' : 'Not done');
 
-    if (this.checked) {
-      box.innerHTML =
-        '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 6.2 5 8.2 9 4"/></svg>';
-    }
+    // The tick is always here and hidden when the box is empty, rather than
+    // added when it is ticked.
+    //
+    // This is a baseline rule, not a style choice. An `inline-grid` with no
+    // in-flow content takes its baseline from its own bottom edge; one with
+    // content takes it from the content. So a box that gained the tick on
+    // being ticked changed where its baseline was, and `vertical-align` then
+    // put it 2.25px lower — measured — which reads as the box dropping when
+    // you press it. Keeping one child in both states keeps the baseline still.
+    box.innerHTML =
+      '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 6.2 5 8.2 9 4"/></svg>';
 
     return box;
   }

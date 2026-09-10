@@ -76,6 +76,10 @@ Both modes read from the same semantic tokens. A component never branches on sur
 
 `revealWindow` waits two animation frames, since one fires *before* the paint it is scheduled alongside, then hands over to `reveal_window` in Rust — which shows, focuses, and applies the surface **again**, because a backdrop set on a window nobody has shown yet is one the compositor has had no reason to compose. Rust also shows any window still hidden after two seconds: a front end that never runs would otherwise leave the application invisible, which is a worse failure than the flash this replaced.
 
+**A window opens opaque and dissolves into glass.** Even shown at the right moment, the compositor's blur is not always composed by the first frame, and a window that painted its tint straight away showed the desktop through it *unblurred* for a fraction of a second. So every window paints Solid to begin with, whatever mode it is in, and `settleSurface` lets it become glass a frame after it is up. There is then no moment where a window is pretending to be transparent over something that is not yet frosted.
+
+The dissolve is `.surface`'s own `background-color` transition. That is the tint layer being animated over a backdrop that does not change — the sanctioned case in **Never Allowed** below, not the forbidden one: nothing is re-blurred per frame.
+
 ---
 
 ## Token contract
@@ -256,7 +260,7 @@ So a window arrives by the light on it rather than by moving: a sheen across the
 |---|---|
 | Animate blur radius | Switch between discrete blur states |
 | Animate a window's opacity | Animate `transform` and `box-shadow` |
-| Animate the alpha of a large glass surface | Animate the tint layer above it — a paint, not a re-blur |
+| Animate the alpha of a large glass surface | Animate the tint layer above it — a paint, not a re-blur. A window dissolving from Solid into Glass on arrival *is* this: `background-color` over a constant backdrop |
 | `backdrop-filter` for the primary window surface | OS compositor blur, applied from Rust. A **control** is the exception, and the only one: it sits over the app's own content, which is all that filter can see — `--gloss-blur`, ADR-039 |
 | A static colour value in a component | A semantic token |
 | Spacing or radius outside the scale | A scale token |

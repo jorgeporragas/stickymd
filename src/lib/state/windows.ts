@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { settleSurface } from './surface';
 
 /**
  * Opening note windows.
@@ -65,4 +66,10 @@ export async function revealWindow(): Promise<void> {
     // No backend — the window is being served in a plain browser for testing,
     // where there is nothing to show and nothing was ever hidden.
   }
+
+  // Opaque until here, then it dissolves into glass — see `settleSurface`.
+  // The hold is a frame rather than a duration: the window has been shown and
+  // the backdrop asked for again, and the dissolve is long enough to cover
+  // whatever the compositor still owes.
+  requestAnimationFrame(() => settleSurface());
 }

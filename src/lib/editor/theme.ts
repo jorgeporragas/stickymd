@@ -96,6 +96,11 @@ export const editorTheme = EditorView.theme({
     background: 'var(--gloss-tinted)'
   },
 
+  // Hidden rather than absent — see `taskList.ts`. `visibility` keeps the
+  // element in flow, which is the whole point: it is what holds the box's
+  // baseline still between ticked and not.
+  '.cm-md-task[data-checked="false"] svg': { visibility: 'hidden' },
+
   '.cm-md-task svg': {
     width: '0.7em',
     height: '0.7em',

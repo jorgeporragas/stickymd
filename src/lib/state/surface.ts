@@ -17,6 +17,14 @@ import { listen } from '@tauri-apps/api/event';
  */
 export type SurfaceMode = 'glass' | 'solid';
 
+/**
+ * The mode this window will settle into, while it is still painted opaque.
+ *
+ * Undefined once it has settled, or when it was Solid to begin with and there
+ * is nothing to settle into.
+ */
+let settling: SurfaceMode | undefined;
+
 export async function applySurfaceMode(): Promise<SurfaceMode> {
   let mode: SurfaceMode = 'solid';
 
@@ -27,10 +35,22 @@ export async function applySurfaceMode(): Promise<SurfaceMode> {
     // testing. Solid is the honest answer: there is no compositor here.
   }
 
-  document.documentElement.dataset.surface = mode;
+  // **Painted opaque first, whatever the mode.** A window is shown the instant
+  // it has painted (SMD-089), and the compositor's blur is not always composed
+  // by then — so a window that painted its glass straight away showed the
+  // desktop through it, unblurred, for a fraction of a second. Opening as a
+  // solid card and dissolving into glass is the founder's own suggestion and
+  // the right one: there is no moment where the window is pretending to be
+  // transparent over something that is not yet frosted.
+  document.documentElement.dataset.surface = 'solid';
+  settling = mode === 'glass' ? mode : undefined;
 
   try {
+    // A change *after* the window is up applies at once. The deferral above is
+    // about arriving, not about the setting: someone switching transparency off
+    // is watching for it to happen.
     await listen<SurfaceMode>('surface-changed', (event) => {
+      settling = undefined;
       document.documentElement.dataset.surface = event.payload;
     });
   } catch {
@@ -38,4 +58,19 @@ export async function applySurfaceMode(): Promise<SurfaceMode> {
   }
 
   return mode;
+}
+
+/**
+ * Let the window become glass, once it is on screen and frosted.
+ *
+ * The fade itself is `.surface`'s own `background-color` transition — a paint
+ * over a backdrop that does not change, which is the tint layer `docs/DESIGN.md`
+ * says to animate rather than the surface's own alpha. Nothing is re-blurred
+ * per frame.
+ */
+export function settleSurface(): void {
+  if (!settling) return;
+
+  document.documentElement.dataset.surface = settling;
+  settling = undefined;
 }
