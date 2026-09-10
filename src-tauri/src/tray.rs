@@ -36,6 +36,13 @@ fn new_note(app: &AppHandle) {
 ///
 /// Every open window is told rather than left stale: a theme that only applies
 /// to windows opened afterwards is a setting that appears not to work.
+///
+/// The check mark means *explicitly dark*, not *currently dark*. A third
+/// preference exists — `system` — and this side cannot resolve it: the
+/// operating system's theme is something a window can be told, and Rust would
+/// have to ask one to find out. So following the system leaves this unchecked,
+/// and ticking it is how you stop following and choose dark outright. The
+/// settings window is where the three-way lives, and it says which one is on.
 fn set_dark(app: &AppHandle, item: &CheckMenuItem<tauri::Wry>) {
     let mut settings = settings::load(app);
     settings.theme = if settings.theme == "dark" { "frost".into() } else { "dark".into() };

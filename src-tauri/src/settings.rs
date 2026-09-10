@@ -29,8 +29,14 @@ pub const DEFAULT_NEW_NOTE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
     pub new_note_shortcut: String,
-    /// The application-wide theme. Notes carry a tint of their own; the theme
-    /// decides the ink. See ADR-024.
+    /// The application-wide theme preference: `frost`, `dark`, or `system`.
+    ///
+    /// A *preference*, not a theme — `system` is resolved by each window, in
+    /// `src/lib/state/theme.ts`, because the operating system's setting is
+    /// something a window can ask for and be told about and this side cannot.
+    /// Stored here as the string it arrives as and never interpreted.
+    ///
+    /// Notes carry a tint of their own; the theme decides the ink. See ADR-024.
     pub theme: String,
     /// The formatting chords, inside a note window.
     ///

@@ -3,6 +3,7 @@
   import Field from '../../lib/components/Field.svelte';
   import ChordInput from '../../lib/components/ChordInput.svelte';
   import Toggle from '../../lib/components/Toggle.svelte';
+  import { applyPreference, type Theme, type ThemePreference } from '../../lib/state/theme';
   import {
     checkForUpdate,
     installUpdate,
@@ -35,6 +36,9 @@
   );
 
   onMount(async () => {
+    // What the window is painted in right now, which `applyTheme` has already
+    // resolved and applied by the time this component mounts.
+    resolved = (document.documentElement.dataset.theme as Theme) ?? 'frost';
     VERSION = await runningVersion();
 
     const loaded = await readPreferences();
@@ -42,13 +46,49 @@
     shortcutProblem = loaded.shortcutProblem ?? undefined;
   });
 
+  /**
+   * What this window is painted in, as against what is stored.
+   *
+   * `following` means the stored preference is `system`, and then the theme is
+   * whatever the operating system says — so the Dark toggle below reads the
+   * resolved value rather than the preference. A control that showed "off"
+   * while the window was plainly dark would be lying about the thing it is
+   * pointing at.
+   */
+  let resolved = $state<Theme>('frost');
+  const following = $derived(prefs?.theme === 'system');
+
+  /**
+   * Turning Dark on or off is always an explicit choice, and taking it stops
+   * following the system.
+   *
+   * The alternative was to grey this out while following, and a dead control
+   * is a worse answer than one that means what it does: this is how you leave
+   * system mode, and you leave it by saying what you want instead.
+   */
   async function toggleDark(on: boolean): Promise<void> {
-    const theme = on ? 'dark' : 'frost';
+    const theme: ThemePreference = on ? 'dark' : 'frost';
     if (prefs) prefs.theme = theme;
+
     // Applied here as well as saved: this window listens for the same event it
     // is about to cause, but seeing it happen should not wait on a round trip.
-    document.documentElement.dataset.theme = theme;
+    resolved = await applyPreference(theme);
     await setTheme(theme);
+  }
+
+  /**
+   * Follow the system, or stop following it.
+   *
+   * Stopping pins whatever is on screen at that moment rather than snapping to
+   * a default — turning the switch off should change nothing you can see, and
+   * only change what happens at sunset.
+   */
+  async function toggleFollow(on: boolean): Promise<void> {
+    const preference: ThemePreference = on ? 'system' : resolved;
+    if (prefs) prefs.theme = preference;
+
+    resolved = await applyPreference(preference);
+    await setTheme(preference);
   }
 
   async function toggleStartup(on: boolean): Promise<void> {
@@ -211,9 +251,23 @@
         </div>
       </div>
     {:else}
-      <Field label="Dark" note="Applies to every window, including the ones already open.">
+      <Field
+        label="Follow the system"
+        note="Match Windows, and change with it."
+      >
         {#snippet control()}
-          <Toggle on={prefs?.theme === 'dark'} label="Dark theme" onChange={toggleDark} />
+          <Toggle on={following} label="Follow the system theme" onChange={toggleFollow} />
+        {/snippet}
+      </Field>
+
+      <Field
+        label="Dark"
+        note={following
+          ? 'Following the system, which is currently ' + (resolved === 'dark' ? 'dark.' : 'light.')
+          : 'Applies to every window, including the ones already open.'}
+      >
+        {#snippet control()}
+          <Toggle on={resolved === 'dark'} label="Dark theme" onChange={toggleDark} />
         {/snippet}
       </Field>
 

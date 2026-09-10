@@ -161,6 +161,10 @@ Tint selectors are qualified by theme — `[data-theme='dark'][data-tint='sun']`
 
 **Every tint alpha is computed, never chosen.** The tint sits over the compositor's blur, so the ink has to hold 4.5:1 against it over a worst-case wallpaper. In the light theme a coloured tint needs *more* alpha than Clear, because it is darker than white. In the dark theme the worst case inverts to a white wallpaper. A tint whose alpha has not been checked is not a tint yet.
 
+**The stored preference is one of three: Frost, Dark, or *system*.** Only two of them are themes — `system` is resolved per window, in `src/lib/state/theme.ts`, because the operating system's setting is something a window can ask for and be told about while Rust would have to ask a window to find out. Rust stores the string and never interprets it. A window listening for system changes stops listening the moment the preference stops being `system`, or it would repaint over a choice the user had since made explicitly.
+
+The tray's Dark check mark means *explicitly dark*, not *currently dark*: it cannot resolve `system` for the same reason. The settings window is where the three-way lives, and it says which is on.
+
 ### Frost — the default
 
 Colourless frosted glass. The tint is present only so that dark wallpapers cannot swallow the text; it is not perceived as a colour. Warm neutrals, so the surface never reads clinical, and no accent at all — since ADR-025 the only hues are the signals and the notes' own tints.
