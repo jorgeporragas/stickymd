@@ -53,6 +53,7 @@ src-tauri/                Rust backend
     index.rs              the sidecar index
     windows.rs            window lifecycle
     shortcuts.rs          global and in-app shortcuts
+    dev.rs                what marks a debug build — compiled out of a release one
 docs/                     FLOW documentation
 .githooks/                committed git hooks
 ```

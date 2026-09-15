@@ -16,6 +16,7 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use tauri_plugin_autostart::ManagerExt;
 
+use crate::dev;
 use crate::settings;
 use crate::shortcuts::ShortcutStatus;
 use crate::windows;
@@ -194,13 +195,21 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(target_os = "macos")]
     let icon = menu_bar_mark();
 
+    //
+    // A debug build turns the mark's hue instead, which is the one place the
+    // founder actually looks when he means to summon a note. The menu bar
+    // above has no equivalent and needs none: a template image is alpha only,
+    // so there is no colour there to turn — its tooltip carries the name.
     #[cfg(not(target_os = "macos"))]
-    let icon = app.default_window_icon().cloned().ok_or_else(|| {
-        tauri::Error::Io(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            "tauri.conf.json defines no application icon for the tray to use",
-        ))
-    })?;
+    let icon = match dev::tray_mark(app) {
+        Some(mark) => mark,
+        None => app.default_window_icon().cloned().ok_or_else(|| {
+            tauri::Error::Io(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "tauri.conf.json defines no application icon for the tray to use",
+            ))
+        })?,
+    };
 
     TrayIconBuilder::with_id("tray")
         .icon(icon)
@@ -208,7 +217,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
         // rather than as a platform branch: the image above *is* a template on
         // one platform and is not on the others.
         .icon_as_template(cfg!(target_os = "macos"))
-        .tooltip("sticky.md")
+        .tooltip(dev::tooltip())
         .menu(&menu)
         // The menu belongs on the right button. Left-clicking a tray icon to be
         // shown a menu is a Windows convention this app has no reason to

@@ -91,6 +91,10 @@ fn build(app: &AppHandle, template: &str, label: &str) -> Result<WebviewWindow, 
         .build()
         .map_err(|error| NoteError::Io { message: error.to_string() })?;
 
+    // Before it is revealed, so a debug build never shows the real mark even
+    // for a frame. A no-op in a release build.
+    crate::dev::brand(&window);
+
     reveal_eventually(&window);
 
     Ok(window)

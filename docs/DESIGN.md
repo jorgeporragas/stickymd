@@ -223,6 +223,14 @@ The rim is the one proportion that does *not* follow the interface. A control's 
 
 Temporary, at the founder's word, until he draws the mark properly.
 
+### In a development build
+
+The same mark with **only its hue turned**, from the green's 154 to 60 — the amber SMD-093 chose when dark yellow turned out to be olive. Lightness and chroma are held, which is the arithmetic `--swatch-*-engaged` already uses: one colour with the hue rotated reads as the same thing wearing a different coat, where a freshly picked colour reads as a different thing. `#76c893` becomes `#e7a267`; the S is near-black at chroma 0.029 and barely moves, so the disc changes colour and the letter stays the letter.
+
+Computed from the real mark at runtime in `src-tauri/src/dev.rs`, never drawn as a second asset — the mark above is temporary until the founder redraws it, and a hand-maintained dev copy would be the old one the morning after he does.
+
+It exists only where `debug_assertions` does. A released build has no dev mark because it has no code for one.
+
 ### In the macOS menu bar
 
 The mark cannot go there. A menu-bar extra is a **template image**: macOS reads its alpha channel alone and paints the result itself, so the icon follows the bar's own light or dark and its vibrancy — and a full-colour disc reduced to a silhouette is a filled circle with the S gone.

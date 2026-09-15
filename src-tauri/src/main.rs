@@ -6,6 +6,7 @@
 // Release builds must not open a console window behind the app.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod dev;
 mod index;
 mod notes;
 mod preferences;
@@ -61,6 +62,13 @@ fn main() {
             // other, so it is tracked like any other.
             app.state::<windows::OpenNotes>()
                 .register(windows::FIRST_WINDOW, None)?;
+
+            // A debug build wears the mark in another colour and says so in
+            // its title. Nothing here in a release build: the whole module is
+            // gated on `debug_assertions`, so there is no switch to forget.
+            // This covers the window Tauri built from the config; every later
+            // one is branded as it is built.
+            dev::brand_open_windows(app.handle());
 
             // Applies the surface to the window Tauri already built, records
             // the mode, and starts watching for the setting changing under us.
