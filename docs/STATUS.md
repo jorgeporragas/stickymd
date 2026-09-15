@@ -20,6 +20,10 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **SMD-092, SMD-093 and SMD-094 are verified** — the founder confirmed all three in a running window on 2026-09-10, the palette's pop included, which was worth watching because it reversed a retract he had asked for and liked. They are on `main` and in no release: `v1.1.0` predates them, so a tag is owed before anyone but him sees them.
 
+**SMD-099 shipped today** — a debug build wears the mark in amber and says `(dev)` in every window title and the tray tooltip, so the founder stops arriving in the wrong build.
+
+**Building it turned up SMD-100, which is the larger half of the same problem.** The two builds share one settings file, because the config directory is keyed by a bundle identifier that does not vary by profile. His installed application has been writing to the testing notes folder since 2026-09-10, and STATUS said it was not. Corrected; the fix itself is his call and is logged rather than taken.
+
 **One thing came back from that pass.** SMD-098: the placeholder is all but invisible on a tinted dark note, and the same token takes a bare URL with it. Logged at his word rather than built.
 
 **The Check job earned itself on its first run**, finding SMD-097 — a note name carrying the other platform's separator, in the code CLAUDE.md names as handling untrusted input. It had been asserted by a test since the day the test was written and no compiler had ever run it.
@@ -42,7 +46,7 @@ The rest of the log is ideas: SMD-001 search, SMD-002 custom themes, SMD-010 sig
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
 | MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Both halves build and the application runs. |
 | WebView2 | Ships with Windows 11 |
-| Notes folder (dev) | The founder pointed the **dev build** at a folder of its own on 2026-09-10, to keep it out of the notes he actually uses. So `Documents\sticky.md` is the default and the installed build's folder, and is *not* where a `npm run tauri dev` session writes. Anything reading notes off disk during development should ask the application rather than assume the default. |
+| Notes folder | **One folder, for both builds.** The founder set it to `Documents\sticky.md_testing` on 2026-09-10 believing it applied to the dev build alone. It does not: settings live in `%APPDATA%\com.stickymd.app\settings.json`, keyed by the bundle identifier, which is the same string in a debug build and a release one — so the installed application has been writing there too. Verified by reading the file on 2026-09-14. SMD-100 carries the decision; until then, assume any sticky.md on this machine is pointed at `sticky.md_testing`. |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
 ---
@@ -671,6 +675,41 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
+
+### [SMD-100] The dev build and the installed build share one settings file
+Type:    bug
+State:   idea
+Created: 2026-09-14
+History:
+  2026-09-14  found while building SMD-099 — the founder's decision, not logged as accepted
+Notes: Settings live in `%APPDATA%\com.stickymd.app\settings.json`. That path comes from `app_config_dir()`, which is the bundle identifier — `com.stickymd.app` — and the identifier is the same string whether the binary was built by `tauri dev` or by the release workflow. So there is **one** settings file, one shortcut registration and one autostart entry across both builds.
+
+  **The consequence is already real.** On 2026-09-10 the founder pointed "the dev build" at `Documents\sticky.md_testing`. Reading the file today, `notesFolder` is that path — so his *installed* application has been writing there for four days, and `STATUS` said the opposite in as many words. The row is corrected above.
+
+  The sidecar index is not affected: it lives in the notes folder, so it follows wherever the folder points.
+
+  **Why this outranks the icon.** SMD-099 makes the two builds tell themselves apart, which is what he asked for and is worth having. But it labels the problem rather than removing it: the two builds are still one application as far as the disk is concerned, so landing in the wrong one still changes the right one's settings.
+
+  **The fix, and the reason it is his call.** Give the dev build its own identifier — a `tauri.dev.conf.json` passed by the `dev` npm script alone — and it gets its own config directory, its own settings, its own autostart entry. Paired with a `cfg(debug_assertions)` default notes folder, the two builds could not reach each other at all.
+
+  Two things to weigh before doing it. It moves where his dev settings live, so the dev build starts from defaults once. And a config overlay is a weaker guarantee than SMD-099's: `debug_assertions` cannot ship because the compiler decides it, whereas a config file only stays out of a release because the release script does not pass it. That is one line in `package.json` to read, but it is a line rather than a law.
+
+### [SMD-099] Two builds, one face
+Type:    feature
+State:   shipped
+Created: 2026-09-14
+History:
+  2026-09-14  asked for by the founder — "I keep launching the dev build on accident"
+  2026-09-14  shipped — commit bbd97ba
+Notes: Two builds of sticky.md can be on screen at once and nothing tells them apart: same mark, same chromeless windows, same tray. A debug build now wears the mark in a different colour and says `(dev)` wherever a name is written — the tray tooltip, and every window title, which is what the taskbar and Alt+Tab show. The chrome is custom and draws no title of its own, so the title is the only *name* a window of this application has.
+
+  **The mark is derived, not drawn.** `dev.rs` takes whatever `default_window_icon()` returns and turns its hue, rather than carrying a second SVG. `docs/DESIGN.md` says the mark is temporary until the founder draws it properly, and a hand-maintained dev copy would be the old mark the morning after he does. This one cannot go stale.
+
+  Only the hue moves — lightness and chroma are held, which is the arithmetic `--swatch-*-engaged` already uses to make "selected" follow a note's tint. Measured on the mark's five colours: every one sits at hue 154 and lands at 60, the amber SMD-093 chose, with L and C intact to three decimal places. `#76c893` becomes `#e7a267`. The S is `#09180e` at chroma 0.029, so turning its hue moves it to `#1e1106` — still near-black. The disc changes colour and the letter stays the letter.
+
+  **It cannot ship, and that is a property of the compiler rather than of care.** Everything is gated on `debug_assertions`, so a release binary does not contain the code — there is no switch to forget, no asset to exclude from the bundle, and the release workflow needs to know nothing about it. Proven rather than assumed: `cargo check --release` builds clean with every `not(debug_assertions)` half in play.
+
+  The macOS menu bar keeps its template mark. A template image is alpha only, so there is no colour there to turn; its tooltip carries the name instead.
 
 ### [SMD-098] Muted ink goes the wrong way on a tinted dark note
 Type:    bug
