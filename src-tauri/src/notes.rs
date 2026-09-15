@@ -106,11 +106,17 @@ pub fn notes_dir(app: &AppHandle) -> Result<PathBuf, NoteError> {
         return Ok(dir);
     }
 
+    // A debug build defaults somewhere else, so that a development session
+    // starting from no configuration lands in a scratch folder rather than in
+    // the notes the founder actually keeps. It is still only a default: the
+    // settings window can point a development build anywhere, and now that it
+    // has settings of its own (`settings.rs`) doing so leaves the installed
+    // build where it was.
     let dir = app
         .path()
         .document_dir()
         .map_err(|_| NoteError::NoNotesFolder)?
-        .join("sticky.md");
+        .join(if cfg!(debug_assertions) { "sticky.md (dev)" } else { "sticky.md" });
 
     std::fs::create_dir_all(&dir)?;
     Ok(dir)

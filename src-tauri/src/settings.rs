@@ -90,10 +90,32 @@ impl Default for Formatting {
     }
 }
 
+/// A debug build keeps its settings in a file of its own.
+///
+/// The config directory is `app_config_dir()`, which is the bundle identifier
+/// — and the identifier is the same string whether the binary came from
+/// `tauri dev` or from the release workflow. So without this the two builds
+/// share one settings file, and pointing the development build at a scratch
+/// notes folder points the installed one there too. That is the founder's
+/// case exactly, and it is why the two files sit side by side rather than the
+/// development build being told to use a different directory: the same folder
+/// is where he would look for either.
+///
+/// `cfg!` rather than a configuration flag, for the reason `dev.rs` gives: a
+/// release build cannot take the wrong branch, because the branch is not in
+/// it. Nothing in the bundler or the release workflow needs to know.
+fn settings_file() -> &'static str {
+    if cfg!(debug_assertions) {
+        "settings.dev.json"
+    } else {
+        "settings.json"
+    }
+}
+
 fn settings_path(app: &AppHandle) -> Option<PathBuf> {
     let dir = app.path().app_config_dir().ok()?;
     std::fs::create_dir_all(&dir).ok()?;
-    Some(dir.join("settings.json"))
+    Some(dir.join(settings_file()))
 }
 
 /// Read the settings, writing a default file if there is not one yet.
