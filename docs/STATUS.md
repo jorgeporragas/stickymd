@@ -684,7 +684,11 @@ History:
   2026-09-14  found while building SMD-099 — the founder's decision, not logged as accepted
 Notes: Settings live in `%APPDATA%\com.stickymd.app\settings.json`. That path comes from `app_config_dir()`, which is the bundle identifier — `com.stickymd.app` — and the identifier is the same string whether the binary was built by `tauri dev` or by the release workflow. So there is **one** settings file, one shortcut registration and one autostart entry across both builds.
 
-  **The consequence is already real.** On 2026-09-10 the founder pointed "the dev build" at `Documents\sticky.md_testing`. Reading the file today, `notesFolder` is that path — so his *installed* application has been writing there for four days, and `STATUS` said the opposite in as many words. The row is corrected above.
+  **What is demonstrated, and what is not.** On 2026-09-10 the founder pointed "the dev build" at `Documents\sticky.md_testing`. The settings file says exactly that and has not been written since 2026-09-10 14:13, so **both** builds have read that folder ever since — his installed 1.1.0 included, whenever it was launched. `STATUS` said the opposite in as many words; that row is corrected above.
+
+  What is *not* demonstrated is that the installed build actually wrote anything there, and one timestamp argues against it: `parte-4-defensa-activa.md` sits in `Documents\sticky.md` with an mtime of 2026-09-11 17:50, a day after the switch, in the folder no build was pointed at. Something wrote it and it was not this application reading these settings — most likely another editor, which is the product working as intended. Recorded rather than explained away: the first draft of this entry claimed four days of misdirected writes, and the evidence does not carry that.
+
+  **The effect that is certain** is the one that matters to him: his three real notes in `Documents\sticky.md` are invisible to either build right now, because neither is pointed there.
 
   The sidecar index is not affected: it lives in the notes folder, so it follows wherever the folder points.
 
