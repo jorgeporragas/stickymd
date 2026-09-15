@@ -22,7 +22,7 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **SMD-099 shipped today** — a debug build wears the mark in amber and says `(dev)` in every window title and the tray tooltip, so the founder stops arriving in the wrong build.
 
-**Building it turned up SMD-100, which is the larger half of the same problem.** The two builds share one settings file, because the config directory is keyed by a bundle identifier that does not vary by profile. His installed application has been writing to the testing notes folder since 2026-09-10, and STATUS said it was not. Corrected; the fix itself is his call and is logged rather than taken.
+**SMD-100 shipped with it.** The two builds shared one settings file — the config directory is keyed by a bundle identifier that does not vary by profile — so "point the dev build somewhere else" was not achievable while it stood. A debug build now reads `settings.dev.json` and defaults to `Documents\sticky.md (dev)`. **The installed build is still pointed at `sticky.md_testing`** and repointing it is the founder's.
 
 **One thing came back from that pass.** SMD-098: the placeholder is all but invisible on a tinted dark note, and the same token takes a bare URL with it. Logged at his word rather than built.
 
@@ -46,7 +46,7 @@ The rest of the log is ideas: SMD-001 search, SMD-002 custom themes, SMD-010 sig
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
 | MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Both halves build and the application runs. |
 | WebView2 | Ships with Windows 11 |
-| Notes folder | **One folder, for both builds.** The founder set it to `Documents\sticky.md_testing` on 2026-09-10 believing it applied to the dev build alone. It does not: settings live in `%APPDATA%\com.stickymd.app\settings.json`, keyed by the bundle identifier, which is the same string in a debug build and a release one — so the installed application has been writing there too. Verified by reading the file on 2026-09-14. SMD-100 carries the decision; until then, assume any sticky.md on this machine is pointed at `sticky.md_testing`. |
+| Notes folder | **A folder each, since SMD-100 on 2026-09-14.** A debug build reads `settings.dev.json` and defaults to `Documents\sticky.md (dev)`; the installed build keeps `settings.json` and its own folder. They were one file until today, which is why `settings.json` still reads `Documents\sticky.md_testing` — set on 2026-09-10 for the dev build and never moved back. **The installed build is still pointed there**; repointing it is the founder's, through its own settings window. |
 | `core.hooksPath` | Set on the development machine 2026-09-05. Must be set again on every clone — see `CLAUDE.md § Local setup`. |
 
 ---
@@ -676,27 +676,25 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
-### [SMD-100] The dev build and the installed build share one settings file
+### [SMD-100] The dev build and the installed build shared one settings file
 Type:    bug
-State:   idea
+State:   shipped
 Created: 2026-09-14
 History:
-  2026-09-14  found while building SMD-099 — the founder's decision, not logged as accepted
-Notes: Settings live in `%APPDATA%\com.stickymd.app\settings.json`. That path comes from `app_config_dir()`, which is the bundle identifier — `com.stickymd.app` — and the identifier is the same string whether the binary was built by `tauri dev` or by the release workflow. So there is **one** settings file, one shortcut registration and one autostart entry across both builds.
+  2026-09-14  found while building SMD-099
+  2026-09-14  the founder asked for the dev build to point somewhere else, which is this
+  2026-09-14  shipped — commit e648acd
+Notes: Settings lived in `%APPDATA%\com.stickymd.app\settings.json`. That path comes from `app_config_dir()`, which is the bundle identifier — and the identifier is the same string whether the binary came from `tauri dev` or from the release workflow. There is no profile-dependent branch anywhere in `settings.rs` or `notes_dir`; both were verified by reading. So one settings file, read and written by both builds.
 
-  **What is demonstrated, and what is not.** On 2026-09-10 the founder pointed "the dev build" at `Documents\sticky.md_testing`. The settings file says exactly that and has not been written since 2026-09-10 14:13, so **both** builds have read that folder ever since — his installed 1.1.0 included, whenever it was launched. `STATUS` said the opposite in as many words; that row is corrected above.
+  **The consequence, which is the founder's actual request.** Pointing the development build at a scratch notes folder pointed the installed one there too — so "point the dev build somewhere else" was not achievable at all while the file was shared. Fixing the sharing *is* the feature.
 
-  What is *not* demonstrated is that the installed build actually wrote anything there, and one timestamp argues against it: `parte-4-defensa-activa.md` sits in `Documents\sticky.md` with an mtime of 2026-09-11 17:50, a day after the switch, in the folder no build was pointed at. Something wrote it and it was not this application reading these settings — most likely another editor, which is the product working as intended. Recorded rather than explained away: the first draft of this entry claimed four days of misdirected writes, and the evidence does not carry that.
+  **The fix is narrower than the one first proposed here, and better.** The first draft said to give the development build its own bundle identifier through a `tauri.dev.conf.json`. What shipped instead is a filename: `settings.dev.json` beside `settings.json`, chosen by `cfg!(debug_assertions)`, plus a `sticky.md (dev)` default notes folder chosen the same way. Three reasons it wins. It is compile-time, so a release build cannot take the wrong branch — where a config overlay stays out of a release only because the release script does not pass it. It changes no identifier, so the installed build's config, autostart entry and updater are untouched. And both files sit in the same directory, which is where he would look for either.
 
-  **The effect that is certain** is the one that matters to him: his three real notes in `Documents\sticky.md` are invisible to either build right now, because neither is pointed there.
+  Verified by running it: `settings.dev.json` was created, `settings.json` was not written, and `Documents\sticky.md (dev)` appeared.
 
-  The sidecar index is not affected: it lives in the notes folder, so it follows wherever the folder points.
+  **An observation this entry could not explain, recorded rather than theorised away.** Earlier drafts claimed the installed build had been writing to the testing folder since 2026-09-10. The founder says he used the application day to day on his real notes in that window and wrote `parte-4-defensa-activa.md` himself, and `Documents\sticky.md\.sticky-index.json` — a file only this application writes — is stamped 2026-09-11 18:19. So the app was demonstrably using the *real* folder a day after the shared settings file says it should have been using the testing one, and that file has not been written since 2026-09-10 14:13.
 
-  **Why this outranks the icon.** SMD-099 makes the two builds tell themselves apart, which is what he asked for and is worth having. But it labels the problem rather than removing it: the two builds are still one application as far as the disk is concerned, so landing in the wrong one still changes the right one's settings.
-
-  **The fix, and the reason it is his call.** Give the dev build its own identifier — a `tauri.dev.conf.json` passed by the `dev` npm script alone — and it gets its own config directory, its own settings, its own autostart entry. Paired with a `cfg(debug_assertions)` default notes folder, the two builds could not reach each other at all.
-
-  Two things to weigh before doing it. It moves where his dev settings live, so the dev build starts from defaults once. And a config overlay is a weaker guarantee than SMD-099's: `debug_assertions` cannot ship because the compiler decides it, whereas a config file only stays out of a release because the release script does not pass it. That is one line in `package.json` to read, but it is a line rather than a law.
+  Nothing found accounts for it: settings are read fresh on every call with no cache, no path caches the folder, only one `settings.json` exists on the machine, the identifier has never changed, `Documents` is not redirected, and `#[serde(default)]` makes a parse failure unlikely. Two confident explanations were written here and both were wrong. A third is not worth writing. It is left open because the fix above removes the situation that produced it, and because a log that guesses is worse than one that says it does not know.
 
 ### [SMD-099] Two builds, one face
 Type:    feature
