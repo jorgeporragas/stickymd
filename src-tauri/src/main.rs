@@ -79,40 +79,33 @@ fn main() {
         // is reachable — the capability grants `process:allow-restart` alone.
         .plugin(tauri_plugin_process::init())
         .setup(|app| {
-            // Checked rather than used: the surface is applied to every open
-            // window by `surface::refresh` below. This is here so a missing
-            // window entry in the config fails at startup with a sentence
-            // rather than as an empty screen.
-            app.get_webview_window(windows::FIRST_WINDOW)
-                .ok_or("the note window is missing from tauri.conf.json")?;
+            // Checked up front so a missing window entry in the config fails
+            // at startup with a sentence rather than as an empty screen. Every
+            // note window is built from this entry, and no window is made from
+            // it until `launch` asks for one.
+            if !app.config().app.windows.iter().any(|window| window.label == windows::NOTE) {
+                return Err("the note window is missing from tauri.conf.json".into());
+            }
 
             app.manage(surface::Current::default());
             app.manage(index::IndexLock::default());
             app.manage(windows::OpenNotes::default());
 
-            // The window Tauri built from the config is a note window like any
-            // other, so it is tracked like any other.
-            app.state::<windows::OpenNotes>()
-                .register(windows::FIRST_WINDOW, None)?;
+            // The restored notes, or the hub or a blank note if there are
+            // none. A debug build's mark and title are put on each window as
+            // it is built, so nothing here needs to brand anything.
+            if let Err(error) = windows::launch(app.handle()) {
+                eprintln!("sticky.md: could not open anything at launch: {error}");
+            }
 
-            // A debug build wears the mark in another colour and says so in
-            // its title. Nothing here in a release build: the whole module is
-            // gated on `debug_assertions`, so there is no switch to forget.
-            // This covers the window Tauri built from the config; every later
-            // one is branded as it is built.
-            dev::brand_open_windows(app.handle());
-
-            // Applies the surface to the window Tauri already built, records
-            // the mode, and starts watching for the setting changing under us.
+            // After the launch rather than before it, so the mode recorded is
+            // measured on the windows that are actually open. Each window has
+            // already had the surface applied as it was built. This applies it
+            // again, records the mode the front ends will ask for, and starts
+            // watching for the setting changing under us. No front end has
+            // asked yet: their pages load once the event loop is running.
             surface::refresh(app.handle());
             surface::watch(app.handle().clone());
-
-            // A session that cannot be restored is not a reason to refuse to
-            // start: the notes are still on disk, and an empty window is a
-            // working application.
-            if let Err(error) = windows::restore(app.handle()) {
-                eprintln!("sticky.md: could not restore the last session: {error}");
-            }
 
             // Registered, never enabled: MASTER veto 5 forbids launching at
             // startup without explicit consent, so only the tray toggle turns
@@ -148,6 +141,7 @@ fn main() {
             preferences::read_preferences,
             preferences::set_theme,
             preferences::set_launch_at_startup,
+            preferences::set_on_launch,
             preferences::set_new_note_shortcut,
             preferences::set_formatting_shortcut,
             preferences::inspect_notes_folder,

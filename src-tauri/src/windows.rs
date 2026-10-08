@@ -15,10 +15,13 @@ use tauri::{AppHandle, Manager, WebviewWindow, WebviewWindowBuilder};
 
 use crate::index::{self, IndexLock, NoteState};
 use crate::notes::{notes_dir, NoteError};
+use crate::settings::{self, OnLaunch};
 use crate::surface;
 
-/// The label of the window Tauri creates from `tauri.conf.json` at startup.
-pub const FIRST_WINDOW: &str = "note";
+/// The note window's entry in `tauri.conf.json`, which every note window is
+/// built from. `create: false`, like the hub: what opens at startup is decided
+/// by `launch`, not by the config, so no window exists until one is asked for.
+pub const NOTE: &str = "note";
 
 /// The hub. Defined in `tauri.conf.json` with `create: false`, so its geometry
 /// has one home without a window being made at startup — this is a
@@ -191,7 +194,7 @@ pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> 
     }
 
     let label = next_label();
-    let window = build(app, FIRST_WINDOW, &label)?;
+    let window = build(app, NOTE, &label)?;
 
     let _ = surface::apply(&window);
     open_notes.register(&label, note)?;
@@ -331,25 +334,33 @@ pub fn remember(app: &AppHandle, label: &str, still_open: bool) {
     }
 }
 
-/// Reopen the notes that were open when the application last stopped.
+/// Start the session: bring back the notes that were open, or, if there are
+/// none, open whatever the settings say a launch opens.
 ///
-/// The window Tauri built from the config is reused for the first of them
-/// rather than left empty beside them — otherwise every restored session would
-/// come back with one more note than it had.
-pub fn restore(app: &AppHandle) -> Result<(), NoteError> {
-    let dir = notes_dir(app)?;
-    let notes = index::restorable(&dir);
-
-    let mut notes = notes.into_iter();
-
-    if let Some((name, state)) = notes.next() {
-        if let Some(window) = app.get_webview_window(FIRST_WINDOW) {
-            app.state::<OpenNotes>().register(FIRST_WINDOW, Some(name))?;
-            place(&window, &state);
-        }
+/// "None" means nothing ended up on screen, not that the index listed
+/// nothing. A session that fails to restore partway still leaves its windows
+/// alone, and one that fails entirely still opens something. An application
+/// that starts into nothing but a tray icon reads as one that did not start.
+pub fn launch(app: &AppHandle) -> Result<(), NoteError> {
+    if let Err(error) = restore(app) {
+        eprintln!("sticky.md: could not restore the last session: {error}");
     }
 
-    for (name, state) in notes {
+    if !app.webview_windows().is_empty() {
+        return Ok(());
+    }
+
+    match settings::load(app).on_launch {
+        OnLaunch::Hub => open_hub(app),
+        OnLaunch::Note => open(app, None).map(|_| ()),
+    }
+}
+
+/// Reopen the notes that were open when the application last stopped.
+fn restore(app: &AppHandle) -> Result<(), NoteError> {
+    let dir = notes_dir(app)?;
+
+    for (name, state) in index::restorable(&dir) {
         let label = open(app, Some(name))?;
         if let Some(window) = app.get_webview_window(&label) {
             place(&window, &state);

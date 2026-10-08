@@ -14,6 +14,7 @@
     "windows": [
       {
         "label": "note",
+        "create": false,
         "url": "src/windows/note/index.html",
         "title": "sticky.md",
         "width": 320,

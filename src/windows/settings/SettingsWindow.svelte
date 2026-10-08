@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Field from '../../lib/components/Field.svelte';
   import ChordInput from '../../lib/components/ChordInput.svelte';
+  import Choice from '../../lib/components/Choice.svelte';
   import Toggle from '../../lib/components/Toggle.svelte';
   import { applyPreference, type Theme, type ThemePreference } from '../../lib/state/theme';
   import {
@@ -19,10 +20,12 @@
     readPreferences,
     setLaunchAtStartup,
     setNewNoteShortcut,
+    setOnLaunch,
     setFormattingShortcut,
     setNotesFolder,
     setTheme,
     type FormattingChords,
+    type OnLaunch,
     type Preferences
   } from '../../lib/state/preferences';
 
@@ -79,6 +82,21 @@
     // is about to cause, but seeing it happen should not wait on a round trip.
     resolved = await applyPreference(preference);
     await setTheme(preference);
+  }
+
+  /**
+   * What a launch opens when there is nothing to restore. Named the way the
+   * tray names the same two things, so one word means one thing everywhere.
+   */
+  const LAUNCHES: { value: OnLaunch; label: string }[] = [
+    { value: 'hub', label: 'All notes' },
+    { value: 'note', label: 'New note' }
+  ];
+
+  async function chooseLaunch(choice: OnLaunch): Promise<void> {
+    if (prefs) prefs.onLaunch = choice;
+    const took = await setOnLaunch(choice);
+    if (prefs && took) prefs.onLaunch = took;
   }
 
   async function toggleStartup(on: boolean): Promise<void> {
@@ -248,19 +266,23 @@
           : 'Applies to every window, including the ones already open.'}
       >
         {#snippet control()}
-          <div class="choice" role="radiogroup" aria-label="Theme">
-            {#each THEMES as option (option.value)}
-              <span class="option">
-                <Toggle
-                  on={prefs?.theme === option.value}
-                  label={option.label}
-                  role="radio"
-                  onChange={() => chooseTheme(option.value)}
-                />
-                <span class="caption">{option.label}</span>
-              </span>
-            {/each}
-          </div>
+          <Choice
+            options={THEMES}
+            value={prefs?.theme as ThemePreference | undefined}
+            label="Theme"
+            onChange={chooseTheme}
+          />
+        {/snippet}
+      </Field>
+
+      <Field label="At launch" note="When there are no notes to bring back from last time.">
+        {#snippet control()}
+          <Choice
+            options={LAUNCHES}
+            value={prefs?.onLaunch}
+            label="At launch"
+            onChange={chooseLaunch}
+          />
         {/snippet}
       </Field>
 
@@ -339,29 +361,6 @@
 </div>
 
 <style>
-  /*
-    Three bubbles in a row, each captioned. The captions are what make it a
-    choice rather than three unrelated switches — an unlabelled ring of
-    identical discs is a puzzle, and this is the one control in the window
-    where which one is which cannot be inferred from position.
-  */
-  .choice {
-    display: flex;
-    gap: var(--space-3);
-  }
-
-  .option {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-1);
-  }
-
-  .caption {
-    font-size: var(--font-size-caption);
-    line-height: var(--line-height-ui);
-    color: var(--ink-secondary);
-  }
-
   h1 {
     margin: 0;
     padding: 0 var(--space-4) var(--space-2);

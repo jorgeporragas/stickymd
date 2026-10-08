@@ -96,7 +96,7 @@ What sticky.md does. Amended by decision as capability is added or removed, and 
 - Autosave to the `.md` file on a debounce; no save action exists
 - Filenames slugified from the first line, deduplicated with a numeric suffix, renamed on a debounce
 - A sidecar index holding window geometry, tint, always-on-top, and open state
-- Open windows restore when the application launches
+- Open windows restore when the application launches. With nothing to restore, a launch opens the hub, or a new note if the settings say so (ADR-040)
 - A per-note always-on-top toggle, off by default
 - A hub window listing every note, from which notes are opened, focused, and deleted
 - Deleting a note sends the file to the operating system's trash

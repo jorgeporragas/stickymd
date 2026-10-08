@@ -165,21 +165,6 @@ pub fn brand(window: &WebviewWindow) {
 #[cfg(not(debug_assertions))]
 pub fn brand(_window: &WebviewWindow) {}
 
-/// Put them on every window that is already open.
-///
-/// For the window Tauri builds from the config before anything else runs, which
-/// never passes through `windows::build`. `surface::refresh` exists for the
-/// same reason and is called from the same place.
-#[cfg(debug_assertions)]
-pub fn brand_open_windows(app: &AppHandle) {
-    for window in app.webview_windows().values() {
-        brand(window);
-    }
-}
-
-#[cfg(not(debug_assertions))]
-pub fn brand_open_windows(_app: &AppHandle) {}
-
 /// The mark the tray should wear, or `None` in a release build.
 ///
 /// Returned rather than applied, because the tray is built once with a builder

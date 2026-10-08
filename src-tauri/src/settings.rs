@@ -49,6 +49,10 @@ pub struct Settings {
     /// that a user who has never chosen one keeps following the default if
     /// their Documents folder ever moves.
     pub notes_folder: Option<String>,
+    /// What opens when the application starts and there is no session to
+    /// bring back. Restored notes always come back first. This only decides
+    /// what appears when nothing else would.
+    pub on_launch: OnLaunch,
 }
 
 impl Default for Settings {
@@ -58,7 +62,36 @@ impl Default for Settings {
             theme: "frost".to_string(),
             formatting: Formatting::default(),
             notes_folder: None,
+            on_launch: OnLaunch::default(),
         }
+    }
+}
+
+/// What a launch with nothing to restore opens.
+///
+/// The hub by default. A blank note was the only answer until SMD-104, and
+/// the founder's reasoning for changing it is that you launch the
+/// application to find a note at least as often as to start one. The global
+/// shortcut is still there for starting one.
+///
+/// Stored as `"hub"` or `"note"`. Read leniently: any other string is the
+/// default. Without that, a typo in this one field of a hand-edited file
+/// would fail the whole parse and quietly reset every other setting with it,
+/// which is the opposite of what `load` promises.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum OnLaunch {
+    #[default]
+    Hub,
+    Note,
+}
+
+impl<'de> Deserialize<'de> for OnLaunch {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(match String::deserialize(deserializer)?.as_str() {
+            "note" => OnLaunch::Note,
+            _ => OnLaunch::Hub,
+        })
     }
 }
 
@@ -169,4 +202,33 @@ pub fn location(app: &AppHandle) -> String {
     settings_path(app)
         .map(|path| path.display().to_string())
         .unwrap_or_else(|| "the application config directory".to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_settings_file_from_before_the_launch_choice_opens_the_hub() {
+        let settings: Settings = serde_json::from_str(r#"{"theme":"dark"}"#).unwrap();
+        assert_eq!(settings.on_launch, OnLaunch::Hub);
+        assert_eq!(settings.theme, "dark");
+    }
+
+    #[test]
+    fn the_launch_choice_round_trips() {
+        for choice in [OnLaunch::Hub, OnLaunch::Note] {
+            let text = serde_json::to_string(&choice).unwrap();
+            assert_eq!(serde_json::from_str::<OnLaunch>(&text).unwrap(), choice);
+        }
+        assert_eq!(serde_json::to_string(&OnLaunch::Note).unwrap(), r#""note""#);
+    }
+
+    #[test]
+    fn a_mistyped_launch_choice_costs_only_itself() {
+        let settings: Settings =
+            serde_json::from_str(r#"{"theme":"dark","onLaunch":"nope"}"#).unwrap();
+        assert_eq!(settings.on_launch, OnLaunch::Hub);
+        assert_eq!(settings.theme, "dark");
+    }
 }

@@ -21,6 +21,9 @@ export interface FormattingChords {
   strikethrough: string;
 }
 
+/** What a launch with nothing to restore opens. See `OnLaunch` in settings.rs. */
+export type OnLaunch = 'hub' | 'note';
+
 export interface Preferences {
   theme: string;
   newNoteShortcut: string;
@@ -29,6 +32,7 @@ export interface Preferences {
   notesFolder: string;
   launchAtStartup: boolean;
   formatting: FormattingChords;
+  onLaunch: OnLaunch;
   settingsFile: string;
 }
 
@@ -49,6 +53,7 @@ const unavailable: Preferences = {
     inlineCode: 'Mod-e',
     strikethrough: 'Mod-Shift-x'
   },
+  onLaunch: 'hub',
   settingsFile: 'unavailable'
 };
 
@@ -66,6 +71,16 @@ export async function setTheme(theme: string): Promise<void> {
     await invoke('set_theme', { theme });
   } catch (error) {
     console.error('sticky.md: could not change the theme', error);
+  }
+}
+
+/** Returns the choice as stored, so the window shows what took. */
+export async function setOnLaunch(choice: OnLaunch): Promise<OnLaunch | undefined> {
+  try {
+    return await invoke<OnLaunch>('set_on_launch', { choice });
+  } catch (error) {
+    console.error('sticky.md: could not change what opens at launch', error);
+    return undefined;
   }
 }
 

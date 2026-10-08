@@ -17,7 +17,7 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::notes::{notes_dir, NoteError};
-use crate::settings::{self, Formatting};
+use crate::settings::{self, Formatting, OnLaunch};
 use crate::shortcuts::{self, ShortcutStatus};
 
 /// Everything the settings window shows, resolved.
@@ -32,6 +32,7 @@ pub struct Preferences {
     pub notes_folder: String,
     pub launch_at_startup: bool,
     pub formatting: Formatting,
+    pub on_launch: OnLaunch,
     /// Where the settings file itself lives, for the user who would rather
     /// edit it by hand. That was the only way to reach these until now.
     pub settings_file: String,
@@ -50,6 +51,7 @@ pub fn read_preferences(app: AppHandle, status: tauri::State<'_, ShortcutStatus>
             .unwrap_or_else(|_| "unavailable".to_string()),
         launch_at_startup: app.autolaunch().is_enabled().unwrap_or(false),
         formatting: stored.formatting,
+        on_launch: stored.on_launch,
         settings_file: settings::location(&app),
     }
 }
@@ -64,6 +66,18 @@ pub fn set_theme(app: AppHandle, theme: String) {
     stored.theme = theme.clone();
     settings::save(&app, &stored);
     let _ = app.emit("theme-changed", theme);
+}
+
+/// Choose what a launch with nothing to restore opens.
+///
+/// Nothing to broadcast: it is read once, at the next launch, by
+/// `windows::launch`.
+#[tauri::command]
+pub fn set_on_launch(app: AppHandle, choice: OnLaunch) -> OnLaunch {
+    let mut stored = settings::load(&app);
+    stored.on_launch = choice;
+    settings::save(&app, &stored);
+    stored.on_launch
 }
 
 #[tauri::command]
