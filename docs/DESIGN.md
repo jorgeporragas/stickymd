@@ -212,7 +212,7 @@ A taller window listing every note, newest first. Its heading and its empty stat
 
 It is defined in `src-tauri/tauri.conf.json` with `create: false`, so its dimensions live in the same place as the note window's without a window being built at startup. There is only ever one hub: a second list of the same notes would be two things to keep in step for no gain.
 
-**It is what a launch opens** when there are no notes to bring back from the last session, unless the settings say a new note (ADR-040).
+**It is what a launch opens** when there are no notes to bring back from the last session, unless the settings say a new note (ADR-040). Asked for while it is open on another virtual desktop, it comes to the desktop you are on rather than taking you to it (ADR-041). The settings window and an already-open note behave the same way.
 
 ---
 

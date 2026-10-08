@@ -106,6 +106,18 @@ pub fn transparency_enabled() -> bool {
     false
 }
 
+/// A window's handle, as this crate's `HWND`.
+///
+/// Tauri's HWND comes from its own version of the windows crate, which is not
+/// necessarily this one. The raw value is the same handle either way, so it is
+/// carried across rather than the versions being forced to match. One place
+/// for that, because `desktop.rs` needs the same handle.
+#[cfg(target_os = "windows")]
+pub fn native_handle(window: &WebviewWindow) -> Option<windows::Win32::Foundation::HWND> {
+    let handle = window.hwnd().ok()?;
+    Some(windows::Win32::Foundation::HWND(handle.0 as isize))
+}
+
 /// Round the window itself.
 ///
 /// The compositor draws its backdrop across the whole window rectangle, which
@@ -118,20 +130,14 @@ pub fn transparency_enabled() -> bool {
 /// round. See docs/FIXES.md.
 #[cfg(target_os = "windows")]
 fn round_corners(window: &WebviewWindow) {
-    use windows::Win32::Foundation::HWND;
     use windows::Win32::Graphics::Dwm::{
         DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND,
         DWM_WINDOW_CORNER_PREFERENCE,
     };
 
-    let Ok(handle) = window.hwnd() else {
+    let Some(handle) = native_handle(window) else {
         return;
     };
-
-    // Tauri's HWND comes from its own version of the windows crate, which is
-    // not necessarily this one. The raw value is the same handle either way,
-    // so it is carried across rather than the versions being forced to match.
-    let handle = HWND(handle.0 as isize);
 
     let preference = DWMWCP_ROUND;
 

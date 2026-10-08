@@ -14,6 +14,7 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager, WebviewWindow, WebviewWindowBuilder};
 
 use crate::index::{self, IndexLock, NoteState};
+use crate::desktop;
 use crate::notes::{notes_dir, NoteError};
 use crate::settings::{self, OnLaunch};
 use crate::surface;
@@ -177,7 +178,7 @@ fn place(window: &WebviewWindow, state: &NoteState) {
     }
 }
 
-/// Open a note window. An already-open note is focused rather than opened
+/// Open a note window. An already-open note is summoned rather than opened
 /// twice — two windows editing one file would overwrite each other.
 pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> {
     let open_notes = app.state::<OpenNotes>();
@@ -185,7 +186,7 @@ pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> 
     if let Some(name) = note.as_deref() {
         if let Some(label) = open_notes.window_showing(name)? {
             if let Some(window) = app.get_webview_window(&label) {
-                let _ = window.set_focus();
+                summon(&window);
                 return Ok(label);
             }
             // The window is gone but its entry survived — clean up and open.
@@ -202,20 +203,35 @@ pub fn open(app: &AppHandle, note: Option<String>) -> Result<String, NoteError> 
     Ok(label)
 }
 
-/// Open the hub, or focus it if it is already open.
+/// Bring a window that is already open to the user.
+///
+/// To the user rather than the user to it: on another virtual desktop it is
+/// moved to this one first, so asking for a window never pulls someone away
+/// from what they were doing. SMD-103.
+fn summon(window: &WebviewWindow) {
+    desktop::bring_here(window);
+    let _ = window.show();
+    let _ = window.set_focus();
+}
+
+/// Open a window that only ever exists once, or summon the one already open.
+fn open_single(app: &AppHandle, label: &str) -> Result<(), NoteError> {
+    if let Some(window) = app.get_webview_window(label) {
+        summon(&window);
+        return Ok(());
+    }
+
+    let window = build(app, label, label)?;
+    let _ = surface::apply(&window);
+    Ok(())
+}
+
+/// Open the hub, or summon it if it is already open.
 ///
 /// There is only ever one: a second list of the same notes would be two things
 /// to keep in step for no gain.
 pub fn open_hub(app: &AppHandle) -> Result<(), NoteError> {
-    if let Some(window) = app.get_webview_window(HUB) {
-        let _ = window.show();
-        let _ = window.set_focus();
-        return Ok(());
-    }
-
-    let window = build(app, HUB, HUB)?;
-    let _ = surface::apply(&window);
-    Ok(())
+    open_single(app, HUB)
 }
 
 #[tauri::command]
@@ -223,22 +239,14 @@ pub async fn show_hub(app: AppHandle) -> Result<(), NoteError> {
     open_hub(&app)
 }
 
-/// Open the settings window, or focus the one already open.
+/// Open the settings window, or summon the one already open.
 ///
 /// Built from the config entry like every other window, so its geometry lives
 /// in one place. It is not a note and is not tracked as one — nothing about it
 /// is restored, because a settings window left open is not a session worth
 /// bringing back.
 pub fn open_settings(app: &AppHandle) -> Result<(), NoteError> {
-    if let Some(window) = app.get_webview_window(SETTINGS) {
-        let _ = window.show();
-        let _ = window.set_focus();
-        return Ok(());
-    }
-
-    let window = build(app, SETTINGS, SETTINGS)?;
-    let _ = surface::apply(&window);
-    Ok(())
+    open_single(app, SETTINGS)
 }
 
 #[tauri::command]

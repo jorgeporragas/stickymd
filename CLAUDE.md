@@ -52,6 +52,7 @@ src-tauri/                Rust backend
     settings.rs           application settings, in the config directory
     index.rs              the sidecar index
     windows.rs            window lifecycle, and what a launch opens
+    desktop.rs            virtual desktops — bringing a window to the one in use
     surface.rs            compositor blur, window rounding, and the transparency setting
     tray.rs               tray residency and its menu
     preferences.rs        the settings window's commands
@@ -81,7 +82,7 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 - Run the Rust tests with `cargo test` from `src-tauri/`. Path and name validation carries tests; do not change that logic without them.
 - Debounce writes. Never write a note file on every keystroke.
 - Write the sidecar index through the lock and the temporary-file rename in `src-tauri/src/index.rs`. Never write it in place, and never read-modify-write it without holding the lock — two windows doing that at once lose one of the two changes.
-- No window is created from `src-tauri/tauri.conf.json` at startup. Every entry is `create: false`, and `windows::launch` decides what opens.
+- No window is created from `src-tauri/tauri.conf.json` at startup. Every entry is `create: false`, and `windows::launch` decides what opens. Bring a window that is already open forward through `windows::summon`, never with a bare `set_focus`, so it comes to the virtual desktop in use rather than pulling the user to another one.
 - Build every note window from the window entry in `src-tauri/tauri.conf.json` rather than repeating its geometry in code. Two sources for one size is how they drift, and `docs/DESIGN.md` names that file as where the dimensions live.
 - Derive filenames here, never in the frontend. The frontend sends a title; Rust slugifies it, deduplicates against the folder, and returns the name the note now has. Deduplication cannot be done without seeing the folder.
 - Apply compositor blur here, through `window-vibrancy`, never from CSS. A web view cannot see the desktop behind it, so `backdrop-filter` is not an alternative — it is a different effect that looks correct only over the app's own content.

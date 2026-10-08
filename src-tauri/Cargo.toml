@@ -59,10 +59,17 @@ version = "0.6"
 # Win32_System_Registry is for the transparency setting: it lives in the
 # registry and the only way to hear it change is to watch the key. No new
 # crate for it -- this dependency is already here for the corner rounding.
+# Com, RemoteDesktop, Threading and UI_Shell are for virtual desktops: asking
+# whether a window is on the one in front of the user and moving it there. See
+# src-tauri/src/desktop.rs.
 windows = { version = "0.56", features = [
   "Win32_Foundation",
   "Win32_Graphics_Dwm",
+  "Win32_System_Com",
   "Win32_System_Registry",
+  "Win32_System_RemoteDesktop",
+  "Win32_System_Threading",
+  "Win32_UI_Shell",
 ] }
 
 # Bundle size is a stated product priority. See MASTER.md section 'Stack'.
