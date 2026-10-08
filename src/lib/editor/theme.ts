@@ -159,9 +159,14 @@ export const editorTheme = EditorView.theme({
     borderBottomRightRadius: 'var(--radius-control)'
   },
 
+  // Padding, never margin. CodeMirror measures a block widget by its bounding
+  // box, which a margin is outside of, so a margin here put every line below
+  // a table that much lower on screen than CodeMirror thought it was — and
+  // the arrow keys, which move by where CodeMirror thinks lines are, skipped
+  // a line for every table above the cursor. See docs/FIXES.md.
   '.cm-md-table-wrapper': {
     overflowX: 'auto',
-    margin: 'var(--space-2) 0'
+    padding: 'var(--space-2) 0'
   },
 
   '.cm-md-table': {

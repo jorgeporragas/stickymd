@@ -378,3 +378,32 @@ Never:    Never remove the separator check as redundant because the component
           others. Equally, never let it replace the component check — `..` and
           a Windows stream name like `note.md:evil` carry no separator at all.
           Any change here runs on macOS as well as Windows before it lands.
+
+### A block widget or line in the editor must never carry a vertical margin
+Area:     The CodeMirror inline-rendering layer and its decorations
+Date:     2026-10-07
+Commit:   <this commit>
+Problem:  The arrow keys sometimes skipped lines and Enter seemed to land
+          the cursor several lines away. The founder suspected window
+          resizing. It was the rendered table. `.cm-md-table-wrapper` had
+          `margin: var(--space-2) 0`, and CodeMirror measures each line and
+          block widget with `getBoundingClientRect().height`, which leaves
+          the margin out. So CodeMirror's height map put everything below a
+          table 16px higher than it was drawn, and every further table
+          added 16px more. Vertical motion finds the next line by asking the
+          height map what sits half a line below the caret, and once the
+          drift reached a line's height it got back the line after next.
+          Measured in a harness built on the real editor: with three tables
+          above it, `line 0` was drawn at 521px and mapped at 473px, and
+          ArrowDown went from line 22 to 25 to 28 to 31.
+Fix:      The wrapper is spaced with `padding`, which is inside the box
+          CodeMirror measures. Drawn exactly as before, now with zero drift,
+          and ArrowDown moves one line per press.
+Never:    Never give vertical margin to anything CodeMirror measures as a
+          line or a block: a `.cm-line`, a line decoration's class, or the
+          root element a block widget's `toDOM` returns. Use padding, or put
+          the margin on an element *inside* the root. Nothing looks wrong when
+          this breaks. Rendering is fine, and the only symptom is a cursor
+          that lands in the wrong place, some distance from the cause. Check
+          it with `view.lineBlockAt(pos).top + view.documentTop` against the
+          line's own `getBoundingClientRect().top`. They must be equal.
