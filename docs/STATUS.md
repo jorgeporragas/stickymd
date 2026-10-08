@@ -688,11 +688,12 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
 
 ### [SMD-107] The repository is private, so releases reach no one
 Type:    bug
-State:   active
+State:   shipped
 Created: 2026-10-08
 History:
   2026-10-08  found while publishing v1.2.0
   2026-10-08  resolved outside the repository: the founder made it public again (GitHub reports the change at 16:13 UTC)
+  2026-10-08  shipped — commit dae7725, which records the change; the change itself was a repository setting, not code
 Notes: `gh repo view` reports `PRIVATE`. Anonymously, the repository page, every release asset and `releases/latest/download/latest.json` all return 404, v1.1.0's included. SMD-005 recorded that endpoint returning 200 on 2026-09-08, so the repository was public then and was made private at some point after. No commit records when or why, and this log doesn't guess.
   The consequences are broad. The README's download link fails for anyone but the founder. The updater compiled into every installed copy fetches the manifest without signing in, so Check now ends in the "could not reach GitHub" error rather than an update, and that has probably been true since the change. The release workflow is unaffected: it authenticates.
   Not a code fix. If private was deliberate, the updater and the README's download link no longer describe anything that works, and that is a presence pass for ADR-014 and the README. If it wasn't, making the repository public again restores both, with nothing to rebuild. 1.2.0's manifest is already in place.
