@@ -24,6 +24,8 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **SMD-100 shipped with it.** The two builds shared one settings file — the config directory is keyed by a bundle identifier that does not vary by profile — so "point the dev build somewhere else" was not achievable while it stood. A debug build now reads `settings.dev.json` and defaults to `Documents\sticky.md (dev)`. **The installed build is still pointed at `sticky.md_testing`** and repointing it is the founder's.
 
+**Also shipped on 2026-10-07:** SMD-104, a launch opens the hub, or a new note if the settings say so. SMD-103, an open window comes to the virtual desktop in use. SMD-098, quiet ink readable on tinted dark notes. SMD-103's cross-desktop move is unseen, because the machine had one desktop. SMD-105 was logged from the same pass.
+
 **Two bugs the founder reported shipped on 2026-10-07.** SMD-101: the cursor skipped lines below a rendered table. SMD-102: a second launch started a second copy of the application. Both are on `main` and in no release. SMD-101 can be checked in the dev build. SMD-102 is release-only by design, so it shows after the next tag.
 
 **One thing came back from that pass.** SMD-098: the placeholder is all but invisible on a tinted dark note, and the same token takes a bare URL with it. Logged at his word rather than built.
@@ -378,6 +380,7 @@ Notes: One window per note. Which note a window holds is tracked in Rust by wind
   The in-app chord was removed. It hit two unrelated platform hazards in a row — see ADR-021 — and the global shortcut in SMD-032 is the affordance `MASTER.md § Core Loop` specifies anyway.
   Confirmed by the founder on 2026-09-05: two windows write two different files.
   Known sloppiness: `surface_mode` returns the mode measured on the first window. A second window has acrylic applied and its result discarded. In practice every window on a machine resolves the same way, but it is an assumption rather than a measurement.
+  2026-10-07: narrower since SMD-104. The mode is now measured across every window open at launch, not only the first. A window opened later still has its own result discarded.
 
 ### [SMD-032] Global shortcut for a new note
 Type:    feature
@@ -450,8 +453,9 @@ History:
   2026-09-05  confirmed on device (founder)
 Notes: Notes that were open when the application stopped come back where they were. The index carries `open` and the geometry; a note is marked open when it takes a name, and closed when its window is closed deliberately. Position is written when a window loses focus and again as it closes — the two moments it is worth writing. Writing on every drag frame would put the disk to work for the whole gesture.
   The window Tauri builds from the config is reused for the first restored note rather than left empty beside them, or every restored session would come back with one more note than it had.
+  2026-10-07: no longer true, since SMD-104 (ADR-040). No window is built from the config, so there is nothing to reuse, and every restored note is built the same way. With nothing restored, a launch opens the hub or a new note, as the settings say.
   Geometry is in logical pixels. Physical ones were tried first and were wrong — see SMD-043. Placement failures are ignored: a saved position can be off-screen after a monitor is unplugged, and a note that opens in the wrong place beats one that refuses to open.
-  A restore that fails does not stop the application starting. The notes are still on disk and an empty window is a working app.
+  A restore that fails does not stop the application starting. The notes are still on disk and an empty window is a working app. Since SMD-104 a failed restore opens the launch choice rather than an empty note.
   Confirmed by the founder on 2026-09-05: a session comes back.
 
 ### [SMD-043] Pale lines down the right and bottom of a restored window
@@ -678,13 +682,39 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
-### [SMD-103] A second launch could bring the notes to the desktop it came from
-Type:    idea
+### [SMD-105] A blockquote on a tinted dark note is under 3:1
+Type:    bug
 State:   idea
 Created: 2026-10-07
 History:
+  2026-10-07  found while fixing SMD-098; logged, not built
+Notes: `t.quote` in `highlight.ts` reads `--ink-secondary`, `#b9b5ac` on Dark. On the six dark tints that measures 3.64 to 3.75 opaque and 2.53 to 2.60 over a mid backdrop, which is under the 3:1 floor `--ink-syntax` and `--ink-note-muted` hold. It is the SMD-098 shape again: a secondary ink is sized against near-black, and a tint is lighter than that. Unlike a placeholder, a quote is content, so it may want to stay closer to `--ink-primary` than a muted ink does. That is a design call, not arithmetic.
+
+### [SMD-104] What a launch opens, as a setting
+Type:    feature
+State:   shipped
+Created: 2026-10-07
+History:
+  2026-10-07  asked for by the founder: open the hub at launch by default, with a setting for hub or new note
+  2026-10-07  shipped — commit b64d6ca
+Notes: ADR-040. A launch brings back the notes that were open. If none come back, it opens the hub, or a new note if "At launch" in settings says so. Two questions settled by the founder before building: the choice applies only when nothing was restored, and a relaunch while running stays the hub whatever the setting says.
+  **The blank note was never chosen.** It came from Tauri building the note window from the config at startup, with restore reusing it. The note entry is now `create: false` like the others, and `windows::launch` decides. That also removed `dev::brand_open_windows`, which existed only to brand that config-built window. Every window is now branded as it is built.
+  `surface::refresh` moved after the launch, so the mode the front ends read is measured on the windows actually open rather than on the config's window before anything else ran.
+  `onLaunch` is read leniently, as `"note"` or anything else meaning the hub. A strict enum would have failed the whole settings file on one typo. Tested, with two more tests beside it.
+  The theme picker's captioned radio row became the `Choice` component, because the launch choice was its second use.
+  Verified in the dev build, three launches. With nothing to restore and the default, only the hub opened. With "New note", only a blank note. With "All notes" chosen and a note left open, only that note came back, and no hub. The settings window renders both choices and the selection moves. Not exercised: the click reaching Rust through `set_on_launch` in the running app, which was checked by type rather than by hand.
+  Behaviour to know: with launch-at-startup on and nothing left open, the hub now appears at login where a blank note used to.
+
+### [SMD-103] A second launch could bring the notes to the desktop it came from
+Type:    idea
+State:   shipped
+Created: 2026-10-07
+History:
   2026-10-07  logged as idea, from building SMD-102
+  2026-10-07  bundled at the founder's word, shipped — commit 68f6d47
 Notes: After SMD-102, launching sticky.md again opens the hub in the copy already running. If the hub is already open on another virtual desktop, focusing it takes the founder *to* that desktop rather than bringing the hub to the one he is working on. Windows can move a process's own windows between desktops (`IVirtualDesktopManager::MoveWindowToDesktop`), so the hub could come to him instead. Not built: nothing in Tauri wraps it, it is Windows-only, and whether to follow him or stay put is a product call. The global shortcut already opens a new note on whichever desktop is current.
+  **2026-10-07 — built, as ADR-041.** He chose "follow". Any window that is already open and asked for (the hub, settings, a note opened from the hub) is moved to the desktop in use before it is focused, through `windows::summon`. The current desktop's ID has no public API. It is read from Explorer's own record in the registry, the Windows 11 key with the Windows 10 per-session key as fallback, which is what Windows Terminal and PowerToys do. Any failure falls back to the old focus-where-it-is behaviour.
+  **Not verified across desktops.** The development machine had one virtual desktop at the time, so the move itself has not been seen. The registry read was checked against the live key, and both build profiles compile. Waits on the founder: open the hub, switch to another desktop, click the tray icon, and the hub should arrive on the new desktop instead of the view switching back.
 
 ### [SMD-102] Several copies of sticky.md in the taskbar
 Type:    bug
@@ -747,10 +777,11 @@ Notes: Two builds of sticky.md can be on screen at once and nothing tells them a
 
 ### [SMD-098] Muted ink goes the wrong way on a tinted dark note
 Type:    bug
-State:   idea
+State:   shipped
 Created: 2026-09-10
 History:
   2026-09-10  reported by the founder while verifying SMD-094 — logged, not built, at his word
+  2026-10-07  bundled at the founder's word, shipped — commit 964804b
 Notes: "The placeholder text 'Write something.' doesn't quite read well in it. In fact, it's not that visible in dark windows at all, since it's gray."
 
   Measured, and it is worse than grey. `.cm-placeholder` reads `--ink-muted`, which is `#7e7a73` on Dark:
@@ -771,6 +802,18 @@ Notes: "The placeholder text 'Write something.' doesn't quite read well in it. I
   So the likely fix is not to retune `--ink-muted` but to have note-surface ink read through a token that already knows it lives on a tint — the family `--ink-syntax` belongs to — and to keep whatever lands subordinate to `--ink-primary`, since a placeholder that reads as strongly as writing is a different bug. For scale: `--ink-syntax` itself would give 4.74 worst opaque and 3.28 through glass; `--ink-secondary` 3.64 and 2.52.
 
   **A second instance he did not report.** `t.url` reads the same token, so a bare autolink in a tinted dark note is as invisible as the placeholder. Worth fixing in the same pass rather than waiting for it to be noticed separately.
+
+  **2026-10-07 — what shipped.** The answer above, as a new token rather than a retuned one. `--ink-note-muted` is quiet ink written on a note, and both note uses now read it. `--ink-muted` keeps its seven uses on the hub and settings, which are never tinted. The token follows `--ink-syntax`'s rule: 3:1 on every note on its theme's design basis.
+
+  | | was | now |
+  |---|---|---|
+  | dark tints, mid backdrop | 1.21–1.25 | 3.00–3.09 (`#c9c5bc`) |
+  | clear dark, mid backdrop | 2.79 | 3.07 (`#85817a`) |
+  | light tints, white backdrop | 2.79–3.10 | 3.10–3.45 (`#83827d`) |
+
+  The dark tints get their own value under `:root[data-theme='dark'][data-tint]`, which a clear note never matches, because no single value both clears 3:1 on a tint and stays quiet on near-black. Frost moved slightly too. Lilac sat at 2.79 there, under the same floor. That wasn't reported, but it is the same rule. Checked as resolved colours in the editor on all three kinds of surface, and by eye on a dark lilac note.
+
+  **One more on the same ground, logged as SMD-105 rather than fixed here.** A blockquote reads `--ink-secondary`, which measures 2.53 over a mid backdrop on a dark tint.
 
 ### [SMD-097] A note name could carry the other platform's separator
 Type:    bug
