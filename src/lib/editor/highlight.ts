@@ -23,7 +23,8 @@ export const markdownHighlight = HighlightStyle.define([
   { tag: t.strikethrough, textDecoration: 'line-through' },
 
   { tag: t.link, color: 'var(--ink-primary)', textDecoration: 'underline' },
-  { tag: t.url, color: 'var(--ink-muted)' },
+  // Note ink for the same reason as the placeholder. See `--ink-note-muted`.
+  { tag: t.url, color: 'var(--ink-note-muted)' },
 
   { tag: t.quote, color: 'var(--ink-secondary)', fontStyle: 'italic' },
 

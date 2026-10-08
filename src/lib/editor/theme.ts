@@ -197,8 +197,10 @@ export const editorTheme = EditorView.theme({
     lineHeight: 'var(--line-height-code)'
   },
 
+  // Note ink, not `--ink-muted`: this sits on a surface that can be tinted,
+  // and on a dark tint the general muted ink is darker than the note itself.
   '.cm-placeholder': {
-    color: 'var(--ink-muted)',
+    color: 'var(--ink-note-muted)',
     fontStyle: 'normal'
   }
 });

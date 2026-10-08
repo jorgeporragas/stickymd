@@ -105,7 +105,8 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 |---|---|
 | `--ink-primary` | Note content |
 | `--ink-secondary` | UI labels, metadata |
-| `--ink-muted` | Placeholder and inactive states |
+| `--ink-muted` | Inactive states and metadata on the hub and settings, which are surfaces that are never tinted |
+| `--ink-note-muted` | Quiet ink written on a note: the placeholder and a link's destination. **Holds 3:1 on every note, clear or tinted, on its theme's design basis.** On a dark tint it sits *above* the surface, for the reason `--ink-syntax` does, and stays below `--ink-primary` so a placeholder never reads as writing. Split from `--ink-muted` by SMD-098, which found the placeholder at 1.21:1 on tinted dark notes |
 | `--ink-syntax` | Markdown syntax characters when revealed. **Holds 3:1 against every tint on its own theme's design basis** — a white backdrop on Frost (ADR-018), a mid one on Dark (ADR-036) — and stays roughly a third of `--ink-primary`'s contrast, so it reads as markup rather than as text. It was below 2:1 everywhere and 1.02:1 at worst until SMD-083; quiet is the intent, invisible was a bug |
 | `--ink-on-accent` | Text on an accent-filled surface |
 
