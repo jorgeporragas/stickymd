@@ -24,6 +24,8 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **SMD-100 shipped with it.** The two builds shared one settings file — the config directory is keyed by a bundle identifier that does not vary by profile — so "point the dev build somewhere else" was not achievable while it stood. A debug build now reads `settings.dev.json` and defaults to `Documents\sticky.md (dev)`. **The installed build is still pointed at `sticky.md_testing`** and repointing it is the founder's.
 
+**Two bugs the founder reported shipped on 2026-10-07.** SMD-101: the cursor skipped lines below a rendered table. SMD-102: a second launch started a second copy of the application. Both are on `main` and in no release. SMD-101 can be checked in the dev build. SMD-102 is release-only by design, so it shows after the next tag.
+
 **One thing came back from that pass.** SMD-098: the placeholder is all but invisible on a tinted dark note, and the same token takes a bare URL with it. Logged at his word rather than built.
 
 **The Check job earned itself on its first run**, finding SMD-097 — a note name carrying the other platform's separator, in the code CLAUDE.md names as handling untrusted input. It had been asserted by a test since the day the test was written and no compiler had ever run it.
@@ -675,6 +677,36 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
+
+### [SMD-103] A second launch could bring the notes to the desktop it came from
+Type:    idea
+State:   idea
+Created: 2026-10-07
+History:
+  2026-10-07  logged as idea, from building SMD-102
+Notes: After SMD-102, launching sticky.md again opens the hub in the copy already running. If the hub is already open on another virtual desktop, focusing it takes the founder *to* that desktop rather than bringing the hub to the one he is working on. Windows can move a process's own windows between desktops (`IVirtualDesktopManager::MoveWindowToDesktop`), so the hub could come to him instead. Not built: nothing in Tauri wraps it, it is Windows-only, and whether to follow him or stay put is a product call. The global shortcut already opens a new note on whichever desktop is current.
+
+### [SMD-102] Several copies of sticky.md in the taskbar
+Type:    bug
+State:   shipped
+Created: 2026-10-07
+History:
+  2026-10-07  reported by the founder: "several instances of sticky.md open in the taskbar", possibly tied to his use of several virtual desktops
+  2026-10-07  shipped — commit 621ac2f
+Notes: Literal copies. Nothing kept the application to one, so launching it while it sat in the tray started a second whole application: a second tray icon, a global shortcut it could not claim, and every open note restored again. His guess was the mechanism. A second virtual desktop's taskbar does not show the first copy as running, so the pinned icon there reads as a cold start.
+  `tauri-plugin-single-instance` now sends a second launch to the copy already running, which opens the hub. That is what a tray left click and a Dock click do. **Release builds only.** The plugin keys on the bundle identifier, which the debug build shares with the installed one (SMD-100), so registering it in both would make `tauri dev` hand itself to the installed copy and quit. On Windows it adds the plugin and nothing else, since `windows-sys` was already in the tree. The lockfile's 400-odd new lines are its Linux D-Bus side, which Windows never compiles.
+  Verified on a debug build with the guard forced on. The second launch exited with code 0 in under a second, one process remained, and the hub appeared in it. The switch was then reverted. **The founder cannot see it until a release carries it**, since his dev build skips the guard on purpose. Anything already running as two copies stays two until both are quit.
+
+### [SMD-101] The cursor skipped lines below a rendered table
+Type:    bug
+State:   shipped
+Created: 2026-10-07
+History:
+  2026-10-07  reported by the founder: arrows sometimes jump several lines, and Enter seems to skip several, possibly after a window resize
+  2026-10-07  shipped — commit 07d07da
+Notes: Not the resize. The table wrapper had a vertical margin, which CodeMirror leaves out when it measures a block widget, so its height map ran 16px behind the drawn page for every table above the cursor. Vertical motion asks that map for the line below, and past one line of drift it gets the line after next. Reproduced in a harness built on the real editor: with three tables above it, ArrowDown went 22, 25, 28, 31. After the fix the map matched the drawn page to the pixel, ArrowDown moved one line per press, and Enter followed by ArrowDown with real keystrokes landed where expected. Padding draws the table exactly as before. See `docs/FIXES.md`.
+  It will have looked tied to the window because it only shows with tables above the caret, and the further down a long note you are, the more of them there are.
+  Waits on the founder confirming it in the running application.
 
 ### [SMD-100] The dev build and the installed build shared one settings file
 Type:    bug

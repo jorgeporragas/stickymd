@@ -382,7 +382,7 @@ Never:    Never remove the separator check as redundant because the component
 ### A block widget or line in the editor must never carry a vertical margin
 Area:     The CodeMirror inline-rendering layer and its decorations
 Date:     2026-10-07
-Commit:   <this commit>
+Commit:   07d07da
 Problem:  The arrow keys sometimes skipped lines and Enter seemed to land
           the cursor several lines away. The founder suspected window
           resizing. It was the rendered table. `.cm-md-table-wrapper` had
@@ -411,7 +411,7 @@ Never:    Never give vertical margin to anything CodeMirror measures as a
 ### A second launch must not start a second application
 Area:     Global and in-app shortcut registration, and tray lifecycle
 Date:     2026-10-07
-Commit:   <this commit>
+Commit:   621ac2f
 Problem:  Several sticky.md entries were showing in the taskbar. Nothing kept
           the app to one copy, so launching it while it sat in the tray
           started a second whole application: a second tray icon, a failed
