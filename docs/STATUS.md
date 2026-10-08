@@ -8,17 +8,21 @@ Everything with a state. This is the only file permitted to contain statements t
 
 **Build** — Phase 6 — Cross-Platform Expansion, macOS first and then Linux.
 
-Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by the workflow on a clean runner and published with both assets. Phase 7 — Release & Auto-Update was taken before Phase 6 at the founder's direction and `v1.1.0` shipped from it on 2026-09-10; `MASTER.md` says the numbering records the order phases were defined in rather than a plan with an ending.
+Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by the workflow on a clean runner and published with both assets. Phase 7 — Release & Auto-Update was taken before Phase 6 at the founder's direction and `v1.1.0` shipped from it on 2026-09-10; `MASTER.md` says the numbering records the order phases were defined in rather than a plan with an ending. `v1.2.0` was published on 2026-10-08, Windows only.
 
 **Closing Phase 7 is still owed** — the truth check, which the last one earned: it found 38 shipped items citing no commit and the missing pre-commit check that let them through. Phase 6 opened before it, at the founder's word.
 
 ## Current Active Step
 
+**`v1.2.0` is published, and nobody can download it but the founder.** Tagged and released on 2026-10-08, with the installer, the portable zip and a signed manifest, carrying SMD-092 to 094, 098 and 101 to 104. But the repository is private (SMD-107). GitHub serves release downloads anonymously only from a public repository, so the README's download link and the updater endpoint every installed copy asks both return 404. That includes v1.1.0's manifest, which returned 200 on 2026-09-08. Making the repository public, or not, is the founder's decision. Until it is made, **the updater cannot deliver 1.2.0 to anyone, him included.** He can install it by hand from the release page while signed in.
+
+**The release's macOS job failed** (SMD-106), so 1.2.0 is Windows-only, which is what its notes say. The Windows job was untouched by it.
+
 **macOS is written through step 5 of SMD-095's order and verified on no Mac.** SMD-096 carries the work. Steps 1 to 3 landed in `2ec1da6`; steps 4 and 5 — the menu-bar mark, and the window behaviour that turned out to need reading rather than writing — landed today.
 
 **What is left is mostly the founder's**, and it is the part that was always going to be: the vibrancy material, the menu-bar mark beside real system icons, whether an undecorated window can still be resized from its edges, and whether a Dock icon alongside a menu-bar extra is the right shape for something that lives in the tray.
 
-**SMD-092, SMD-093 and SMD-094 are verified** — the founder confirmed all three in a running window on 2026-09-10, the palette's pop included, which was worth watching because it reversed a retract he had asked for and liked. They are on `main` and in no release: `v1.1.0` predates them, so a tag is owed before anyone but him sees them.
+**SMD-092, SMD-093 and SMD-094 are verified** — the founder confirmed all three in a running window on 2026-09-10, the palette's pop included, which was worth watching because it reversed a retract he had asked for and liked. They shipped in `v1.2.0` on 2026-10-08.
 
 **SMD-099 shipped today** — a debug build wears the mark in amber and says `(dev)` in every window title and the tray tooltip, so the founder stops arriving in the wrong build.
 
@@ -26,7 +30,7 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 **Also shipped on 2026-10-07:** SMD-104, a launch opens the hub, or a new note if the settings say so. SMD-103, an open window comes to the virtual desktop in use. SMD-098, quiet ink readable on tinted dark notes. SMD-103's cross-desktop move is unseen, because the machine had one desktop. SMD-105 was logged from the same pass.
 
-**Two bugs the founder reported shipped on 2026-10-07.** SMD-101: the cursor skipped lines below a rendered table. SMD-102: a second launch started a second copy of the application. Both are on `main` and in no release. SMD-101 can be checked in the dev build. SMD-102 is release-only by design, so it shows after the next tag.
+**Two bugs the founder reported shipped on 2026-10-07.** SMD-101: the cursor skipped lines below a rendered table. SMD-102: a second launch started a second copy of the application. Both are in `v1.2.0`. SMD-101 can be checked in the dev build. SMD-102 is release-only by design, so it shows once 1.2.0 is installed.
 
 **One thing came back from that pass.** SMD-098: the placeholder is all but invisible on a tinted dark note, and the same token takes a bare URL with it. Logged at his word rather than built.
 
@@ -681,6 +685,26 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   This adds the application's only `backdrop-filter`, which is not the rule being broken. The rule is about the primary window surface, where that filter cannot see the desktop and so cannot do the job. Here what is behind the control is the app's own content — the note's text, under a bubble in the ring — and without the blur the words read through the glyph. ADR-034 predicted these bubbles would not need it; that was true of an opaque fill and is not true now.
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
+
+### [SMD-107] The repository is private, so releases reach no one
+Type:    bug
+State:   idea
+Created: 2026-10-08
+History:
+  2026-10-08  found while publishing v1.2.0
+Notes: `gh repo view` reports `PRIVATE`. Anonymously, the repository page, every release asset and `releases/latest/download/latest.json` all return 404, v1.1.0's included. SMD-005 recorded that endpoint returning 200 on 2026-09-08, so the repository was public then and was made private at some point after. No commit records when or why, and this log doesn't guess.
+  The consequences are broad. The README's download link fails for anyone but the founder. The updater compiled into every installed copy fetches the manifest without signing in, so Check now ends in the "could not reach GitHub" error rather than an update, and that has probably been true since the change. The release workflow is unaffected: it authenticates.
+  Not a code fix. If private was deliberate, the updater and the README's download link no longer describe anything that works, and that is a presence pass for ADR-014 and the README. If it wasn't, making the repository public again restores both, with nothing to rebuild. 1.2.0's manifest is already in place.
+
+### [SMD-106] The macOS release job fails without the Apple secrets
+Type:    bug
+State:   idea
+Created: 2026-10-08
+History:
+  2026-10-08  found when the v1.2.0 release run failed on macOS
+Notes: The `Build` step dies in `security import`: "failed codesign application: … failed to import keychain certificate". The workflow passes `APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}`, and an absent secret becomes an empty string, not an unset variable. Tauri treats the variable being present as the instruction to sign, and tries to import an empty certificate.
+  So the comment above that step is wrong: "Absent either, the build still succeeds and simply produces less". It was written without a run to check it, and this was the first tag to reach the job. The Check workflow didn't catch it because it never bundles.
+  The likely fix is to drop the APPLE_* variables in the step when the certificate is empty, so an unsigned `.app` and `.dmg` come out. That only changes what happens without secrets. Whether an unsigned macOS build should be attached to a release at all, when Gatekeeper will refuse to open it, is a separate question, and the founder's. It cost nothing this time: 1.2.0's notes are Windows-only.
 
 ### [SMD-105] A blockquote on a tinted dark note is under 3:1
 Type:    bug
