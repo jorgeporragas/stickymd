@@ -407,3 +407,31 @@ Never:    Never give vertical margin to anything CodeMirror measures as a
           that lands in the wrong place, some distance from the cause. Check
           it with `view.lineBlockAt(pos).top + view.documentTop` against the
           line's own `getBoundingClientRect().top`. They must be equal.
+
+### A second launch must not start a second application
+Area:     Global and in-app shortcut registration, and tray lifecycle
+Date:     2026-10-07
+Commit:   <this commit>
+Problem:  Several sticky.md entries were showing in the taskbar. Nothing kept
+          the app to one copy, so launching it while it sat in the tray
+          started a second whole application: a second tray icon, a failed
+          attempt to register the global shortcut, and every open note
+          restored again in new windows. The easy way to do it is from a
+          second virtual desktop. That desktop's taskbar does not show the
+          first copy as running, so the pinned icon looks like a cold start.
+Fix:      `tauri-plugin-single-instance`, registered first in `main.rs` so a
+          second copy exits before its own setup runs. The copy already
+          running opens the hub, which is how the tray answers a left click
+          and how the Dock answers a click. Verified with a debug build that
+          had the guard forced on: the second launch exited with code 0 in
+          under a second, one process remained, and the hub appeared in it.
+Never:    Never register it in a debug build. The plugin keys its mutex and
+          its message window on the bundle identifier, which a debug build
+          shares with the installed one (see SMD-100). Registered in both,
+          `tauri dev` would hand itself to the installed copy and quit. The
+          `cfg!(debug_assertions)` branch is what keeps the two builds able
+          to run side by side.
+          Never open the window directly in the callback, either. The plugin
+          calls it from inside a window procedure on the main thread, so it is
+          spawned onto the async runtime, for the reason given in "A command
+          that builds a window must be `async`".

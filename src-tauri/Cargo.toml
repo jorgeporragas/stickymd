@@ -34,6 +34,12 @@ tauri-plugin-autostart = "2"
 tauri-plugin-updater = "2.11.0"
 tauri-plugin-process = "2.3.1"
 
+# One copy of the application. Without it, launching sticky.md while it sat in
+# the tray started a second whole application -- a second tray icon, and every
+# open note restored a second time. Easy to reach on a second virtual desktop,
+# whose taskbar does not show the first copy as running. See main.rs.
+tauri-plugin-single-instance = "2"
+
 # Compositor blur. The frosted surface is a window property applied here, not a
 # CSS filter -- a web view cannot see the desktop behind it.
 # See docs/DESIGN.md principle 3.

@@ -35,7 +35,39 @@ fn surface_mode(current: tauri::State<'_, surface::Current>) -> SurfaceMode {
 }
 
 fn main() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+
+    // One copy of the application, and registered first so a second copy
+    // exits before it has built a window, restored a session or put a second
+    // icon in the tray. It used to do all three: launch sticky.md from a second
+    // virtual desktop, whose taskbar does not show the first copy as running,
+    // and both copies stayed resident.
+    //
+    // Launching it again means "show me sticky.md", so the copy already
+    // running answers the way the tray answers a left click and the Dock
+    // answers a click on macOS: it brings the notes back. Spawned rather than
+    // run in place, because the plugin calls this from inside a window
+    // procedure on the main thread, and building a window from there is the
+    // wedge docs/FIXES.md describes.
+    //
+    // Release builds only. The guard keys on the bundle identifier, which a
+    // debug build shares with the installed one — the same fact behind
+    // SMD-100 — so in a debug build it would make the two builds one, and
+    // starting `tauri dev` would summon the installed copy and quit.
+    let builder = if cfg!(debug_assertions) {
+        builder
+    } else {
+        builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            let app = app.clone();
+            tauri::async_runtime::spawn(async move {
+                if let Err(error) = windows::open_hub(&app) {
+                    eprintln!("sticky.md: a second launch could not open the hub: {error}");
+                }
+            });
+        }))
+    };
+
+    builder
         .plugin(tauri_plugin_dialog::init())
         // The one part of this application that touches the network, and it
         // carries no note content — ADR-014, and MASTER veto 2 is about

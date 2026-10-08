@@ -84,6 +84,7 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 - Treat a window that could not be frosted as Solid, not as an error. Solid is a supported way to run.
 - Keep a debug build's settings out of the installed build's. `app_config_dir()` is the bundle identifier and does not vary by build profile, so both binaries resolve one directory; `settings.rs` picks `settings.dev.json` under `cfg!(debug_assertions)` and `notes_dir` defaults elsewhere the same way. Without that, pointing a development build at a scratch notes folder moves the installed one too. See SMD-100.
 - Never let closing the last window end the application. It is tray-resident, and a summonable note is the product. Only an explicit quit exits.
+- Keep the application to one copy. `tauri-plugin-single-instance` makes a second launch hand over to the copy already running, which opens the hub. It is registered in release builds only, because it keys on the bundle identifier that a debug build shares with the installed one. See `docs/FIXES.md`.
 
 ## Editor
 
