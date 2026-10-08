@@ -14,7 +14,7 @@ Phases 1 to 5 are closed and V1 is out: `v1.0.0`, tagged 2026-09-07, built by th
 
 ## Current Active Step
 
-**`v1.2.0` is published, and nobody can download it but the founder.** Tagged and released on 2026-10-08, with the installer, the portable zip and a signed manifest, carrying SMD-092 to 094, 098 and 101 to 104. But the repository is private (SMD-107). GitHub serves release downloads anonymously only from a public repository, so the README's download link and the updater endpoint every installed copy asks both return 404. That includes v1.1.0's manifest, which returned 200 on 2026-09-08. Making the repository public, or not, is the founder's decision. Until it is made, **the updater cannot deliver 1.2.0 to anyone, him included.** He can install it by hand from the release page while signed in.
+**`v1.2.0` is published and reachable.** Tagged and released on 2026-10-08, with the installer, the portable zip and a signed manifest, carrying SMD-092 to 094, 098 and 101 to 104. The repository had been private (SMD-107), which made every download and the updater's manifest return 404. The founder made it public again the same day. Checked anonymously afterwards: all of them return 200, the manifest names 1.2.0, and its signature carries key `91BFF250E1BA98CB`, the key compiled into the application. **Still unexercised: an installed copy actually updating to it.**
 
 **The release's macOS job failed** (SMD-106), so 1.2.0 is Windows-only, which is what its notes say. The Windows job was untouched by it.
 
@@ -688,13 +688,15 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
 
 ### [SMD-107] The repository is private, so releases reach no one
 Type:    bug
-State:   idea
+State:   active
 Created: 2026-10-08
 History:
   2026-10-08  found while publishing v1.2.0
+  2026-10-08  resolved outside the repository: the founder made it public again (GitHub reports the change at 16:13 UTC)
 Notes: `gh repo view` reports `PRIVATE`. Anonymously, the repository page, every release asset and `releases/latest/download/latest.json` all return 404, v1.1.0's included. SMD-005 recorded that endpoint returning 200 on 2026-09-08, so the repository was public then and was made private at some point after. No commit records when or why, and this log doesn't guess.
   The consequences are broad. The README's download link fails for anyone but the founder. The updater compiled into every installed copy fetches the manifest without signing in, so Check now ends in the "could not reach GitHub" error rather than an update, and that has probably been true since the change. The release workflow is unaffected: it authenticates.
   Not a code fix. If private was deliberate, the updater and the README's download link no longer describe anything that works, and that is a presence pass for ADR-014 and the README. If it wasn't, making the repository public again restores both, with nothing to rebuild. 1.2.0's manifest is already in place.
+  **2026-10-08 — public again, at the founder's hand.** Re-checked anonymously: the repository page, `releases/latest`, both 1.2.0 assets, and the manifests for 1.2.0 and 1.1.0 all return 200. The served manifest names 1.2.0, and its signature's key ID matches the public key in `tauri.conf.json`. Nothing was rebuilt or re-uploaded. Why it went private is still unrecorded.
 
 ### [SMD-106] The macOS release job fails without the Apple secrets
 Type:    bug
