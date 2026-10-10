@@ -11,7 +11,7 @@
     whenModified,
     type NoteSummary
   } from '../../lib/state/hub';
-  import { openNewNoteWindow } from '../../lib/state/windows';
+  import { openNewNoteWindow, showSettings } from '../../lib/state/windows';
 
   let notes = $state<NoteSummary[]>([]);
   let loaded = $state(false);
@@ -71,6 +71,25 @@
 <div class="surface">
   <WindowChrome {revealed} closeLabel="Close the notes list">
     {#snippet controls()}
+      <!-- Leading the row: settings is about the application rather than the
+           notes, so it sits furthest from the two controls that act on them. -->
+      <button
+        class="lozenge chrome-control"
+        class:revealed
+        type="button"
+        aria-label="Settings"
+        onclick={showSettings}
+      >
+        <!-- A cog on the same 12-unit grid: a ring and six teeth. At 9px the
+             teeth are round-capped stubs that merge into the ring, which is
+             what makes it read as a cog rather than a sun. -->
+        <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+          <circle cx="6" cy="6" r="2.4" />
+          <path
+            d="M6 2.4V1.4M6 9.6v1M9.12 4.2l.86-.5M2.88 4.2l-.86-.5M2.88 7.8l-.86.5M9.12 7.8l.86.5"
+          />
+        </svg>
+      </button>
       <button
         class="lozenge chrome-control"
         class:revealed

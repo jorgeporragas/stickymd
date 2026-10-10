@@ -686,6 +686,14 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
   Contrast checked first, across white, mid and black desktops, in both themes, for the neutral control and all six tinted ones: worst case 4.01:1 against a 3:1 floor, most above 8:1. Legibility was never the binding constraint — appearance was — but it is better known than assumed.
   Verified first in a mock served by the dev server, since the compositor's own blur cannot be seen in a browser: the wallpaper's colour comes through the bubbles and the text behind them frosts. The one thing that mock could not stand in for — `backdrop-filter` inside WebView2 on a real layered window — was then confirmed by the founder in the running application: "it works as you described".
 
+### [SMD-108] A settings button in the hub
+Type:    feature
+State:   active
+Created: 2026-10-10
+History:
+  2026-10-10  asked for by the founder, logged as active
+Notes: Settings was reachable only from the tray menu. The hub now carries a cog in its chrome, the left-most of its three controls (settings, new note, close), on the same `.lozenge chrome-control` treatment as the new-note button, so no component was added. It calls the existing `show_settings` command through `showSettings()` in `src/lib/state/windows.ts`, which had no caller until now, so it opens the one settings window or summons it per ADR-041. The glyph is hand-drawn on the 12-unit grid: a ring and six round-capped teeth. Type-checked; how the cog reads at 9px is for the founder to judge in a running window.
+
 ### [SMD-107] The repository is private, so releases reach no one
 Type:    bug
 State:   shipped
