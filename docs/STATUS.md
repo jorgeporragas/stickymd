@@ -688,10 +688,11 @@ Notes: ADR-039. "Any way to make bubble buttons transparent as well? Like the wi
 
 ### [SMD-108] A settings button in the hub
 Type:    feature
-State:   active
+State:   shipped
 Created: 2026-10-10
 History:
   2026-10-10  asked for by the founder, logged as active
+  2026-10-10  shipped — commit 684abae
 Notes: Settings was reachable only from the tray menu. The hub now carries a cog in its chrome, the left-most of its three controls (settings, new note, close), on the same `.lozenge chrome-control` treatment as the new-note button, so no component was added. It calls the existing `show_settings` command through `showSettings()` in `src/lib/state/windows.ts`, which had no caller until now, so it opens the one settings window or summons it per ADR-041. The glyph is hand-drawn on the 12-unit grid: a ring and six round-capped teeth. Type-checked; how the cog reads at 9px is for the founder to judge in a running window.
 
 ### [SMD-107] The repository is private, so releases reach no one
