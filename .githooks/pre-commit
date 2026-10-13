@@ -1,91 +1,27 @@
 #!/bin/sh
+# FLOW pre-commit hook. Installed by flow_sync; do not edit (flow_check C10 verifies it).
 #
-# StickyMD pre-commit hook — FLOW Net 1.
+# Runs flow_check's commit checks (C8) on the staged diff: the same rules CI runs on every
+# pull request. This hook is the early warning; CI is the check that counts, so a bypass
+# (git commit --no-verify) is legitimate and a missing Python only warns.
 #
-# Reports only. Never rewrites files, never stages anything, never calls the
-# network. POSIX shell only: must run under Git Bash on Windows and zsh on
-# macOS without modification. Staged diff only.
-#
-# `git commit --no-verify` is legitimate. This is one of four nets; a bypass is
-# caught by reconciliation at the next session start.
-#
-# Two checks. Both are unambiguous and both will actually fire. Judgement-based
-# obligations belong to FLOW's trigger table, not here.
+# Enable once per clone:   git config core.hooksPath .githooks
 
-fail=0
-
-staged=$(git diff --cached --name-only --diff-filter=ACM)
-[ -z "$staged" ] && exit 0
-
-# --- 1. A new shared component or token file with no change to DESIGN.md ------
-#
-# docs/DESIGN.md's component inventory is authoritative: if a component is not
-# listed, it does not exist. A new file in the shared directories owes an entry
-# in the same commit.
-
-new_ui=$(git diff --cached --name-only --diff-filter=A \
-         | grep -E '^src/lib/(components|tokens)/' )
-
-if [ -n "$new_ui" ]; then
-  if ! echo "$staged" | grep -q '^docs/DESIGN\.md$'; then
-    echo "FLOW: new shared component or token file staged, with no change to docs/DESIGN.md:"
-    echo "$new_ui" | sed 's/^/    /'
-    echo "  Fix: add each to the Component Inventory in docs/DESIGN.md, in this commit."
-    echo
-    fail=1
-  fi
-fi
-
-# --- 2. A hard-coded colour outside the token layer ---------------------------
-#
-# docs/DESIGN.md principle 5: every colour is read through a semantic token.
-# Raw values are permitted only in src/lib/tokens/.
-
-hits=""
-for f in $(echo "$staged" | grep -E '\.(svelte|ts|css)$' | grep -v '^src/lib/tokens/'); do
-  if git diff --cached -U0 -- "$f" \
-     | grep '^+' \
-     | grep -Eqi '#[0-9a-f]{3}([0-9a-f]{3})?\b|rgba?\(|hsla?\('; then
-    hits="$hits $f"
-  fi
+for py in python3 python; do
+	if command -v "$py" >/dev/null 2>&1 && "$py" -c 'import tomllib' >/dev/null 2>&1; then
+		out=$("$py" .flow/flow_check.py --staged --only C8 2>&1)
+		status=$?
+		[ "$status" -ne 0 ] && printf '%s\n' "$out"  # silent when the commit owes nothing
+		if [ "$status" -eq 1 ]; then
+			printf '\nThis commit owes a doc update (above). Stage it and commit again,\n'
+			printf 'or bypass deliberately with: git commit --no-verify. CI will check it again.\n'
+			exit 1
+		fi
+		if [ "$status" -eq 2 ]; then
+			printf 'flow_check could not run (above). Not blocking the commit; CI will run it.\n'
+		fi
+		exit 0
+	fi
 done
-
-if [ -n "$hits" ]; then
-  echo "FLOW: hard-coded colour value added outside src/lib/tokens/:"
-  for f in $hits; do echo "    $f"; done
-  echo "  Fix: read the colour through a semantic token."
-  echo "  See docs/DESIGN.md section 'Token contract'."
-  echo
-  fail=1
-fi
-
-# --- 3. An item moved to `shipped` with no commit cited -----------------------
-#
-# FLOW names this check and it was never written, which is how 38 shipped items
-# reached the log with nothing to verify them against — found by the truth check
-# at the V1 transition and backfilled from git history.
-#
-# The hash cannot be this commit's: it does not exist yet. The convention is the
-# one the log already uses — cite the commit that did the work, which is either
-# an earlier one or, when code and item ship together, a follow-up. Either way
-# the citation is a hash, and its absence is what this catches.
-
-if echo "$staged" | grep -q '^docs/STATUS\.md$'; then
-  added=$(git diff --cached -U0 -- docs/STATUS.md | grep -E '^\+')
-
-  if echo "$added" | grep -Eq '^\+State:[[:space:]]+shipped'; then
-    if ! echo "$added" | grep -Eq 'commit [0-9a-f]{7,40}'; then
-      echo "FLOW: an item moved to shipped with no commit cited."
-      echo "  Fix: add a history line to that item —"
-      echo "         YYYY-MM-DD  shipped — commit <hash>"
-      echo "       naming the commit that did the work."
-      echo "  If that commit is this one, its hash does not exist yet: commit"
-      echo "  the work first, then the ship line citing it. Two commits, and"
-      echo "  the second is one line — which is what the log has always done."
-      echo
-      fail=1
-    fi
-  fi
-fi
-
-exit $fail
+printf 'FLOW: Python 3.11+ not found, commit checks skipped. CI will run them.\n'
+exit 0
