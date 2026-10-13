@@ -1,0 +1,41 @@
+# FLOW configuration for this project. flow_sync creates this file once and never overwrites
+# it: everything here belongs to the project (D-005). Every key is optional; anything omitted
+# takes FLOW's default, and every value that differs from a default is shown in the report.
+# Definitions of every check: .flow/SPEC.md.
+
+# Where FLOW's files live, if not the defaults.
+# [files]
+# status = "docs/STATUS.md"
+# decisions = "docs/DECISIONS.md"
+
+# Limits. Raising one is visible in every report; say why in the pull request.
+# [current_step]
+# max_words = 250
+# [component_files]
+# max_words = 400
+
+# Per-file entry limits (C3). One block per file.
+# [[entries]]
+# file = "docs/FIXES.md"
+# heading_level = 2
+# max_words = 600
+
+# Section references inside code comments (C5).
+# [references]
+# code_globs = ["lib/**/*.dart"]
+
+# The component inventory (C7): every file in dir has a file in doc_dir or is named in doc.
+# [[inventory]]
+# dir = "lib/core/widgets"
+# glob = "*.dart"
+# doc = "docs/components"
+
+# Files that must change together (C8). on = "any" (default) or "added".
+# [[co_change]]
+# when = "supabase/migrations/*.sql"
+# require = "docs/SCHEMA.md"
+
+# Reading cost metric: files read at every session start, and files read in most sessions.
+# [reading_cost]
+# session_start = ["FLOW_SYSTEM.md", "docs/STATUS.md", "CLAUDE.md"]
+# optional = ["docs/DESIGN.md"]
