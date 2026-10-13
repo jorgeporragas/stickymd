@@ -1,8 +1,7 @@
 # DECISIONS
 
 > **Authoritative for:** why sticky.md is the way it is. One entry per decision, append-only.
-> **Never contains:** work tracking, or current policy. A decision is not a task — tasks live in `docs/STATUS.md`. Current policy lives in `MASTER.md § Permanent Vetoes` or in an item's state. Nothing may cite this file as current policy.
-> **Last verified:** 2026-09-07
+> **Never contains:** work tracking, or current policy. A decision is not a task — tasks live in the repository's GitHub issues. Current policy lives in `MASTER.md § Permanent Vetoes` or in an issue's state. Nothing may cite this file as current policy.
 
 `Context` and `Decision` are immutable once written. `Status` changes only to record supersession. `Consequences` is append-only.
 

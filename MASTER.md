@@ -1,8 +1,7 @@
 # sticky.md
 
 > **Authoritative for:** what sticky.md is — problem, user, core loop, domain model, stack choices and their rationale, scope, permanent vetoes, build phase definitions, and deployment.
-> **Never contains:** anything with a state. Current phase, active work, the item log and completed milestones live in `docs/STATUS.md`. Engineering imperatives live in `CLAUDE.md`. Decision history lives in `docs/DECISIONS.md`. The visual system lives in `docs/DESIGN.md`.
-> **Last verified:** 2026-09-06
+> **Never contains:** anything with a state. Current phase and active work live in `docs/STATUS.md`; work lives in the repository's GitHub issues. Engineering imperatives live in `CLAUDE.md`. Decision history lives in `docs/DECISIONS.md`. The visual system lives in `docs/DESIGN.md`.
 
 ---
 
