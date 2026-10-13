@@ -11,7 +11,7 @@ It's for the text that isn't worth a vault: a prompt you're editing, a paragraph
 
 ## Install
 
-[**Download the latest release.**](../../releases/latest) Windows 10 or 11, 64-bit. Take the installer, or the portable zip if you'd rather nothing touched the registry.
+[**Download the latest release.**](https://github.com/jorgeporragas/stickymd/releases/latest) Windows 10 or 11, 64-bit. Take the installer, or the portable zip if you'd rather nothing touched the registry.
 
 Windows will say **"Windows protected your PC"** — click **More info → Run anyway**. The binaries are unsigned, and a certificate that removes that warning costs a few hundred dollars a year which this project doesn't have.
 
