@@ -244,6 +244,7 @@ Consequences: The stop was chosen by measurement, and the measurement decided th
 ## ADR-029 — Departure Mono replaces Handjet as the display face
 Status:     Accepted
 Date:       2026-09-06
+Supersedes: ADR-011 (as to the face)
 Context:    The founder asked for display alternatives in Redaction's spirit and picked Departure Mono — a monospaced pixel face by Helena Zhang, SIL OFL, verified from the licence file shipped in the release rather than from a directory listing, which is the lesson ADR-011 paid for. It replaces Handjet everywhere: app identity, hub headers, empty states.
 Decision:   `--font-display` is `'Departure Mono', ui-monospace, monospace`. Handjet's files, licence and axis tokens are removed rather than left for a face nothing uses.
 Consequences: Version 1.500, one 22 kB woff2, vendored whole. Geist and Martian Mono are subset to latin and latin-ext; this one arrives as a single file covering Latin, Cyrillic and Greek, and subsetting it would cost a build step and a dependency to save a few kilobytes.
