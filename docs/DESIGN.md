@@ -24,7 +24,7 @@ The frosted surface comes from the OS compositor — Acrylic on Windows, vibranc
 Transparency is a system setting, and Windows disables it under battery saver. Some users will only ever see the Solid surface mode. It is designed to look deliberate, not degraded.
 
 **5. Every colour is read through a token.**
-No component declares a static colour, ever. This is what makes a theme a data file rather than a refactor. The pre-commit hook rejects a raw colour outside `src/lib/tokens/`.
+No component declares a static colour, ever. This is what makes a theme a data file rather than a refactor. CI rejects a pull request that adds a raw colour outside `src/lib/tokens/`, through `scripts/check-raw-colours.sh`.
 
 **6. Tokens layer: primitive, then semantic.**
 Primitives name values. Semantics name roles. Components read semantics only. When a semantic token starts serving two visually distinct purposes, it splits into two named tokens before the roles need to diverge.

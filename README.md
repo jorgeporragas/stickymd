@@ -19,7 +19,7 @@ It lives in the tray. **Ctrl+Shift+Space** makes a note from anywhere; right-cli
 
 ## Build it yourself
 
-Needs Node, Rust, and the MSVC C++ build tools.
+Needs Node (LTS, with npm), Rust (stable, via rustup), and the MSVC C++ build tools. The WebView2 runtime is already there on Windows 11.
 
 ```bash
 git clone https://github.com/jorgeporragas/stickymd.git
@@ -29,13 +29,13 @@ git config core.hooksPath .githooks
 npm run tauri dev
 ```
 
-That third line isn't optional: the pre-commit hook lives in `.githooks/`, and git doesn't look there until it's told to — on every clone, not once per repository.
+That third line isn't optional: the pre-commit hook lives in `.githooks/`, and git doesn't look there until it's told to — on every clone, not once per repository. Start the app with `npm run tauri dev`; a bare `npm run dev` starts the web page without the Tauri shell around it.
 
 ## Under it
 
 Tauri v2 with a Rust backend, Svelte 5 and TypeScript in the frontend, CodeMirror 6 for the editor. It uses the web view Windows already has rather than bundling a browser engine, which is most of why it's under 2 MB.
 
-The docs are unusually complete for something this size, because they're kept under a system that treats a stale doc as a bug: [MASTER.md](MASTER.md) for what the product is, [docs/DECISIONS.md](docs/DECISIONS.md) for why anything is the way it is, [docs/DESIGN.md](docs/DESIGN.md) for the visual system, [docs/STATUS.md](docs/STATUS.md) for everything with a state, and [docs/FIXES.md](docs/FIXES.md) for the fixes that must not be undone.
+The docs are unusually complete for something this size, because they're kept under a system that treats a stale doc as a bug: [MASTER.md](MASTER.md) for what the product is, [docs/DECISIONS.md](docs/DECISIONS.md) for why anything is the way it is, [docs/DESIGN.md](docs/DESIGN.md) for the visual system, [docs/STATUS.md](docs/STATUS.md) for where the project is now, the repository's [issues](https://github.com/jorgeporragas/stickymd/issues) for the work, and [docs/FIXES.md](docs/FIXES.md) for the fixes that must not be undone. The system itself is [FLOW_SYSTEM.md](FLOW_SYSTEM.md).
 
 ## Licence
 
