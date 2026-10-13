@@ -1,0 +1,11 @@
+# .lozenge (`src/app.css`)
+
+The Aqua seated control: shape, seat, specular, and the pressed state, with no size, fill or rim of its own. A control declares `--lozenge-fill` and optionally `--lozenge-pressed`; the states belong to the shared treatment, so pressing one is written once rather than by every control that has a fill. It carries the neutral fill **and rim** by default, and `.lit` for anything held on — the pin, a settings toggle, an engaged action in the ring, the save indicator, and every tint swatch. A component using it supplies only the hue, as `color`; the fill, the pressed fill, the rim and the glyph's colour all follow. Glyphs are sized at 58% of the diameter here rather than per component, so they scale with the disc.
+
+The neutral is the default and `.lit` the exception, which is not arbitrary: a component that declared the neutral itself would win over `.lit` — same specificity, and component styles are injected after `app.css`. That produced two faults in turn, a lit control coming out grey and then a lit control keeping the pale rim of the unlit state.
+
+The specular is a gradient rather than a flat ellipse. Solid, it was a white sticker across the top half of every bubble, and it sat over the glyph instead of on the glass. Light falls off.
+
+Translucent, and the alpha runs down the gradient rather than sitting flat across it — dense where the light lands, thin through the body (ADR-039). A disc of even translucency reads as a hole cut in the window. The rim, the seat and the specular stay at full strength: those are what keep it an object. A **lit** lozenge stays opaque, because its fill is the information.
+
+Round, and worn only by a note window's own chrome — the controls, the tint swatches, the save indicator. Nothing outside that window joins it: the hub's delete control is flat and secondary (ADR-031). Pressed, the fill lights from below and the specular goes out: a highlight on a face no longer turned toward the light is what makes a pressed state look painted on rather than pushed in. Worn by the window's controls and by every tint swatch. Not a component — a shared treatment, in `app.css` for the same reason `.surface` is: two components wanted it.

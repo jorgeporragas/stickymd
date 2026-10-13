@@ -1,0 +1,5 @@
+# ChordInput
+
+A keyboard shortcut, pressed rather than typed. Shows the chord in the platform's own names — `Ctrl + Shift + X`, not `Mod-Shift-x` — and on click waits for a keypress. Takes `value`, `format` (`editor` for CodeMirror's dialect, `global` for the operating system's), `label`, `onChange`.
+
+Replaced a text field that handed free text to CodeMirror, which ignores what it cannot parse: a typo made a shortcut that never fired and never said why (SMD-074). Capturing the keypress removes the class of error rather than reporting it. A button, not an input — it takes one keypress and shows one value, where an input would carry a caret, a selection and a paste target that mean nothing here. It refuses a bare letter, a lone modifier, and **Ctrl+Alt**, which is AltGr on most non-US layouts; a refusal keeps it listening, since every one of them is a chord the user was one key away from. Listening is drawn in `--signal-engaged`, because the control is holding the keyboard and every other shortcut in the window is inert until it stops.
