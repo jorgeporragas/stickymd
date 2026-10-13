@@ -39,3 +39,35 @@
 # [reading_cost]
 # session_start = ["FLOW_SYSTEM.md", "docs/STATUS.md", "CLAUDE.md"]
 # optional = ["docs/DESIGN.md"]
+
+# --- sticky.md ---------------------------------------------------------------
+
+# FIXES entries are `###` headings under the document's own sections. 600 is FLOW's suggested
+# size for a fix; an older entry over it stays a warning until someone edits it.
+[[entries]]
+file = "docs/FIXES.md"
+heading_level = 3
+max_words = 600
+
+# Section references inside code comments (C5).
+[references]
+code_globs = ["src/**/*.ts", "src/**/*.svelte", "src-tauri/src/**/*.rs"]
+
+# The component inventory (C7): every shared component has its own file in docs/components/.
+# The CSS classes below the .svelte files (.lozenge, .chrome-control, .bubble-in) have files
+# there too, but they are not files in this directory, so the check cannot enumerate them.
+[[inventory]]
+dir = "src/lib/components"
+glob = "*.svelte"
+doc = "docs/components"
+
+# A new token file owes DESIGN. A new shared component owes its file in docs/components/,
+# which C7 already enforces, so it needs no rule here. This was check 1 of the old hook.
+[[co_change]]
+when = "src/lib/tokens/*"
+on = "added"
+require = "docs/DESIGN.md"
+
+[reading_cost]
+session_start = ["FLOW_SYSTEM.md", "docs/STATUS.md", "CLAUDE.md"]
+optional = ["docs/DESIGN.md"]

@@ -1,0 +1,5 @@
+# Toggle
+
+A setting that is on or off, **or one of a set**: one seated bubble that lights and shows a dot when held. `role` is `switch` or `radio` — the control looks the same and the difference is what a screen reader announces, since "switch, off" said three times over a three-way choice describes the wrong thing. A radio pressed while already on does nothing, because you cannot deselect one of three themes into having none; the `radiogroup` around it is the caller's, and `Choice` is that caller. A dot rather than a check: a check is an action being confirmed, and this is a state being held — the same reason the pin draws a pin. The same control the always-on-top pin is, doing the same job. Takes `on`, `label`, `role`, `onChange`.
+
+It was a sliding switch first, with the bubble as its knob — one component too many. A switch has a track, a travel distance and an end stop to get wrong, and the knob overshot its track. The bubble already says on-or-off in this application's language and cannot overshoot anything.
