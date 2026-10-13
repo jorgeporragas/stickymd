@@ -1,0 +1,33 @@
+# FLOW checks for a project's CI. Add this job to an existing workflow, or save this file as
+# .github/workflows/flow.yml. It needs no secrets and only read access.
+#
+# fetch-depth: 0 is required: the commit checks walk the pull request's commits, and the
+# docs-only metric reads the last 30 days of history.
+name: flow
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: flow_check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python .flow/flow_check.py --range "origin/${{ github.base_ref }}..HEAD"
+          else
+            python .flow/flow_check.py --range "${{ github.event.before }}..${{ github.sha }}"
+          fi

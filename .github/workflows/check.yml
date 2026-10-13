@@ -57,3 +57,28 @@ jobs:
       - name: Test
         working-directory: src-tauri
         run: cargo test
+
+  # A raw colour outside src/lib/tokens/ breaks the design system's one rule
+  # about colour (docs/DESIGN.md, "Token contract"). This was the second check
+  # of the hand-written pre-commit hook; FLOW 3.0 replaced that hook, so the
+  # rule runs here instead, where --no-verify cannot skip it.
+  #
+  # Pull requests only: it judges what a branch adds against its base. The full
+  # history (fetch-depth: 0) is what lets `base...HEAD` find the merge base.
+  colours:
+    name: No raw colours
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check added lines
+        env:
+          # Through the environment rather than interpolated into the script, so
+          # a branch name is never parsed as shell.
+          BASE_REF: ${{ github.base_ref }}
+        run: sh scripts/check-raw-colours.sh "origin/$BASE_REF"
