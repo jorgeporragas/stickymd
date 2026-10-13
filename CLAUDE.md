@@ -1,27 +1,20 @@
 # CLAUDE.md
 
-> **Authoritative for:** engineering imperatives for this repository — session procedure, project structure, framework usage rules, design enforcement, cross-platform discipline, local setup, and build.
-> **Never contains:** project context, stack rationale, or current state. What sticky.md is and why the stack was chosen live in `MASTER.md`. The visual system lives in `docs/DESIGN.md`. Current phase and active work live in `docs/STATUS.md`.
-> **Last verified:** 2026-09-07
+> **Authoritative for:** engineering imperatives for this repository — what is specific to this repo in a session's reading, project structure, framework usage rules, design enforcement, cross-platform discipline, local setup, and build.
+> **Never contains:** project context, stack rationale, or current state. What sticky.md is and why the stack was chosen live in `MASTER.md`. The visual system lives in `docs/DESIGN.md`. Current phase and active work live in `docs/STATUS.md`. FLOW's own rules live in `FLOW_SYSTEM.md`. How to set up and run the project lives in the README.
 
-This project runs on FLOW. The spec sits in the working tree at `docs/FLOW_SYSTEM_v*.md` and is **deliberately untracked** — it is the founder's portable system, excluded by `.gitignore` per ADR-015. Read it before doing anything else. If it is absent from your working copy, ask the founder for it rather than proceeding without it.
+This project runs on FLOW, installed from the FLOW repository by `flow_sync`. `FLOW_SYSTEM.md` and the files in `.flow/` other than `config.toml` are FLOW's and are never edited here, nor are `.githooks/pre-commit` and `.claude/skills/flow-start/`: `flow_check` fails when any of them differs from `.flow/manifest.json` (C10). Read `FLOW_SYSTEM.md` before doing anything else.
 
 ---
 
 ## Before Every Session
 
-Read, in this order:
+Start every session with `/flow-start`. What is specific to this repository:
 
-1. `docs/STATUS.md` — current phase, active step, item log
-2. `CLAUDE.md` — this file
-3. `docs/DESIGN.md` — before any UI work, without exception
-4. `docs/FIXES.md` — before touching any area listed below
-5. `MASTER.md` — when starting a new phase or implementing a new feature
-6. `docs/DECISIONS.md` — only when a past decision is in question
-
-Then reconcile: run `git log` for commits since STATUS.md was last updated, check each against FLOW's trigger table, verify `core.hooksPath` is set on this machine, and report gaps before doing any work.
-
-There is no `docs/SCHEMA.md`. This project has no database.
+- Read `docs/DESIGN.md` before any UI work, without exception, and `docs/components/` for each component you touch.
+- Read `docs/FIXES.md` before touching any area listed below. FIXES has no area index of its own, so this list is it.
+- Read `MASTER.md` when starting a new phase or implementing a new feature.
+- There is no `docs/SCHEMA.md`. This project has no database.
 
 ### Areas that require reading FIXES.md first
 
@@ -37,11 +30,15 @@ There is no `docs/SCHEMA.md`. This project has no database.
 ## Project structure
 
 ```
+FLOW_SYSTEM.md            FLOW's rules — installed by flow_sync, never edited
+.flow/                    FLOW's checks, installed by flow_sync; config.toml is this project's
+.claude/                  agent settings, and FLOW's session-start skill
+scripts/                  this project's code checks, run in CI
 assets/icon/              the application mark — source SVG, never a generated size
 src/                      Svelte frontend
   assets/fonts/           vendored typefaces, each with its licence text
   lib/
-    components/           shared components — every file here is in the DESIGN inventory
+    components/           shared components — every file here has its file in docs/components/
     tokens/               design tokens — the only place a raw colour value may appear
     editor/               CodeMirror configuration and the inline-rendering layer
     state/                Svelte 5 rune-based state
@@ -59,6 +56,8 @@ src-tauri/                Rust backend
     shortcuts.rs          global and in-app shortcuts
     dev.rs                what marks a debug build — compiled out of a release one
 docs/                     FLOW documentation
+  components/             one file per shared component — the inventory
+  COMPLETED.md            work closed before FLOW 3.0: frozen, never edited
 .githooks/                committed git hooks
 ```
 
@@ -104,7 +103,7 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 
 - **Read every colour through a semantic token.** No component declares a static colour value. Raw values live only in `src/lib/tokens/`.
 - **Use only the spacing and radius scale.** No arbitrary pixel values.
-- **Before building any UI, read the component inventory in `docs/DESIGN.md`.** If a component is not listed, it does not exist — and if you create one, it lands in the inventory in the same commit.
+- **Before building any UI, look in `docs/components/`.** If a component has no file there, it does not exist — and if you create one, its file lands in the same commit.
 
 ## DRY
 
@@ -126,21 +125,8 @@ Windows and macOS on Apple Silicon are the build targets; Linux is next. These r
 
 ## Local setup
 
-Required on every machine, and per clone:
-
-```
-git config core.hooksPath .githooks
-```
-
-The hook does not run without it. Reconciliation verifies it at session start.
-
-Toolchain:
-
-- Rust stable, via rustup
-- Node LTS, with npm
-- WebView2 runtime — present by default on Windows 11
-
-Run the app with `npm run tauri dev`. Never start a dev server with a bare `npm run dev` — the Tauri shell will not be attached.
+- `core.hooksPath` must be `.githooks` in every clone. The pre-commit hook does not run without it, and `/flow-start` verifies it. The command is in the README under *Build it yourself*.
+- Never start a dev server with a bare `npm run dev` — the Tauri shell will not be attached. Run the app with `npm run tauri dev`.
 
 ## Build and release
 

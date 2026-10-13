@@ -109,7 +109,7 @@ Decision:   Not in V1. V1 makes zero network requests; updates are downloaded ma
 Consequences: "V1 makes zero network requests" is a promise that needs no footnote. The updater is useless until a second release exists anyway. When it ships it must prompt before replacing anything, never install silently.
 
 ## ADR-015 — FLOW_SYSTEM.md is excluded from the repository
-Status:     Accepted
+Status:     Superseded by ADR-042
 Date:       2026-09-05
 Context:    Gitignoring the FLOW documentation as a whole was considered and rejected: FLOW's central contract is that a change and the docs it invalidates land in the same commit, which is meaningless if the docs are untracked, and reconciliation works by diffing `git log` against STATUS.md. The founder's actual concern was narrower — FLOW is his own system, still in development, and he does not want to publish it unfinished.
 Decision:   Track `CLAUDE.md`, `MASTER.md`, `docs/`, `.githooks/` and `.gitattributes`. Exclude only `FLOW_SYSTEM.md`.
@@ -387,3 +387,20 @@ Consequences: There is no public API for the current desktop's ID. It is read fr
             Windows only. macOS brings a window to the active Space when it is brought forward, so there is nothing to do there.
             A note opened fresh from the hub was never the problem: a new window is created on the desktop in use.
 
+
+## ADR-042 — FLOW's files are tracked in the repository
+Status:     Accepted
+Date:       2026-10-13
+Supersedes: ADR-015
+Context:    FLOW 3.0 vendors its files into the project (`FLOW_SYSTEM.md`, `.flow/`, the pre-commit hook and the session-start skill) and verifies them in CI against a manifest. Untracked, CI and a fresh clone's hook cannot run them. On 2026-10-13 the founder chose to track them, knowing the repository is public. Why he now accepts FLOW being publicly readable: [founder]
+Decision:   Track every file `flow_sync` installs. `.flow/dashboard.html` is generated and stays ignored.
+Consequences: FLOW becomes publicly readable through this repository. `.gitignore` no longer excludes `FLOW_SYSTEM*.md`, and `CLAUDE.md` no longer describes the spec as untracked. The untracked `docs/FLOW_SYSTEM_v2.2.md` is no longer used and can be deleted.
+            2026-10-13 — CLAUDE.md amended; ADR-015 marked superseded.
+
+## ADR-043 — Work moves to GitHub issues; pre-3.0 items are frozen in docs/COMPLETED.md
+Status:     Accepted
+Date:       2026-10-13
+Context:    Adopting FLOW 3.0, which tracks work in the host's issues rather than in files (FLOW's D-016).
+Decision:   The open items and the real-world checks the record showed unconfirmed became GitHub issues. The 100 items closed before the adoption were kept word for word in `docs/COMPLETED.md`, with STATUS's completed milestones, rather than deleted, because truth files and FIXES cite SMD IDs. `docs/COMPLETED.md` is frozen; new work is tracked in issues. Why issues rather than a converted item log, and why the founder accepted the frozen record: [founder]
+Consequences: STATUS no longer carries an item log. SMD IDs stay valid: a closed one resolves in `docs/COMPLETED.md`, and a migrated issue's title opens with its SMD ID.
+            2026-10-13 — STATUS, MASTER, DECISIONS and FIXES headers amended to name issues.
