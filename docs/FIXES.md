@@ -491,3 +491,26 @@ Never:    Never replace this with `atomicRanges`. Never find marks by scanning
           a *closing* mark (the node ends its parent and does not start it), or
           typing `*` in front of an opening `**` stops inserting. Check after
           any change: `**word**|` then Backspace leaves `**word*`.
+
+### An absent secret is an empty variable, and Tauri signs on presence
+Area:     Tauri bundler and release workflow configuration
+Date:     2026-10-14
+Commit:   d72effc
+Problem:  The macOS release job failed on every tag in `security import`,
+          "failed to import keychain certificate", although no Apple secret
+          had been created. `APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}`
+          does not leave the variable unset when the secret is missing. It
+          sets it to an empty string, and Tauri treats the variable being
+          present as the instruction to sign. The comment above the step said
+          the build "still succeeds" without secrets. It was written without a
+          run to check it, and the Check workflow never bundles, so the first
+          tag to reach the job was the first test.
+Fix:      The Windows job reads the certificate in one step and outputs only
+          whether it is set. The macOS job has `if:` on that output, because a
+          job-level `if` cannot read `secrets` directly. Without the
+          certificate the job is skipped, not failed (ADR-046).
+Never:    Never pass an optional secret straight into `env:` for a tool that
+          switches behaviour on a variable being present: test it and branch
+          instead. Never move the check into the macOS job's own `if:` using
+          `secrets.*`, which Actions rejects there. Never treat a release-only
+          path as working because a pull request's CI passed. Only a tag runs it.

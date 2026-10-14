@@ -12,7 +12,7 @@ Where the project is now. Work lives in the repository's GitHub issues, not here
 
 **macOS.** The build is written through the vibrancy material, the menu-bar mark and the window behaviour, is compiled and tested on macOS by the Check workflow, and has been verified on no Mac. #6 carries the work and the list of what only a Mac can show.
 
-**Blocked on the founder.** Step 6, the macOS updater and a notarised build, waits on the six Apple signing secrets (#19), which are his to create and which nothing here should ever see. Until they exist the macOS release job fails (#8), so a release is Windows-only.
+**Blocked on the founder.** Step 6, the macOS updater and a notarised build, waits on the six Apple signing secrets (#19), which are his to create and which nothing here should ever see. Until they exist the release workflow skips the macOS job (ADR-046), so a release is Windows-only.
 
 **What waits on the founder** is the open issues labelled `needs-verification` and `founder-only`. `/flow-start` lists them.
 
