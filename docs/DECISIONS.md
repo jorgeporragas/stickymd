@@ -404,3 +404,12 @@ Context:    Adopting FLOW 3.0, which tracks work in the host's issues rather tha
 Decision:   The open items and the real-world checks the record showed unconfirmed became GitHub issues. The 100 items closed before the adoption were kept word for word in `docs/COMPLETED.md`, with STATUS's completed milestones, rather than deleted, because truth files and FIXES cite SMD IDs. `docs/COMPLETED.md` is frozen; new work is tracked in issues. The founder's reason: it is a FLOW system change, and it solves the context issues of a growing item log while improving context and credit cost.
 Consequences: STATUS no longer carries an item log. SMD IDs stay valid: a closed one resolves in `docs/COMPLETED.md`, and a migrated issue's title opens with its SMD ID.
             2026-10-13 — STATUS, MASTER, DECISIONS and FIXES headers amended to name issues.
+
+## ADR-045 — A blockquote is content and holds the body-text 4.5:1 floor
+Status:     Accepted
+Date:       2026-10-13
+Context:    SMD-105. A blockquote read `--ink-secondary`, which measured 2.53 to 2.60 on the six dark tints over a mid backdrop (ADR-036) — under the 3:1 floor that `--ink-syntax` and `--ink-note-muted` hold. The issue offered the 3:1 floor, as markup and muted ink have, or the 4.5:1 floor, as body text has, and called it a design call rather than arithmetic.
+Decision:   A quote is content, so it holds 4.5:1 on every note, clear and all six tints, in both themes, on each theme's design basis (a white backdrop on Frost, ADR-018; a mid one on Dark, ADR-036). It reads its own token, `--ink-note-quote`. The founder chose this on 2026-10-13. The founder's reason: [founder]
+Consequences: On Dark's tints the primary ink itself reaches only 4.50:1 (blush 4.500, aqua 4.503, lilac 4.506), so the only ink that holds the floor there is `--ink-primary`, and a quote on a dark tint is no quieter than body text; its italic is what sets it apart. Frost and a clear dark note keep `--ink-secondary`, which clears the floor and stays quieter than the primary.
+            Raising Dark's tint alpha or lowering its ink would reopen the headroom between 4.5:1 and the primary ink; neither is part of this decision.
+            2026-10-13 — DESIGN § Semantic — ink amended with `--ink-note-quote`.
