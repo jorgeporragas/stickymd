@@ -24,6 +24,7 @@ Start every session with `/flow-start`. What is specific to this repository:
 - The sidecar index, and note file rename and deduplication logic
 - Global and in-app shortcut registration, and tray lifecycle
 - Tauri bundler and release workflow configuration
+- Where a build's settings file is, and reading it from this machine
 
 ---
 
