@@ -28,5 +28,5 @@ Where the project is now. Work lives in the repository's GitHub issues, not here
 | Rust | rustc 1.98.1, cargo 1.98.1, rustup 1.29.1 — installed 2026-09-05. |
 | MSVC linker | Visual Studio C++ build tools installed 2026-09-05. Both halves build and the application runs. |
 | WebView2 | Ships with Windows 11 |
-| Notes folder | **A folder each, since SMD-100 on 2026-09-14.** A debug build reads `settings.dev.json` and defaults to `Documents\sticky.md (dev)`; the installed build keeps `settings.json` and its own folder. They were one file until today, which is why `settings.json` still reads `Documents\sticky.md_testing` — set on 2026-09-10 for the dev build and never moved back. **The installed build is still pointed there**; repointing it is the founder's, through its own settings window. |
+| Notes folder | **A folder each, since SMD-100 on 2026-09-14.** A debug build reads `settings.dev.json` and defaults to `Documents\sticky.md (dev)`; the installed build keeps `settings.json` and points at `Documents\sticky.md`, read from the real `%APPDATA%` file (written 2026-10-11) on 2026-10-13. A session inside the Claude desktop app can see a stale copy instead: see `docs/FIXES.md`, "Anything the Claude desktop app starts sees a redirected `%APPDATA%`". |
 | `core.hooksPath` | Set on the development machine 2026-09-05. |
