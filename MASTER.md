@@ -84,7 +84,7 @@ Two consequences worth stating plainly:
 
 ## In Scope
 
-What sticky.md does. Amended by decision as capability is added or removed, and verified against the code at every phase transition. Phases 1 through 5 constitute V1.
+What sticky.md does. Amended by decision as capability is added or removed, and verified against the code at every phase transition. Phase 1 — Foundation & Editor Core through Phase 5 — Theme & Motion constitute V1.
 
 - Tray-resident application; launch-at-startup off by default and user-togglable
 - A global hotkey that creates a new note window, focused and empty
@@ -135,13 +135,15 @@ This list is open-ended. Phases are appended by decision as work is approved; th
 
 Releases are published on **GitHub Releases**, each pinned to a `v*` git tag with written release notes.
 
-Every release carries two assets:
+Every Windows release carries two assets:
 
 - an **NSIS installer** — the conventional Windows experience: a wizard, a Start Menu shortcut, an entry in Add/Remove Programs
 - a **portable `.zip`** — the compiled application with no installer. Extract and run. Nothing touches the registry and no administrator rights are needed.
 
+Beside them sits `latest.json`, the manifest the updater reads to learn the newest version and where to download it. It is written only when the build was signed with the updater's key. A macOS release adds a `.dmg` and the `.app.tar.gz` the updater downloads.
+
 **GitHub Actions** builds both. Pushing a `v*` tag triggers a workflow that checks out the tagged commit on a clean machine, builds, and attaches the assets to the release. Builds come from a known commit rather than from a developer's machine, and the same workflow is what makes non-Windows targets possible.
 
-Builds are distributed **unsigned**. Windows SmartScreen warns on unsigned binaries, and that warning is disclosed to users rather than hidden. A signing certificate is an annual cost this project does not carry.
+Builds are distributed **unsigned**. Windows SmartScreen warns on unsigned binaries, and that warning is disclosed to users rather than hidden. A signing certificate is an annual cost this project does not carry. The updater's own signature is a separate thing: it lets an installed copy verify that an update came from this project's key, and it says nothing to SmartScreen.
 
 The project is licensed **GPL-3.0**. Forks must stay open; as sole copyright holder the founder retains the right to license the same code commercially.
