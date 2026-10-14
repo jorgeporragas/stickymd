@@ -12,7 +12,7 @@ Chrome, edges, glass, and motion carry the personality. Everything inside a note
 
 Aqua is not a contradiction of the Rams half, which is why the two names sit in one sentence (ADR-027): its chrome descends from Braun — neutral, restrained, hue concentrated in the small round things and almost nowhere else. That is also the colour rule, unchanged from ADR-025: a hue appears only where colour is what tells you what something does.
 
-Two effects the founder named are still on the table and are recorded here so nothing gets designed in a way that shuts them out: **typographic scrambling** and **line boil**. Neither is built, and neither is settled against Aqua yet.
+**Typographic scrambling** is how the display face arrives: a title settles into itself over chrome (`Scramble`), never over note content, where it would mean rewriting glyphs in the buffer.
 
 **2. Chrome recedes.**
 Controls withdraw when the window is not being used and return on pointer entry or focus. The text is the focal point. Personality lives in the controls; the controls are present only when wanted.
@@ -43,7 +43,7 @@ Three families, all SIL Open Font License, all vendored into `src/assets/fonts/`
 
 | Role | Face | Used for |
 |---|---|---|
-| Display | **Departure Mono** | App identity and the hub's title. Never inside note content, and not for sentences — an empty state is the application talking, and it takes the content face. |
+| Display | **Departure Mono** | App identity, the titles of the hub and the settings window, and the insert ring's centre label. Never inside note content, and not for sentences — an empty state is the application talking, and it takes the content face. |
 | Content | **Geist** | Note body, all UI labels, everything functional. |
 | Mono | **JetBrains Mono** | Fenced code blocks and inline code, at `--font-size-code` (13px). At that size it has the same x-height as the prose and runs 16% wider for the same sentence. It replaced Martian Mono, which ran 35% wider at the same height — the glyphs were never taller, there was just far more of them. One weight, no italic. |
 
@@ -108,7 +108,6 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 | `--ink-note-muted` | Quiet ink written on a note: the placeholder and a link's destination. **Holds 3:1 on every note, clear or tinted, on its theme's design basis.** On a dark tint it sits *above* the surface, for the reason `--ink-syntax` does, and stays below `--ink-primary` so a placeholder never reads as writing. Split from `--ink-muted` by SMD-098, which found the placeholder at 1.21:1 on tinted dark notes |
 | `--ink-syntax` | Markdown syntax characters when revealed. **Holds 3:1 against every tint on its own theme's design basis** — a white backdrop on Frost (ADR-018), a mid one on Dark (ADR-036) — and stays roughly a third of `--ink-primary`'s contrast, so it reads as markup rather than as text. It was below 2:1 everywhere and 1.02:1 at worst until SMD-083; quiet is the intent, invisible was a bug |
 | `--ink-note-quote` | A blockquote's text. A quote is content, so it **holds 4.5:1 on every note, clear or tinted, on its theme's design basis** — the body-text floor, not the 3:1 of `--ink-syntax` and `--ink-note-muted` (ADR-045). Stays below `--ink-primary` wherever 4.5:1 leaves room: on Frost and on a clear dark note it is `--ink-secondary`. On a dark tint it is `--ink-primary` itself, because the primary ink only reaches 4.50:1 there and nothing quieter clears the floor; the italic alone tells a quote from body text. Computed, never picked: SMD-105 measured `--ink-secondary` at 2.53 to 2.60 on the dark tints |
-| `--ink-on-accent` | Text on an accent-filled surface |
 
 ### Semantic — signals
 
@@ -130,9 +129,9 @@ Components read semantic tokens only. A theme supplies a complete set of values 
 
 The palette is one ramp, `--tide-100` to `--tide-1000`, running from a yellow-green through teal to a deep blue (ADR-028). It is a primitive family: a stop nothing reaches for is a value, not a colour in the interface.
 
-**There is no brand colour** (ADR-025). The interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what something does — traffic-light reading, because it needs no learning. Today that is one control: delete.
+**There is no brand colour** (ADR-025). The interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what something does — traffic-light reading, because it needs no learning. That is two jobs: `--signal-danger` for what takes something away or has failed, and `--signal-engaged` for a setting held on.
 
-Amber and green are deliberately not defined. A colour with no job is how a palette turns decorative, and the moment one has a job it can be added with its contrast computed then.
+Amber is deliberately not defined. A colour with no job is how a palette turns decorative, and the moment one has a job it can be added with its contrast computed then.
 
 Every signal value is computed, never picked: it clears 4.5:1 against the worst of the seven tints in its own theme, so it stays legible on any note.
 
@@ -164,7 +163,7 @@ Spacing and radius outside the scale are not permitted.
 
 Two separate things, and keeping them separate is what lets both exist (ADR-024).
 
-A **theme** is application-wide. It decides ink, accent, edges and shadows, and it is a complete set of values for every semantic token. A **tint** is per-note and decides only what that note's surface is painted with. A note keeps its tint in either theme.
+A **theme** is application-wide. It decides ink, edges and shadows, and it is a complete set of values for every semantic token. A **tint** is per-note and decides only what that note's surface is painted with. A note keeps its tint in either theme.
 
 Tint selectors are qualified by theme — `[data-theme='dark'][data-tint='sun']`. A tint block and a theme block carry equal specificity, so an unqualified tint would override the theme's surface entirely and a dark note would come back white.
 
@@ -200,13 +199,13 @@ A square with rounded corners — the Post-It proportion, and the shape the app 
 
 **The corner radius is the platform's, not ours.** The compositor draws the frosted backdrop across the whole window rectangle, so rounding only what the web view paints leaves untinted acrylic showing in each corner. The window itself is rounded instead, and Windows picks that radius — `--radius-window` matches it rather than the other way round. A generous Post-It radius and compositor glass cannot both be had on Windows; glass won.
 
-Default and expanded sizes are a toggle. Free resize is available between the minimum and the display bounds; the square is the default proportion, not a locked aspect ratio.
+Free resize is available between the minimum and the display bounds; the square is the default proportion, not a locked aspect ratio.
 
 Dimensions are a window property, not a style: they live in `src-tauri/tauri.conf.json` under `app.windows`. JSON carries no comments, so this is the only pointer between the two — treat it as the reciprocal reference.
 
 ## The hub
 
-A taller window listing every note, newest first. Its heading and its empty state are set in the display face; everything a note contains stays in the content face, which is Principle 1 applied across windows rather than only within one.
+A taller window listing every note, newest first. Its heading is set in the display face; its empty state and everything a note contains stay in the content face, which is Principle 1 applied across windows rather than only within one.
 
 **The list is live.** Rust emits `notes-changed` whenever a note is written or deleted and the hub re-reads on it, so a note written in another window moves in a hub that is merely open rather than one that is focused. It re-reads on focus as well: the event covers a change this application made, focus covers one it did not — a note edited elsewhere, or dropped into the folder. Newest first means a note being typed in climbs to the top while you watch, which is the list being true rather than restless.
 
