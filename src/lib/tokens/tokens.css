@@ -330,6 +330,13 @@
    * SMD-098. */
   --ink-note-muted: #83827d;
 
+  /* A blockquote's text. A quote is content, so it holds the body-text floor,
+   * 4.5:1, on every note on Frost's design basis (a white backdrop, ADR-018),
+   * not the 3:1 of markup and muted ink (ADR-045). --ink-secondary already
+   * does: 7.27 on lilac at worst, against --ink-primary's 14.06 there, so a
+   * quote is still the quieter of the two. SMD-105. */
+  --ink-note-quote: var(--ink-secondary);
+
   /* Signals. Not an accent — there has not been one since ADR-025. */
   --signal-danger: var(--red-600);
 
@@ -470,6 +477,11 @@
    * measured 2.79. A tinted note overrides it below. SMD-098. */
   --ink-note-muted: #85817a;
 
+  /* A blockquote's text on a clear dark note: --ink-secondary, 5.82:1 over a
+   * mid backdrop (ADR-036) against --ink-primary's 10.36. A tinted note
+   * overrides it below. SMD-105. */
+  --ink-note-quote: var(--ink-secondary);
+
   --signal-danger: var(--red-300);
   --focus-ring: #f2efe8;
 
@@ -577,6 +589,18 @@
  * the theme's own value. SMD-098. */
 :root[data-theme='dark'][data-tint] {
   --ink-note-muted: #c9c5bc;
+
+  /* A quote is content, so it holds 4.5:1 here (ADR-045), and on a dark tint
+   * that leaves no room below --ink-primary. Over a mid backdrop the primary
+   * ink itself measures 4.500 on blush, 4.503 on aqua and 4.506 on lilac, so
+   * the lightest ink that clears the floor on all six tints *is* the primary
+   * ink; --ink-secondary gave 2.53 to 2.60. Anything quieter is under 4.5 on
+   * at least one tint, and anything louder than the primary does not exist.
+   * What still tells a quote from body text here is its italic.
+   *
+   * Reads the primary rather than copying its value, so the two cannot drift
+   * apart and quietly leave this one under the floor. SMD-105. */
+  --ink-note-quote: var(--ink-primary);
 }
 
 :root[data-tint='sun'] {

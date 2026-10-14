@@ -26,7 +26,8 @@ export const markdownHighlight = HighlightStyle.define([
   // Note ink for the same reason as the placeholder. See `--ink-note-muted`.
   { tag: t.url, color: 'var(--ink-note-muted)' },
 
-  { tag: t.quote, color: 'var(--ink-secondary)', fontStyle: 'italic' },
+  // Content, so it reads the 4.5:1 ink rather than the 3:1 one. See `--ink-note-quote`.
+  { tag: t.quote, color: 'var(--ink-note-quote)', fontStyle: 'italic' },
 
   // Only `monospace`. `content` is a broad tag covering ordinary inline text,
   // and including it here renders the whole note in the code face.
