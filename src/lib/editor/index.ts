@@ -9,6 +9,7 @@ import { DEFAULT_CHORDS, formattingKeymapFor, type FormattingChords } from './co
 import { markdownHighlight } from './highlight';
 import { codeLanguages } from './languages';
 import { livePreview } from './livePreview';
+import { markStep } from './markStep';
 import { tableView } from './tableView';
 import { taskList } from './taskList';
 import { editorTheme } from './theme';
@@ -104,6 +105,9 @@ export function createEditor({
         // a chord, and sit in their own compartment so a changed chord can be
         // swapped into an open editor. Everything else is fixed for its life.
         formattingChords.of(keymap.of([...formattingKeymapFor(formatting)])),
+        // Before the default keymap, whose arrow bindings it defers to whenever
+        // no mark is beside the caret.
+        markStep,
         keymap.of([...extraKeymap, ...historyKeymap, ...defaultKeymap])
       ]
     })
