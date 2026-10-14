@@ -29,8 +29,25 @@ jobs:
   windows:
     runs-on: windows-latest
 
+    # Read by the macOS job, which cannot look at a secret in its own `if`.
+    outputs:
+      apple-signing: ${{ steps.apple.outputs.configured }}
+
     steps:
       - uses: actions/checkout@v4
+
+      # Whether the Apple certificate exists decides whether there is a macOS
+      # build at all (see the macos job). Only the answer leaves this step,
+      # never the secret.
+      - name: Check for Apple signing
+        id: apple
+        shell: pwsh
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        run: |
+          $configured = if ($env:APPLE_CERTIFICATE) { 'true' } else { 'false' }
+          "Apple signing configured: $configured"
+          "configured=$configured" >> $env:GITHUB_OUTPUT
 
       # A tag whose version does not match the manifests produces an installer
       # named after the wrong version, which is only ever noticed after it has
@@ -159,8 +176,15 @@ jobs:
   #
   # Apple Silicon only, at the founder's decision. A universal binary doubles
   # the build for a second architecture he does not have and cannot test.
+  #
+  # Skipped, not failed, until the Apple certificate exists (ADR-046). Without
+  # it nothing signed can come out: Tauri reads an APPLE_* variable that is
+  # present but empty as an instruction to sign, and dies importing an empty
+  # certificate. Even an unsigned build that got through would be one
+  # Gatekeeper refuses to open, so a release is Windows-only until then.
   macos:
     needs: windows
+    if: needs.windows.outputs.apple-signing == 'true'
     runs-on: macos-latest
 
     steps:
@@ -196,8 +220,9 @@ jobs:
       # the same one the Windows job uses, and it signs the update artefact so
       # an installed copy can verify what it is about to install.
       #
-      # Absent either, the build still succeeds and simply produces less: no
-      # notarisation, or no signature to put in the manifest.
+      # This job only runs with the Apple certificate set. Without the updater
+      # key the build still succeeds and simply leaves macOS out of the
+      # manifest, as the next step says.
       - name: Build
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
