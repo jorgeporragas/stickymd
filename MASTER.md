@@ -88,7 +88,7 @@ What sticky.md does. Amended by decision as capability is added or removed, and 
 
 - Tray-resident application; launch-at-startup off by default and user-togglable
 - A global hotkey that creates a new note window, focused and empty
-- Inline markdown rendering in the note window, with syntax revealed on the cursor's line
+- Inline markdown rendering in the note window, with syntax revealed on the cursor's line. Each inline mark (`**`, `__`, `*`, `_`, `~~`, `` ` ``) is one step for the caret in both directions, and typing a closing mark steps over it; Backspace and Delete still remove one character
 - Formatting commands that insert real markdown syntax
 - CommonMark, plus strikethrough, task lists, tables, and fenced code blocks with syntax highlighting
 - Copy yields raw markdown source
