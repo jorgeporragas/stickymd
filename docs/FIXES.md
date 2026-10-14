@@ -434,3 +434,30 @@ Never:    Never register it in a debug build. The plugin keys its mutex and
           calls it from inside a window procedure on the main thread, so it is
           spawned onto the async runtime, for the reason given in "A command
           that builds a window must be `async`".
+
+### The caret steps over marks by keymap, never by atomicRanges
+Area:     The CodeMirror inline-rendering layer and its decorations
+Date:     2026-10-13
+Commit:   d83a5e6
+Problem:  On the cursor's line the marks are real characters, so the caret
+          stopped between the two asterisks of `**`. `EditorView.atomicRanges`
+          over the mark nodes gives the arrow behaviour for free, which is why it
+          is the tempting fix. CodeMirror applies atomic ranges to more than the
+          arrows: `deleteCharBackward` and `deleteCharForward` skip them too, so
+          Backspace at `**word**|` would remove both asterisks and leave `**word`;
+          pointer selection skips them, so a click could no longer put the caret
+          inside a mark; word motion is affected as well. Nothing looks wrong
+          until a character is deleted.
+Fix:      `markStep.ts` binds ArrowLeft and ArrowRight (and their Shift
+          variants) to a command that moves the caret across the mark node
+          beside it and returns false otherwise, so the default binding still
+          handles everything else. Typing over a closing mark is an
+          `EditorView.inputHandler`. Marks come from the syntax tree, through
+          the node names in `markup.ts`.
+Never:    Never replace this with `atomicRanges`. Never find marks by scanning
+          text for asterisks: `2 * 3` is not emphasis, and only the tree knows
+          the difference. Never let either path edit the document; caret motion
+          dispatches a selection and nothing else. Typeover must stay limited to
+          a *closing* mark (the node ends its parent and does not start it), or
+          typing `*` in front of an opening `**` stops inserting. Check after
+          any change: `**word**|` then Backspace leaves `**word*`.
