@@ -356,6 +356,36 @@ Never:    Never take a macOS branch as compiled because `cargo check` passed
           and the alternative is proving the build by cutting a release. After
           changing anything under a macOS cfg, watch Check on the push.
 
+### Anything the Claude desktop app starts sees a redirected `%APPDATA%`
+Area:     Where a build's settings file is, and reading it from this machine
+Date:     2026-10-13
+Commit:   none — the hazard is in the machine, not the code
+Problem:  The Claude desktop app is an MSIX package, and Windows redirects
+          `%APPDATA%` for what runs inside it. Writes land under
+          `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\`,
+          and a read finds the copy there before the real file. A dev build
+          started with `npm run tauri dev` from an agent session writes
+          `settings.dev.json` only to that folder. That folder also held a
+          `settings.json` from 2026-09-10 pointing at `Documents\sticky.md_testing`.
+          On 2026-10-13 the installed build's notes folder was checked twice
+          and the two checks disagreed. Git Bash read that stale copy and
+          PowerShell read the real file, which pointed at `Documents\sticky.md`.
+          The stale answer won and went into a pull request as fact. Nothing in
+          the path or the file says which one you are seeing.
+Fix:      Before stating what a settings file says, list both
+          `%APPDATA%\com.stickymd.app\` and the package folder above, compare
+          the hashes and write times, and say which you read. The real file is
+          the one the installed build last wrote. The PowerShell tool read it
+          through `$env:APPDATA`; Git Bash's `$APPDATA` did not.
+Never:    Never take a settings file read from a session inside the Claude
+          desktop app as the installed build's without checking the package
+          folder for a copy. Never copy the package folder's file over the real
+          one to "fix" a mismatch, because that overwrites the installed
+          build's settings with a stale or dev copy. The SMD-100 split between
+          `settings.json` and `settings.dev.json` is not what keeps the builds
+          apart here: an MSIX redirect is a third location neither build knows
+          about.
+
 ### `Path::components` only knows this platform's separators
 Area:     The sidecar index, and note file rename and deduplication logic
 Date:     2026-09-10

@@ -18,6 +18,7 @@ Start every session with `/flow-start`. What is specific to this repository:
 
 ### Areas that require reading FIXES.md first
 
+- Where a build's settings file is, and reading it from this machine
 - The CodeMirror inline-rendering layer and its decorations
 - The editor's language set and bundle composition
 - Window transparency, vibrancy, and compositor blur setup
