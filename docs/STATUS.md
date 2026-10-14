@@ -8,15 +8,11 @@ Where the project is now. Work lives in the repository's GitHub issues, not here
 
 **Build** — Phase 6 — Cross-Platform Expansion, macOS first and then Linux.
 
-Phase 7 — Release & Auto-Update was taken before Phase 6, at the founder's direction, and is not closed: its truth check is owed (#21).
-
 ## Current Active Step
 
 **macOS.** The build is written through the vibrancy material, the menu-bar mark and the window behaviour, is compiled and tested on macOS by the Check workflow, and has been verified on no Mac. #6 carries the work and the list of what only a Mac can show.
 
 **Blocked on the founder.** Step 6, the macOS updater and a notarised build, waits on the six Apple signing secrets (#19), which are his to create and which nothing here should ever see. Until they exist the macOS release job fails (#8), so a release is Windows-only.
-
-**Owed.** The truth check that closes Phase 7 — Release & Auto-Update (#21).
 
 **What waits on the founder** is the open issues labelled `needs-verification` and `founder-only`. `/flow-start` lists them.
 
