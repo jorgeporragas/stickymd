@@ -24,6 +24,7 @@ Start every session with `/flow-start`. What is specific to this repository:
 - The sidecar index, and note file rename and deduplication logic
 - Global and in-app shortcut registration, and tray lifecycle
 - Tauri bundler and release workflow configuration
+- Window lifecycle
 
 ---
 
@@ -36,12 +37,16 @@ FLOW_SYSTEM.md            FLOW's rules — installed by flow_sync, never edited
 scripts/                  this project's code checks, run in CI
 assets/icon/              the application mark — source SVG, never a generated size
 src/                      Svelte frontend
+  app.css                 the shared treatments — `.surface`, `.lozenge`, `.chrome-control`, `.bubble-in`
   assets/fonts/           vendored typefaces, each with its licence text
+  assets/icons/           the licence of the vendored pixel-art glyphs
   lib/
     components/           shared components — every file here has its file in docs/components/
     tokens/               design tokens — the only place a raw colour value may appear
     editor/               CodeMirror configuration and the inline-rendering layer
     state/                Svelte 5 rune-based state
+    icons/                the vendored pixel-art glyphs
+    keys.ts               keyboard chords — capturing, writing and reading them back
   windows/                one entry point per window type
 src-tauri/                Rust backend
   src/
@@ -131,9 +136,9 @@ Windows and macOS on Apple Silicon are the build targets; Linux is next. These r
 ## Build and release
 
 - Build artifacts are produced by GitHub Actions on a `v*` tag, never by hand for distribution.
-- Every Windows release carries both the NSIS installer and the portable zip; a macOS release carries the `.app` and the `.dmg`.
+- Every Windows release carries both the NSIS installer and the portable zip; a macOS release carries the `.dmg` and the `.app.tar.gz` the updater downloads.
 - Vendor all fonts and assets into the repository with their licence files alongside. Never fetch an asset over the network at runtime or at build time.
 - The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
-- Do not add a dependency that makes a network request at runtime. **One exception, and it is named rather than general:** the Tauri updater, per ADR-014 and Phase 7. It carries no note content, checks only when a person presses a button, and prompts before replacing anything. Anything else that reaches the network is a bug, and a second exception needs its own decision.
+- Do not add a dependency that makes a network request at runtime. **One exception, and it is named rather than general:** the Tauri updater, per ADR-014 and Phase 7 — Release & Auto-Update. It carries no note content, checks only when a person presses a button, and prompts before replacing anything. Anything else that reaches the network is a bug, and a second exception needs its own decision.
 - The updater runs in Rust and the Content Security Policy is therefore untouched by it. If something ever appears to need `connect-src` widened for an update check, it is being done in the wrong half of the application.
 - The Content Security Policy in `src-tauri/tauri.conf.json` is restrictive by design — it is MASTER veto 2 enforced by the engine rather than by discipline. Never widen it to make something work. If a change appears to require a wider CSP, the change is wrong.
