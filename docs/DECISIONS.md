@@ -392,7 +392,7 @@ Consequences: There is no public API for the current desktop's ID. It is read fr
 Status:     Accepted
 Date:       2026-10-13
 Supersedes: ADR-015
-Context:    FLOW 3.0 vendors its files into the project (`FLOW_SYSTEM.md`, `.flow/`, the pre-commit hook and the session-start skill) and verifies them in CI against a manifest. Untracked, CI and a fresh clone's hook cannot run them. On 2026-10-13 the founder chose to track them, knowing the repository is public. Why he now accepts FLOW being publicly readable: [founder]
+Context:    FLOW 3.0 vendors its files into the project (`FLOW_SYSTEM.md`, `.flow/`, the pre-commit hook and the session-start skill) and verifies them in CI against a manifest. Untracked, CI and a fresh clone's hook cannot run them. On 2026-10-13 the founder chose to track them, knowing the repository is public. The founder's reason: it is more practical to have FLOW's files in the repository.
 Decision:   Track every file `flow_sync` installs. `.flow/dashboard.html` is generated and stays ignored.
 Consequences: FLOW becomes publicly readable through this repository. `.gitignore` no longer excludes `FLOW_SYSTEM*.md`, and `CLAUDE.md` no longer describes the spec as untracked. The untracked `docs/FLOW_SYSTEM_v2.2.md` is no longer used and can be deleted.
             2026-10-13 — CLAUDE.md amended; ADR-015 marked superseded.
@@ -401,6 +401,6 @@ Consequences: FLOW becomes publicly readable through this repository. `.gitignor
 Status:     Accepted
 Date:       2026-10-13
 Context:    Adopting FLOW 3.0, which tracks work in the host's issues rather than in files (FLOW's D-016).
-Decision:   The open items and the real-world checks the record showed unconfirmed became GitHub issues. The 100 items closed before the adoption were kept word for word in `docs/COMPLETED.md`, with STATUS's completed milestones, rather than deleted, because truth files and FIXES cite SMD IDs. `docs/COMPLETED.md` is frozen; new work is tracked in issues. Why issues rather than a converted item log, and why the founder accepted the frozen record: [founder]
+Decision:   The open items and the real-world checks the record showed unconfirmed became GitHub issues. The 100 items closed before the adoption were kept word for word in `docs/COMPLETED.md`, with STATUS's completed milestones, rather than deleted, because truth files and FIXES cite SMD IDs. `docs/COMPLETED.md` is frozen; new work is tracked in issues. The founder's reason: it is a FLOW system change, and it solves the context issues of a growing item log while improving context and credit cost.
 Consequences: STATUS no longer carries an item log. SMD IDs stay valid: a closed one resolves in `docs/COMPLETED.md`, and a migrated issue's title opens with its SMD ID.
             2026-10-13 — STATUS, MASTER, DECISIONS and FIXES headers amended to name issues.
