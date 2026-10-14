@@ -137,7 +137,7 @@ Windows and macOS on Apple Silicon are the build targets; Linux is next. These r
 ## Build and release
 
 - Build artifacts are produced by GitHub Actions on a `v*` tag, never by hand for distribution.
-- Every Windows release carries both the NSIS installer and the portable zip; a macOS release carries the `.dmg` and the `.app.tar.gz` the updater downloads.
+- Every Windows release carries both the NSIS installer and the portable zip; a macOS release carries the `.dmg` and the `.app.tar.gz` the updater downloads. Never attach an unsigned macOS build: the release workflow skips the macOS job until the Apple certificate is configured (ADR-046).
 - Vendor all fonts and assets into the repository with their licence files alongside. Never fetch an asset over the network at runtime or at build time.
 - The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
 - Do not add a dependency that makes a network request at runtime. **One exception, and it is named rather than general:** the Tauri updater, per ADR-014 and Phase 7 — Release & Auto-Update. It carries no note content, checks only when a person presses a button, and prompts before replacing anything. Anything else that reaches the network is a bug, and a second exception needs its own decision.
