@@ -71,7 +71,7 @@ fn main() {
     builder
         .plugin(tauri_plugin_dialog::init())
         // The one part of this application that touches the network, and it
-        // carries no note content — ADR-014, and MASTER veto 2 is about
+        // carries no note content — ADR-014, and PRD veto 2 is about
         // content rather than about sockets. It runs in Rust, so the web
         // view's Content Security Policy is untouched and stays as strict as
         // it was.
@@ -108,7 +108,7 @@ fn main() {
             surface::refresh(app.handle());
             surface::watch(app.handle().clone());
 
-            // Registered, never enabled: MASTER veto 5 forbids launching at
+            // Registered, never enabled: PRD veto 5 forbids launching at
             // startup without explicit consent, so only the tray toggle turns
             // it on.
             app.handle().plugin(tauri_plugin_autostart::init(

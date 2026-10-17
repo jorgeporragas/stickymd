@@ -27,7 +27,7 @@ tauri-plugin-global-shortcut = "2"
 # field: a notes folder typed by hand is a notes folder that can be wrong.
 tauri-plugin-dialog = "2"
 
-# Launch at startup, off unless the user turns it on. MASTER veto 5 forbids
+# Launch at startup, off unless the user turns it on. PRD veto 5 forbids
 # enabling it without explicit consent, so nothing here ever calls enable()
 # except the tray toggle.
 tauri-plugin-autostart = "2"
@@ -72,7 +72,7 @@ windows = { version = "0.56", features = [
   "Win32_UI_Shell",
 ] }
 
-# Bundle size is a stated product priority. See MASTER.md section 'Stack'.
+# Bundle size is a stated product priority. See docs/PRD.md section 'Stack'.
 [profile.release]
 opt-level = "s"
 lto = true

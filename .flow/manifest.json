@@ -1,16 +1,13 @@
 {
   "files": {
-    ".claude/skills/flow-start/SKILL.md": "47747ad777184b9939519521af3bd28c52591ae67480af76a7b2affe75c2e77f",
-    ".flow/CLOSING.md": "af1587b4cac56b728ddcd5c38c8a6760dc1f359ee86380ff0d0012be19306e46",
-    ".flow/PATTERNS.md": "a0a7d9da84509e8c16df9fe070d9323a5123b3b10c1bb8e188cfe3013c887827",
-    ".flow/RECORDS.md": "f891266e22c672378e817909cdfd7ee78b72b104afe7067a2f4db15fda10b328",
-    ".flow/SETUP.md": "2f882df5adabeb95d3b1c39ccd384b1eb9f18e79f62c391dc4f16fb9dd11fb11",
-    ".flow/SPEC.md": "7d32f1673e4b526b4b7239c313468a9070f29e69326c137992dc35cb737eee5a",
-    ".flow/flow_check.py": "8a559b290af52340feda2e1e7433f6f3b9a6e3751d7b5779e3c067df77c7d536",
-    ".flow/flow_dashboard.py": "92085d1ee86bde29742f91abc50569d8582ed7d797892c542377d76028ab3e4a",
-    ".githooks/pre-commit": "3becbe9a65609a26a9b74e6457c3d175dcd2f00619566b17149e3ffc8c2f52a0",
-    "FLOW_SYSTEM.md": "611af6c288e786574acc0e6f4493717766e9600e9842daa30ce187578c053e25"
+    ".claude/rules/flow.md": "a7fc2232cbbbda2ce0a3309a68c1d29dab7361da76ec3d7a0d21260380ba47e6",
+    ".claude/skills/flow-start/SKILL.md": "dca4f140d1e3fca809448afda71fb23411aed38ce5d0f610c84eef3d62ea4ef7",
+    ".flow/PATTERNS.md": "f3a589851979945023fcf1b51959dcf1db342f186b1816fab8f934a5a5318920",
+    ".flow/SETUP.md": "3e205acfd7cd92368d64fff76db43f7c01789e865d4b867e68bbb57eeae5ce3e",
+    ".flow/SPEC.md": "b69de7a0b43d99459e747d8ce82e5684ee5131789ccbd57a87ba9601a7f2de82",
+    ".flow/flow_check.py": "0450d969bdf6fad201cfa17fe156046ae7d7af47a65cd82b4c2eb390bb29815f",
+    ".githooks/pre-commit": "3becbe9a65609a26a9b74e6457c3d175dcd2f00619566b17149e3ffc8c2f52a0"
   },
-  "source": "4f2b8c9",
-  "version": "3.0.0"
+  "source": "4fddbd3",
+  "version": "4.0.0."
 }

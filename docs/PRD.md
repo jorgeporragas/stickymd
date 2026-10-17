@@ -1,7 +1,7 @@
-# sticky.md
+# sticky.md — Product Requirements Document (PRD)
 
 > **Authoritative for:** what sticky.md is — problem, user, core loop, domain model, stack choices and their rationale, scope, permanent vetoes, build phase definitions, and deployment.
-> **Never contains:** anything with a state. Current phase and active work live in `docs/STATUS.md`; work lives in the repository's GitHub issues. Engineering imperatives live in `CLAUDE.md`. Decision history lives in `docs/DECISIONS.md`. The visual system lives in `docs/DESIGN.md`.
+> **Never contains:** anything with a state. Work, including what is active, lives in the repository's GitHub issues. Engineering imperatives live in `CLAUDE.md`. Decision history lives in `docs/adr/`. The visual system lives in `docs/DESIGN.md`.
 
 ---
 

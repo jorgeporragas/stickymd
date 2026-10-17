@@ -1,9 +1,9 @@
 # CLAUDE.md
 
 > **Authoritative for:** engineering imperatives for this repository — what is specific to this repo in a session's reading, project structure, framework usage rules, design enforcement, cross-platform discipline, local setup, and build.
-> **Never contains:** project context, stack rationale, or current state. What sticky.md is and why the stack was chosen live in `MASTER.md`. The visual system lives in `docs/DESIGN.md`. Current phase and active work live in `docs/STATUS.md`. FLOW's own rules live in `FLOW_SYSTEM.md`. How to set up and run the project lives in the README.
+> **Never contains:** project context, stack rationale, or current state. What sticky.md is and why the stack was chosen live in `docs/PRD.md`. Why anything else is the way it is lives in `docs/adr/`. The visual system lives in `docs/DESIGN.md`. Work, and where it stands, lives in the GitHub issues. FLOW's own rules live in `.claude/rules/flow.md`. How to set up and run the project lives in the README.
 
-This project runs on FLOW, installed from the FLOW repository by `flow_sync`. `FLOW_SYSTEM.md` and the files in `.flow/` other than `config.toml` are FLOW's and are never edited here, nor are `.githooks/pre-commit` and `.claude/skills/flow-start/`: `flow_check` fails when any of them differs from `.flow/manifest.json` (C10). Read `FLOW_SYSTEM.md` before doing anything else.
+This project runs on FLOW, installed from the FLOW repository by `flow_sync`. FLOW's rules are `.claude/rules/flow.md`, which Claude Code loads at every session start. That file and the files in `.flow/` other than `config.toml` are FLOW's and are never edited here, nor are `.githooks/pre-commit` and `.claude/skills/flow-start/`: `flow_check` fails when any of them differs from `.flow/manifest.json` (C10).
 
 ---
 
@@ -13,7 +13,7 @@ Start every session with `/flow-start`. What is specific to this repository:
 
 - Read `docs/DESIGN.md` before any UI work, without exception, and `docs/components/` for each component you touch.
 - Read `docs/FIXES.md` before touching any area listed below. FIXES has no area index of its own, so this list is it.
-- Read `MASTER.md` when starting a new phase or implementing a new feature.
+- Read `docs/PRD.md` when starting a new phase or implementing a new feature.
 - There is no `docs/SCHEMA.md`. This project has no database.
 
 ### Areas that require reading FIXES.md first
@@ -32,9 +32,8 @@ Start every session with `/flow-start`. What is specific to this repository:
 ## Project structure
 
 ```
-FLOW_SYSTEM.md            FLOW's rules — installed by flow_sync, never edited
 .flow/                    FLOW's checks, installed by flow_sync; config.toml is this project's
-.claude/                  agent settings, and FLOW's session-start skill
+.claude/                  FLOW's rules (rules/flow.md) and session-start skill, installed by flow_sync
 scripts/                  this project's code checks, run in CI
 assets/icon/              the application mark — source SVG, never a generated size
 src/                      Svelte frontend
@@ -61,7 +60,10 @@ src-tauri/                Rust backend
     preferences.rs        the settings window's commands
     shortcuts.rs          global and in-app shortcuts
     dev.rs                what marks a debug build — compiled out of a release one
-docs/                     FLOW documentation
+docs/                     the project's documentation
+  PRD.md                  what sticky.md is and why
+  adr/                    one file per decision
+  runbooks/               the machine and toolchain as they stand
   components/             one file per shared component — the inventory
   COMPLETED.md            work closed before FLOW 3.0: frozen, never edited
 .githooks/                committed git hooks
@@ -101,7 +103,7 @@ Place shared components in `src/lib/components/`. Nothing shared lives anywhere 
 - Markdown syntax stays in the buffer at all times. Rendering is a decoration layer over real source — never a transform of it.
 - Formatting commands insert real syntax characters. A command that produces styled text without the corresponding markdown is a bug.
 - Copy yields raw source. Verify this whenever the editor's clipboard behaviour is touched.
-- Do not add a markdown feature beyond what `MASTER.md § In Scope` lists without a decision recorded first.
+- Do not add a markdown feature beyond what `docs/PRD.md` › *In Scope* lists without a decision recorded first.
 
 ## Design enforcement
 
@@ -142,4 +144,4 @@ Windows and macOS on Apple Silicon are the build targets; Linux is next. These r
 - The README discloses the SmartScreen warning that unsigned builds produce. Never remove that disclosure while builds are unsigned.
 - Do not add a dependency that makes a network request at runtime. **One exception, and it is named rather than general:** the Tauri updater, per ADR-014 and Phase 7 — Release & Auto-Update. It carries no note content, checks only when a person presses a button, and prompts before replacing anything. Anything else that reaches the network is a bug, and a second exception needs its own decision.
 - The updater runs in Rust and the Content Security Policy is therefore untouched by it. If something ever appears to need `connect-src` widened for an update check, it is being done in the wrong half of the application.
-- The Content Security Policy in `src-tauri/tauri.conf.json` is restrictive by design — it is MASTER veto 2 enforced by the engine rather than by discipline. Never widen it to make something work. If a change appears to require a wider CSP, the change is wrong.
+- The Content Security Policy in `src-tauri/tauri.conf.json` is restrictive by design — it is PRD veto 2 enforced by the engine rather than by discipline. Never widen it to make something work. If a change appears to require a wider CSP, the change is wrong.

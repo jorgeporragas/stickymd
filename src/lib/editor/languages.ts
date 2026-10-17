@@ -7,7 +7,7 @@ import { LanguageDescription } from '@codemirror/language';
  * Languages highlighted inside fenced code blocks.
  *
  * A curated set rather than the full CodeMirror catalogue: install size is a
- * stated product priority (MASTER.md section 'Stack').
+ * stated product priority (docs/PRD.md section 'Stack').
  *
  * The set is split two ways, and the split is not arbitrary — see
  * docs/FIXES.md, 'HTML, CSS and JavaScript modes cannot be lazy-loaded'.

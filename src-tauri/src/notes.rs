@@ -139,7 +139,7 @@ pub struct NoteSummary {
 
 /// A note's title: its first line with any heading marks removed.
 ///
-/// Derived rather than stored (MASTER § Domain Model). An empty note is
+/// Derived rather than stored (PRD › Domain Model). An empty note is
 /// "Untitled" here and `untitled.md` on disk, which is the same answer given
 /// twice rather than two different ones.
 fn title_of(body: &str) -> String {

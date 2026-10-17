@@ -2,7 +2,7 @@
  * Vendored typefaces. All three are SIL Open Font License; each licence text
  * sits beside the files it covers, which is what the licence asks for.
  *
- * Nothing is fetched at runtime — MASTER veto 2, and the Content Security
+ * Nothing is fetched at runtime — PRD veto 2, and the Content Security
  * Policy in src-tauri/tauri.conf.json restricts font-src to 'self' so a
  * remote face cannot load even by accident.
  *

@@ -1,7 +1,7 @@
 # DESIGN
 
 > **Authoritative for:** the visual system — design principles, the token contract, typography, themes, and motion.
-> **Never contains:** work state, token values, or component entries. Components live in `docs/components/`, one file each. Components and themes that do not exist, and anything carrying a completion mark, are issues. Every token's value lives in `src/lib/tokens/tokens.css`. Product truth lives in `MASTER.md`. Engineering imperatives live in `CLAUDE.md`.
+> **Never contains:** work state, token values, or component entries. Components live in `docs/components/`, one file each. Components and themes that do not exist, and anything carrying a completion mark, are issues. Every token's value lives in `src/lib/tokens/tokens.css`. Product truth lives in `docs/PRD.md`. Engineering imperatives live in `CLAUDE.md`.
 
 ---
 
@@ -289,7 +289,7 @@ So a window arrives by the light on it rather than by moving: a sheen across the
 | The display face inside note content | Geist |
 | Text over glass without the tint layer beneath it | The tint is load-bearing for contrast, not decoration |
 | One semantic token serving two visual roles | Split it into two named tokens |
-| Fetching a font or any asset over the network | Vendored assets — MASTER veto 2 |
+| Fetching a font or any asset over the network | Vendored assets — PRD veto 2 |
 | Branching a component on surface mode or theme | Read the token; the theme carries the difference |
 | Restating a token value in this file | Link to `src/lib/tokens/tokens.css` |
 
