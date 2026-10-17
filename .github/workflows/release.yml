@@ -149,7 +149,7 @@ jobs:
           $manifest | ConvertTo-Json -Depth 5 | Set-Content manifest/latest.json -Encoding utf8
           Get-Content manifest/latest.json
 
-      # Created as a draft: MASTER.md says every release carries written notes,
+      # Created as a draft: docs/PRD.md says every release carries written notes,
       # and notes nobody wrote are not written notes. The assets are attached
       # and the release waits for the founder to describe it and publish.
       - name: Attach the assets to a draft release

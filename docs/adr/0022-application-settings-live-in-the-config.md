@@ -1,0 +1,7 @@
+# ADR-022 — Application settings live in the config directory, not the notes folder
+Status:     Accepted
+Date:       2026-09-06
+Context:    `MASTER.md § In Scope` requires a small set of remappable shortcuts, and nothing in scope is a settings window. The remapping therefore has to be a file the user edits. ADR-002 already put per-note state in a sidecar index beside the notes; the question was whether application settings belong there too.
+Decision:   Application settings live in `settings.json` in the platform's application config directory, resolved through Tauri's path API. The notes folder holds notes and the sidecar index that describes them, and nothing else.
+Consequences: The notes folder stays something a person can open without meeting the application's internals — which is what ADR-001 was for. The settings file is written with defaults the first time it is read, so there is always something to edit rather than a format to guess at. A settings file that cannot be parsed falls back to defaults rather than stopping the application: a typo in a hand-edited file should cost a custom shortcut, not access to notes.
+            This is a file, not a settings surface. It satisfies "remappable" but only for someone willing to edit JSON, and the tray now names the file when a shortcut cannot be claimed. A real settings window is not in scope for V1 and is not logged as one — see STATUS SMD-046.

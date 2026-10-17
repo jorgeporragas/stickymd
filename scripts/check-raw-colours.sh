@@ -7,8 +7,8 @@
 #
 # This was check 2 of the hand-written pre-commit hook. FLOW 3.0 replaced that
 # hook with its own, which runs only FLOW's commit-level checks, so this rule
-# moved to CI as a code check (FLOW_SYSTEM.md, "The Checks": code checks are the
-# project's). It reports only. It never rewrites or stages anything.
+# moved to CI as a code check: FLOW's checks guard the docs, and the project's
+# own checks guard the code. It reports only. It never rewrites or stages anything.
 #
 # POSIX shell only: it runs on GitHub's ubuntu runner, and should also run
 # under Git Bash on Windows and zsh on macOS without modification.

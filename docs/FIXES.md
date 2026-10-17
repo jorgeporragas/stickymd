@@ -1,7 +1,7 @@
 # FIXES
 
 > **Authoritative for:** non-obvious solutions that must never be undone, each naming the area it guards.
-> **Never contains:** anything that is not a fix. Work lives in the repository's GitHub issues. Rules live in `CLAUDE.md`. Decisions live in `docs/DECISIONS.md`.
+> **Never contains:** anything that is not a fix. Work lives in the repository's GitHub issues. Rules live in `CLAUDE.md`. Decisions live in `docs/adr/`.
 
 An entry belongs here when a solution was non-obvious, or when it took more than one failed attempt to get right. Each entry names the area it guards so that `CLAUDE.md § Areas that require reading FIXES.md first` stays accurate.
 

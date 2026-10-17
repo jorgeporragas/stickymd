@@ -17,7 +17,7 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
-TOOL_VERSION = "0.2.0"
+TOOL_VERSION = "0.3.0"
 
 # ---------------------------------------------------------------------------
 # Defaults. A project overrides any of these in .flow/config.toml (D-005).
@@ -25,44 +25,32 @@ TOOL_VERSION = "0.2.0"
 
 DEFAULTS: dict = {
     "files": {
-        "flow_system": "FLOW_SYSTEM.md",
-        "status": "docs/STATUS.md",
         "components_dir": "docs/components",
-        "decisions": "docs/DECISIONS.md",
+        # One file per ADR (D-020). The ID is read from the file's first heading.
+        "adr_dir": "docs/adr",
     },
     "severity": {
         "C3": "error", "C5": "error", "C6": "error",
         "C7": "error", "C8": "error", "C10": "error",
     },
-    "current_step": {"heading": "Current Active Step", "max_words": 250},
     "component_files": {"max_words": 400},
     "entries": [],
-    "decisions": {"entry": r"^## ([A-Z]+-\d+)"},
+    "decisions": {"entry": r"^#{1,2} ([A-Z]+-\d+)"},
     "references": {
         "names": {
-            "FLOW": "FLOW_SYSTEM.md", "FLOW_SYSTEM": "FLOW_SYSTEM.md",
-            "MASTER": "MASTER.md", "CLAUDE": "CLAUDE.md",
-            "STATUS": "docs/STATUS.md", "SCOPING": "docs/SCOPING.md",
-            "COMPLETED": "docs/COMPLETED.md", "DECISIONS": "docs/DECISIONS.md",
-            "DESIGN": "docs/DESIGN.md", "SCHEMA": "docs/SCHEMA.md",
-            "FIXES": "docs/FIXES.md",
-            "CLOSING": ".flow/CLOSING.md", "RECORDS": ".flow/RECORDS.md",
-            "SETUP": ".flow/SETUP.md",
+            "FLOW": ".claude/rules/flow.md", "PRD": "docs/PRD.md", "CLAUDE": "CLAUDE.md",
+            "COMPLETED": "docs/COMPLETED.md", "DESIGN": "docs/DESIGN.md",
+            "SCHEMA": "docs/SCHEMA.md", "FIXES": "docs/FIXES.md", "SETUP": ".flow/SETUP.md",
         },
-        "markdown_globs": ["*.md", "docs/**/*.md"],
-        # Decision records describe the past and are immutable (FLOW § Decision record): a
-        # reference there may name a section that has since gone, and that is accurate history.
-        "exempt": ["docs/DECISIONS.md"],
+        "markdown_globs": ["*.md", "docs/**/*.md", ".claude/**/*.md"],
+        # ADRs describe the past and are immutable: a reference there may name a section that
+        # has since gone, and that is accurate history. Globs.
+        "exempt": ["docs/adr/*.md"],
         "code_globs": [],
     },
     "inventory": [],
     "co_change": [],
     "vendor": {"manifest": ".flow/manifest.json"},
-    "reading_cost": {
-        "session_start": ["FLOW_SYSTEM.md", "docs/STATUS.md", "CLAUDE.md"],
-        "optional": [],
-    },
-    "metrics": {"days": 30, "doc_paths": ["docs/**", "*.md"]},
 }
 
 SIZE_CHECKS = {"C3"}
@@ -97,22 +85,6 @@ def merge(base, over):
     return over
 
 
-def overrides(base, over, prefix=""):
-    """Every user value that differs from FLOW's default, for the report (D-007)."""
-    found = []
-    if isinstance(over, dict):
-        for k, v in over.items():
-            path = f"{prefix}.{k}" if prefix else k
-            if isinstance(base, dict) and k in base:
-                found += overrides(base[k], v, path)
-            # A key FLOW has no default for is configuration, not an override.
-    elif isinstance(base, list) and not base:
-        pass  # filling an empty list (paths, rules) is configuration, not loosening a limit
-    elif base != over:
-        found.append({"key": prefix, "default": base, "value": over})
-    return found
-
-
 def load_config(root: Path, path: str | None):
     cfg_path = root / (path or ".flow/config.toml")
     user: dict = {}
@@ -131,7 +103,7 @@ def load_config(root: Path, path: str | None):
     for k, v in cfg["severity"].items():
         if v not in ("error", "warn", "off"):
             raise ToolError(f"severity.{k} must be error, warn or off, not {v!r}")
-    return cfg, overrides(DEFAULTS, user), (cfg_path if cfg_path.exists() else None)
+    return cfg, (cfg_path if cfg_path.exists() else None)
 
 
 # ---------------------------------------------------------------------------
@@ -151,21 +123,22 @@ def git(root: Path, *args: str, check=True) -> str:
 
 @dataclass
 class Changeset:
-    """One commit's diff, or the staged index (the hook's view)."""
+    """A range's combined diff, or the staged index (the hook's view)."""
     label: str
     changed: dict[str, str] = field(default_factory=dict)  # path -> status letter
 
 
-def changesets_for_range(root: Path, rev_range: str) -> list[Changeset]:
-    out = []
-    for sha in git(root, "rev-list", "--reverse", rev_range).split():
-        cs = Changeset(label=sha[:7])
-        for line in git(root, "diff-tree", "--no-commit-id", "-r", "--name-status",
-                        "--root", sha).splitlines():
-            parts = line.split("\t")
-            cs.changed[parts[-1]] = parts[0][0]
-        out.append(cs)
-    return out
+def changeset_for_range(root: Path, rev_range: str) -> Changeset:
+    """The range as ONE change: what a squash merge puts on the default branch (D-020). A pull
+    request that adds a migration in one commit and SCHEMA in the next owes nothing."""
+    base, head = (rev_range.split("..", 1) if ".." in rev_range
+                  else (f"{rev_range}^", rev_range))
+    head = head.lstrip(".") or "HEAD"
+    cs = Changeset(label=rev_range)
+    for line in git(root, "diff", "--name-status", f"{base}...{head}").splitlines():
+        parts = line.split("\t")
+        cs.changed[parts[-1]] = parts[0][0]
+    return cs
 
 
 def changeset_staged(root: Path) -> Changeset:
@@ -361,10 +334,6 @@ class Ctx:
 
 def c3_entries(ctx: Ctx):
     specs = list(ctx.cfg["entries"])
-    cs = ctx.cfg["current_step"]
-    if cs.get("max_words"):
-        specs.append({"file": ctx.cfg["files"]["status"], "heading_level": 2,
-                      "match": cs["heading"], "max_words": cs["max_words"]})
     # v2.6: one file per component. In separate files an oversized entry looks normal, so each
     # file is an entry with its own limit (D-008).
     cdir = ctx.root / ctx.cfg["files"]["components_dir"]
@@ -474,7 +443,7 @@ def c5_references(ctx: Ctx):
 
     for p in md_files:
         rel = p.relative_to(ctx.root).as_posix()
-        if rel in rc["exempt"]:
+        if any(fnmatch.fnmatch(rel, g) for g in rc["exempt"]):
             continue
         lines = strip_fences(p.read_text(encoding="utf-8", errors="replace").splitlines())
         check_sections(rel, lines)
@@ -510,35 +479,41 @@ def c5_references(ctx: Ctx):
 
 
 def c6_supersession(ctx: Ctx):
-    rel = ctx.cfg["files"]["decisions"]
-    text = read(ctx.root, rel)
-    if text is None:
+    """Supersession pointers agree across the ADR folder, one file per decision (D-020)."""
+    d = ctx.root / ctx.cfg["files"]["adr_dir"]
+    if not d.is_dir():
         return
     entry_re = re.compile(ctx.cfg["decisions"]["entry"], re.M)
-    starts = list(entry_re.finditer(text))
-    recs = {}
-    for n, m in enumerate(starts):
-        body = text[m.start(): starts[n + 1].start() if n + 1 < len(starts) else len(text)]
-        line = text.count("\n", 0, m.start()) + 1
-        status = re.search(r"^Status:\**\s*(.*)$", body, re.M)
-        sup = re.search(r"^Supersedes:\**\s*(.*)$", body, re.M)
-        recs[m.group(1)] = (line, status.group(1) if status else "", sup.group(1).strip() if sup else "")
+    recs = {}  # id -> (file, line, status, supersedes)
+    for p in sorted(d.glob("*.md")):
+        text = p.read_text(encoding="utf-8", errors="replace")
+        m = entry_re.search(text)
+        if not m:
+            continue  # a README or template, not a decision
+        rel = p.relative_to(ctx.root).as_posix()
+        status = re.search(r"^\**Status:\**\s*(.*)$", text, re.M)
+        sup = re.search(r"^\**Supersedes:\**\s*(.*)$", text, re.M)
+        if m.group(1) in recs:
+            ctx.add("C6", rel, 1, f"{m.group(1)} is also {recs[m.group(1)][0]}")
+            continue
+        recs[m.group(1)] = (rel, text.count("\n", 0, m.start()) + 1,
+                            status.group(1) if status else "", sup.group(1).strip() if sup else "")
     idre = re.compile(r"[A-Z]+-\d+")
 
     def superseded_list(s):
         return [] if s.startswith("—") else idre.findall(s)
 
-    for eid, (line, status, sup) in recs.items():
+    for eid, (rel, line, status, sup) in recs.items():
         for by in re.findall(r"Superseded by ([A-Z]+-\d+)", status):
             if by not in recs:
                 ctx.add("C6", rel, line, f"{eid} is superseded by {by}, which does not exist")
-            elif eid not in superseded_list(recs[by][2]):
+            elif eid not in superseded_list(recs[by][3]):
                 ctx.add("C6", rel, line, f"{eid} says Superseded by {by}, but {by} has no "
                         f"'Supersedes: {eid}'")
         for old in superseded_list(sup):
             if old not in recs:
                 ctx.add("C6", rel, line, f"{eid} supersedes {old}, which does not exist")
-            elif f"Superseded by {eid}" not in recs[old][1]:
+            elif f"Superseded by {eid}" not in recs[old][2]:
                 ctx.add("C6", rel, line, f"{eid} supersedes {old}, but {old}'s Status does not "
                         f"say 'Superseded by {eid}'")
 
@@ -579,7 +554,7 @@ def c8_commits(ctx: Ctx):
     if ctx.staged:
         sets = [changeset_staged(ctx.root)]
     elif ctx.range:
-        sets = changesets_for_range(ctx.root, ctx.range)
+        sets = [changeset_for_range(ctx.root, ctx.range)]
     else:
         return
     for cs in sets:
@@ -591,7 +566,7 @@ def c8_commits(ctx: Ctx):
                 req = rule["require"] if isinstance(rule["require"], list) else [rule["require"]]
                 if not any(r in paths for r in req):
                     ctx.add("C8", hits[0], 1, f"{cs.label}: {', '.join(hits)} changed without "
-                            f"{' or '.join(req)} in the same commit")
+                            f"{' or '.join(req)} in the same change")
 
 
 def c10_vendor(ctx: Ctx):
@@ -618,37 +593,6 @@ def file_digest(p: Path) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Metrics
-# ---------------------------------------------------------------------------
-
-def metrics(ctx: Ctx, overrides_found):
-    rc = ctx.cfg["reading_cost"]
-
-    def cost(files):
-        return sum(words(read(ctx.root, f) or "") for f in files)
-
-    m = {"reading_cost": {"session_start": cost(rc["session_start"]),
-                          "with_optional": cost(rc["session_start"] + rc["optional"])}}
-    days = ctx.cfg["metrics"]["days"]
-    log = git(ctx.root, "log", f"--since={days}.days", "--format=@%H", "--name-only",
-              check=False)
-    commits = [c for c in log.split("@") if c.strip()]
-    docs_only = 0
-    for c in commits:
-        files = [l for l in c.splitlines()[1:] if l.strip()]
-        if files and all(any(fnmatch.fnmatch(f, g) for g in ctx.cfg["metrics"]["doc_paths"])
-                         for f in files):
-            docs_only += 1
-    m["docs_only_share"] = {"days": days, "commits": len(commits), "docs_only": docs_only,
-                            "share": round(docs_only / len(commits), 2) if commits else 0}
-    m["overrides"] = overrides_found
-    status_text = read(ctx.root, ctx.cfg["files"]["status"]) or ""
-    pm = re.search(r"^## Current Phase\s*\n+\s*(\S[^\n]*)", status_text, re.M)
-    m["phase"] = pm.group(1).strip() if pm else None
-    return m
-
-
-# ---------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------
 
@@ -657,7 +601,7 @@ def run(root: Path, config: str | None = None, rev_range: str | None = None,
     root = root.resolve()
     if git(root, "rev-parse", "--is-inside-work-tree", check=False).strip() != "true":
         raise ToolError(f"{root} is not inside a git work tree")
-    cfg, found_overrides, cfg_path = load_config(root, config)
+    cfg, cfg_path = load_config(root, config)
     ctx = Ctx(root, cfg, rev_range, staged)
     plan = {
         "C3": lambda: c3_entries(ctx), "C5": lambda: c5_references(ctx), "C6": lambda: c6_supersession(ctx),
@@ -691,7 +635,7 @@ def run(root: Path, config: str | None = None, rev_range: str | None = None,
         "tool": "flow_check", "tool_version": TOOL_VERSION,
         "config": rel_or_abs(cfg_path, root),
         "range": rev_range, "staged": staged, "result": result,
-        "checks": checks, "metrics": metrics(ctx, found_overrides),
+        "checks": checks,
     }
 
 
@@ -721,15 +665,6 @@ def human(report: dict, all_findings: bool = False) -> str:
     for c in report["checks"]:
         n = len(c["findings"])
         out.append(f"{c['id']:<4} {c['name']:<16} {c['status']:<5} {n} finding(s)")
-    m = report["metrics"]
-    out.append(f"reading cost: {m['reading_cost']['session_start']} words at session start, "
-               f"{m['reading_cost']['with_optional']} with optional files")
-    d = m["docs_only_share"]
-    out.append(f"docs-only commits: {d['docs_only']} of {d['commits']} in {d['days']} days")
-    if m["overrides"]:
-        out.append("overrides of FLOW defaults: " +
-                   ", ".join(f"{o['key']}={o['value']!r} (default {o['default']!r})"
-                             for o in m["overrides"]))
     out.append(f"result: {report['result']}")
     return "\n".join(out)
 

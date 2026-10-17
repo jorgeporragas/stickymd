@@ -82,7 +82,7 @@ pub fn set_on_launch(app: AppHandle, choice: OnLaunch) -> OnLaunch {
 
 #[tauri::command]
 pub fn set_launch_at_startup(app: AppHandle, enabled: bool) -> bool {
-    // MASTER veto 5: never enabled without the user asking. This command *is*
+    // PRD veto 5: never enabled without the user asking. This command *is*
     // the user asking, and it is the only path that turns it on besides the
     // tray's own toggle.
     let result = if enabled {

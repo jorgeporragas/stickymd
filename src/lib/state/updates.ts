@@ -7,7 +7,7 @@ import { getVersion } from '@tauri-apps/api/app';
  *
  * The only network request this application makes. It carries nothing — no
  * note content, no identifier, no telemetry — which is why it does not
- * conflict with `MASTER.md` veto 2: that veto is about content leaving the
+ * conflict with `docs/PRD.md` veto 2: that veto is about content leaving the
  * machine, not about sockets existing. See ADR-014.
  *
  * **Nothing here runs on its own.** There is no check at startup and no timer.

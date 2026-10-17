@@ -35,7 +35,7 @@ That third line isn't optional: the pre-commit hook lives in `.githooks/`, and g
 
 Tauri v2 with a Rust backend, Svelte 5 and TypeScript in the frontend, CodeMirror 6 for the editor. It uses the web view Windows already has rather than bundling a browser engine, which is most of why it's under 2 MB.
 
-The docs are unusually complete for something this size, because they're kept under a system that treats a stale doc as a bug: [MASTER.md](MASTER.md) for what the product is, [docs/DECISIONS.md](docs/DECISIONS.md) for why anything is the way it is, [docs/DESIGN.md](docs/DESIGN.md) for the visual system, [docs/STATUS.md](docs/STATUS.md) for where the project is now, the repository's [issues](https://github.com/jorgeporragas/stickymd/issues) for the work, and [docs/FIXES.md](docs/FIXES.md) for the fixes that must not be undone. The system itself is [FLOW_SYSTEM.md](FLOW_SYSTEM.md).
+The docs are unusually complete for something this size, because they're kept under a system that treats a stale doc as a bug: the [PRD](docs/PRD.md) for what the product is, the [ADRs](docs/adr/) for why anything is the way it is, [docs/DESIGN.md](docs/DESIGN.md) for the visual system, the repository's [issues](https://github.com/jorgeporragas/stickymd/issues) for the work and where it stands, and [docs/FIXES.md](docs/FIXES.md) for the fixes that must not be undone. The system's own rules are [`.claude/rules/flow.md`](.claude/rules/flow.md).
 
 ## Licence
 
