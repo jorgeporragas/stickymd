@@ -1,0 +1,13 @@
+# ADR-025 — Aero is dropped; colour becomes functional
+Status:     Accepted
+Date:       2026-09-06
+Context:    The design brief was Frutiger Aero warmth held inside Rams restraint. The founder is moving off Aero as a philosophy, keeping Rams, and naming two effects he wants the app to be built around — typographic scrambling, and line boil. His reading of what exists: it "didn't feel very Aero yet anyways", which matches what was actually built — the frosted surface reads as glass, but nothing else was carrying Aero.
+            He asked for one change now: the colour. Everything else waits until the new direction is worked out.
+Decision:   The Aero accent is removed. There is no brand colour. The interface is ink on a tinted surface, and a hue appears only where colour is what tells the user what something does — traffic-light reading, because it needs no learning.
+            Only red is defined, as `--signal-danger`, on the one control that takes a note away. Amber and green have nothing to say yet and are not defined in advance. A colour with no job is how a palette turns decorative.
+            Note tints are not affected and stay exactly as ADR-018 set them. They are the note's own paper, not interface colour.
+            The two effects the founder named are recorded but not built: STATUS SMD-051 and SMD-052.
+Consequences: `--accent`, `--accent-hover`, `--accent-glow`, `--ink-on-accent` and the aqua ramp are gone from the token contract. What read them now reads ink, with two replacements worth naming: `--selection` for the editor's selection wash, which was the accent glow and is a role of its own; and the always-on-top pin, which showed "on" as a colour and now shows it as a filled chip. That is the better control anyway — a state you can see without knowing what the colour meant.
+            Fenced code loses its hue with everything else. Token classes are told apart by weight and by how dark they are. In a scratchpad a fenced block is something pasted in rather than something being written, so this costs little; if it turns out to cost more than expected, the ADR to write is a narrow one about code, not a return to an accent.
+            Every signal value is computed rather than picked: each clears 4.5:1 against the worst of the seven tints in its own theme — 5.73:1 on Frost, 5.25:1 on Dark — so a signal stays legible on any note.
+            `docs/DESIGN.md` principle 1 no longer says the surface is Aero. The frosted surface itself is unchanged and is not what this decision is about: glass here is a window property (principle 3), and dropping a visual philosophy does not un-frost a window.

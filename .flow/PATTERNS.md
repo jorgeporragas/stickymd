@@ -1,6 +1,6 @@
 # Patterns worth adopting
 
-Shipped with FLOW as `.flow/PATTERNS.md`. Read at Initialization, and when a project sets up or
+Shipped with FLOW as `.flow/PATTERNS.md`. Read when a project is set up, and when it sets up or
 changes CI. These are patterns, not rules: each is worth its cost in most projects, and how to
 build it depends on the stack and host. Each one was proven in Banana Splits; the field reports
 in the FLOW repository have the details.
@@ -36,7 +36,7 @@ negative ships something broken that nobody notices. Prefer the noise.
 
 Whatever the code can describe about itself — a schema reference from the migrations, token
 tables from the token source, generated code from its inputs — is produced by a command, not
-written by hand (FLOW_SYSTEM › *Derive, don't record*). The generated file opens with that
+written by hand (FLOW › *Writing*: if the code can answer it, no doc states it). The generated file opens with that
 command and a do-not-edit line. CI runs the command and fails on `git diff --exit-code`, so a
 stale file is red, not silent. Before trusting the step, check that a clean run on the CI
 machine reproduces the committed file byte for byte: a different generator version or line

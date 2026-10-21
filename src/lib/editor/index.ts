@@ -86,7 +86,7 @@ export function createEditor({
 
         markdown({
           // markdownLanguage is the GFM-enabled base: tables, task lists and
-          // strikethrough, which MASTER lists in scope.
+          // strikethrough, which the PRD lists in scope.
           base: markdownLanguage,
           codeLanguages
         }),

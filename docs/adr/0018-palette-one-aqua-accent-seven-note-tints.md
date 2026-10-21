@@ -1,0 +1,6 @@
+# ADR-018 — Palette: one aqua accent, seven note tints
+Status:     Accepted; the accent is superseded by ADR-025. The seven tints stand.
+Date:       2026-09-05
+Context:    The design brief is Frutiger Aero warmth held inside Rams restraint, on a colourless frosted surface. Three accent candidates were put forward — aqua, a greener spring, and a cooler sky blue — alongside a set of note tints. The founder approved the palette as proposed, which carried a recommendation to keep aqua.
+Decision:   `--accent` stays aqua `#2FB6D9`. Spring reads botanical rather than interface and fights the quiet-content rule on a focus ring; sky is the least distinctive of the three. Note tints are Clear (the default), Sun `#FFE9A3`, Spring `#C7F0D8`, Aqua `#B8ECF7`, Sky `#CFE4FD`, Lilac `#DCD4F7`, Blush `#FBD5E0`.
+Consequences: The tints are pale by necessity, not by taste: they are layered over frosted glass, so `--ink-primary` must hold 4.5:1 against a tint sitting over an arbitrary wallpaper. A saturated Post-It yellow fails that the moment it goes translucent. The values land in `src/lib/tokens/tokens.css` when per-note colour is built (STATUS SMD-021); until then this record is the only place they exist, and it is not policy — `docs/DESIGN.md` and the token file become authoritative once implemented.

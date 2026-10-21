@@ -98,7 +98,7 @@ impl<'de> Deserialize<'de> for OnLaunch {
 /// The four formatting chords.
 ///
 /// Named fields rather than a map: the set is deliberately small and fixed
-/// (`docs/DECISIONS.md` ADR-037), and a map would invite a settings file to
+/// (ADR-037, `docs/adr/0037-the-remappable-set-is-four-formatting-chords-and.md`), and a map would invite a settings file to
 /// name a command that does not exist.
 ///
 /// `CmdOrCtrl` in string form is the platform abstraction — never write Ctrl

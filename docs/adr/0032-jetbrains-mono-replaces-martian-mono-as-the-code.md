@@ -1,0 +1,8 @@
+# ADR-032 — JetBrains Mono replaces Martian Mono as the code face
+Status:     Accepted
+Date:       2026-09-06
+Context:    The founder reported monospaced text reading larger than prose twice, the second time after its size had already been reduced. Measured with both faces forced to load first: at 13px against 15px prose, Martian Mono has the *same* x-height and runs 35% wider for the same sentence. The glyphs were never taller; there was simply far more of them, and that is what reads as a larger size. No size fixes both — at 12px the width gap closes to 25% while the glyphs go 8% shorter than the prose.
+Decision:   The code face is JetBrains Mono, at 13px. There it has the same x-height as the prose and runs 16% wider, against Martian Mono's 35%.
+Consequences: One 92 kB woff2 replaces two subset files totalling 63 kB — 29 kB more, accepted, because the alternative was a face that cannot be made to sit correctly beside the prose at any size. SIL OFL, read from the file in the release rather than a directory listing.
+            One weight and no italic. `font-synthesis: none` is on the body, so an italic that is not in the file simply does not appear — which is why the comment style no longer asks for one. Colour carries comments on its own.
+            A measurement lesson, recorded because it produced a wrong answer that nearly shipped: **fonts load lazily, so a face that is not in use on the page is not loaded, and canvas measurement of it silently falls back to another face.** The first x-height numbers were taken on a note with no code in it and said mono was 15% *smaller* per em; with the face loaded it is 15% larger. Force the face to load before measuring it.
